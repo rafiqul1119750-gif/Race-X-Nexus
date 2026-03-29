@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { SplashScreen } from "@/components/common/SplashScreen";
 
 // Pages
 import Home from "@/pages/home";
@@ -50,7 +52,7 @@ function Router() {
   );
 }
 
-function App() {
+function MainAppContainer() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
@@ -62,6 +64,16 @@ function App() {
         </TooltipProvider>
       </AppProvider>
     </QueryClientProvider>
+  );
+}
+
+function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  return showSplash ? (
+    <SplashScreen onComplete={() => setShowSplash(false)} />
+  ) : (
+    <MainAppContainer />
   );
 }
 
