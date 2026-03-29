@@ -1,0 +1,20 @@
+packages:
+  "framer-motion": "For 3D floating glass animations and page transitions"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility to safely merge Tailwind classes"
+  "date-fns": "For formatting timestamps and dates in social/chat"
+
+images:
+  - path: "artifacts/race-x/public/images/hero-bg.png"
+    description: "Deep dark sci-fi background with neon grid, cyber-particle dust, and subtle glowing electric cyan and deep purple light leaks"
+    aspect_ratio: "16:9"
+  - path: "artifacts/race-x/public/images/rx-logo.png"
+    description: "Ultra-premium 3D glassmorphic neon 'RX' logo, translucent with electric blue and purple glowing edges on transparent background"
+    aspect_ratio: "1:1"
+  - path: "artifacts/race-x/public/images/avatar-ai.png"
+    description: "3D floating glowing AI assistant robot hologram, friendly but futuristic, glowing cyber cyan eyes"
+    aspect_ratio: "1:1"
+
+notes:
+  - Using framer-motion for all the specified interactive hover and bounce states.
+  - Relying on @workspace/api-client-react for all API calls as specified.

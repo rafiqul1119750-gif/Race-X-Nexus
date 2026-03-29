@@ -1,22 +1,32 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Race-X Creator Ecosystem API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: user
+    description: User management
+  - name: modules
+    description: Module management
+  - name: rewards
+    description: Diamonds, Gems, rewards
+  - name: events
+    description: Live events and tournaments
+  - name: admin
+    description: God Mode Admin
+  - name: enforcement
+    description: Safety and enforcement
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +34,349 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /user/profile:
+    get:
+      operationId: getUserProfile
+      tags: [user]
+      summary: Get user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+    put:
+      operationId: updateUserProfile
+      tags: [user]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserProfileRequest"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /modules:
+    get:
+      operationId: getModules
+      tags: [modules]
+      summary: Get all modules and their enabled status
+      responses:
+        "200":
+          description: Module list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModuleListResponse"
+
+  /modules/{moduleId}/toggle:
+    post:
+      operationId: toggleModule
+      tags: [modules]
+      summary: Toggle a module on/off (God Mode)
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ToggleModuleRequest"
+      responses:
+        "200":
+          description: Module toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Module"
+
+  /rewards:
+    get:
+      operationId: getUserRewards
+      tags: [rewards]
+      summary: Get user reward balances
+      responses:
+        "200":
+          description: Reward balances
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBalance"
+
+  /rewards/grant:
+    post:
+      operationId: grantRewards
+      tags: [rewards]
+      summary: Grant diamonds/gems to user (God Mode)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GrantRewardsRequest"
+      responses:
+        "200":
+          description: Updated reward balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBalance"
+
+  /events:
+    get:
+      operationId: getEvents
+      tags: [events]
+      summary: Get live and upcoming events
+      responses:
+        "200":
+          description: Events list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventListResponse"
+    post:
+      operationId: createEvent
+      tags: [events]
+      summary: Create a new event (God Mode)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEventRequest"
+      responses:
+        "201":
+          description: Created event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [events]
+      summary: Get global leaderboard
+      responses:
+        "200":
+          description: Leaderboard entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaderboardResponse"
+    post:
+      operationId: resetLeaderboard
+      tags: [events]
+      summary: Reset leaderboard (God Mode)
+      responses:
+        "200":
+          description: Leaderboard reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/users:
+    get:
+      operationId: adminGetUsers
+      tags: [admin]
+      summary: Get all users (God Mode)
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUserListResponse"
+
+  /admin/users/{userId}/action:
+    post:
+      operationId: adminUserAction
+      tags: [admin]
+      summary: Ban/unban/adjust reputation (God Mode)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserActionRequest"
+      responses:
+        "200":
+          description: Action result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/logs:
+    get:
+      operationId: adminGetLogs
+      tags: [admin]
+      summary: Get audit logs (God Mode)
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogListResponse"
+
+  /enforcement/violations:
+    get:
+      operationId: getViolations
+      tags: [enforcement]
+      summary: Get enforcement violations log
+      responses:
+        "200":
+          description: Violation logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ViolationListResponse"
+    post:
+      operationId: reportViolation
+      tags: [enforcement]
+      summary: Report a violation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportViolationRequest"
+      responses:
+        "200":
+          description: Violation processed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ViolationResult"
+
+  /social/feed:
+    get:
+      operationId: getSocialFeed
+      tags: [modules]
+      summary: Get social feed posts
+      responses:
+        "200":
+          description: Social feed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SocialFeedResponse"
+
+  /social/posts/{postId}/like:
+    post:
+      operationId: likePost
+      tags: [modules]
+      summary: Toggle like on a post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Like toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeResponse"
+
+  /chat/messages:
+    get:
+      operationId: getChatMessages
+      tags: [modules]
+      summary: Get recent chat messages
+      responses:
+        "200":
+          description: Chat messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessagesResponse"
+    post:
+      operationId: sendChatMessage
+      tags: [modules]
+      summary: Send a chat message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageRequest"
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+
+  /music/tracks:
+    get:
+      operationId: getMusicTracks
+      tags: [modules]
+      summary: Get music tracks
+      responses:
+        "200":
+          description: Music tracks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MusicTracksResponse"
+
+  /shop/items:
+    get:
+      operationId: getShopItems
+      tags: [modules]
+      summary: Get shop items
+      responses:
+        "200":
+          description: Shop items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopItemsResponse"
+
+  /shop/cart:
+    post:
+      operationId: addToCart
+      tags: [modules]
+      summary: Add item to cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddToCartRequest"
+      responses:
+        "200":
+          description: Cart updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +384,529 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        displayName:
+          type: string
+        avatar:
+          type: string
+        level:
+          type: integer
+        reputation:
+          type: integer
+        status:
+          type: string
+          enum: [active, inactive, suspended, frozen, archived]
+        diamonds:
+          type: integer
+        gems:
+          type: integer
+        faction:
+          type: string
+        badges:
+          type: array
+          items:
+            type: string
+        joinDate:
+          type: string
+        lastActive:
+          type: string
+        violationCount:
+          type: integer
+        isGodMode:
+          type: boolean
+      required: [id, username, displayName, level, reputation, status, diamonds, gems, violationCount, isGodMode]
+
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+        avatar:
+          type: string
+        diamonds:
+          type: integer
+        gems:
+          type: integer
+
+    Module:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        enabled:
+          type: boolean
+        color:
+          type: string
+        path:
+          type: string
+      required: [id, name, description, icon, enabled, color, path]
+
+    ModuleListResponse:
+      type: object
+      properties:
+        modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/Module"
+      required: [modules]
+
+    ToggleModuleRequest:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+      required: [enabled]
+
+    RewardBalance:
+      type: object
+      properties:
+        diamonds:
+          type: integer
+        gems:
+          type: integer
+        totalEarned:
+          type: integer
+        rank:
+          type: string
+        multiplier:
+          type: number
+      required: [diamonds, gems, totalEarned, rank, multiplier]
+
+    GrantRewardsRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+        diamonds:
+          type: integer
+        gems:
+          type: integer
+        reason:
+          type: string
+      required: [userId]
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [tournament, concert, workshop, pvp, seasonal, challenge]
+        status:
+          type: string
+          enum: [upcoming, live, ended]
+        startDate:
+          type: string
+        endDate:
+          type: string
+        description:
+          type: string
+        reward:
+          type: string
+        participants:
+          type: integer
+        maxParticipants:
+          type: integer
+      required: [id, name, type, status, startDate, description]
+
+    EventListResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
+        liveCount:
+          type: integer
+      required: [events, liveCount]
+
+    CreateEventRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        description:
+          type: string
+        reward:
+          type: string
+        maxParticipants:
+          type: integer
+      required: [name, type, startDate, description]
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+        userId:
+          type: string
+        username:
+          type: string
+        displayName:
+          type: string
+        score:
+          type: integer
+        diamonds:
+          type: integer
+        faction:
+          type: string
+        avatar:
+          type: string
+      required: [rank, userId, username, score, diamonds]
+
+    LeaderboardResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaderboardEntry"
+        season:
+          type: string
+        lastReset:
+          type: string
+      required: [entries, season]
+
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        displayName:
+          type: string
+        status:
+          type: string
+        reputation:
+          type: integer
+        diamonds:
+          type: integer
+        gems:
+          type: integer
+        violationCount:
+          type: integer
+        lastActive:
+          type: string
+        joinDate:
+          type: string
+      required: [id, username, status, reputation, violationCount]
+
+    AdminUserListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminUser"
+        total:
+          type: integer
+      required: [users, total]
+
+    AdminUserActionRequest:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [ban, unban, freeze, adjust_reputation, grant_diamonds, grant_gems, reset_violations]
+        value:
+          type: integer
+        reason:
+          type: string
+      required: [action]
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+        action:
+          type: string
+        targetUserId:
+          type: string
+        performedBy:
+          type: string
+        details:
+          type: string
+      required: [id, timestamp, action]
+
+    AuditLogListResponse:
+      type: object
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+      required: [logs]
+
+    Violation:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+          enum: [age_violation, copyright, harassment, spam, other]
+        timestamp:
+          type: string
+        status:
+          type: string
+          enum: [pending, resolved, frozen, suspended]
+        count:
+          type: integer
+      required: [id, userId, type, timestamp, status, count]
+
+    ViolationListResponse:
+      type: object
+      properties:
+        violations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Violation"
+      required: [violations]
+
+    ReportViolationRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+      required: [userId, type]
+
+    ViolationResult:
+      type: object
+      properties:
+        violationCount:
+          type: integer
+        status:
+          type: string
+        frozenUntil:
+          type: string
+        message:
+          type: string
+      required: [violationCount, status, message]
+
+    SocialPost:
+      type: object
+      properties:
+        id:
+          type: string
+        authorId:
+          type: string
+        authorName:
+          type: string
+        authorAvatar:
+          type: string
+        content:
+          type: string
+        imageUrl:
+          type: string
+        likes:
+          type: integer
+        isLiked:
+          type: boolean
+        comments:
+          type: integer
+        saved:
+          type: boolean
+        timestamp:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+      required: [id, authorId, authorName, content, likes, isLiked, comments, saved, timestamp]
+
+    SocialFeedResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/SocialPost"
+        trending:
+          type: array
+          items:
+            type: string
+      required: [posts, trending]
+
+    LikeResponse:
+      type: object
+      properties:
+        liked:
+          type: boolean
+        count:
+          type: integer
+      required: [liked, count]
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        senderId:
+          type: string
+        senderName:
+          type: string
+        senderAvatar:
+          type: string
+        content:
+          type: string
+        timestamp:
+          type: string
+        type:
+          type: string
+          enum: [text, ai, system]
+      required: [id, senderId, senderName, content, timestamp, type]
+
+    ChatMessagesResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+        aiSuggestions:
+          type: array
+          items:
+            type: string
+      required: [messages, aiSuggestions]
+
+    SendMessageRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        roomId:
+          type: string
+      required: [content]
+
+    MusicTrack:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        artist:
+          type: string
+        duration:
+          type: integer
+        genre:
+          type: string
+        isAiGenerated:
+          type: boolean
+        coverUrl:
+          type: string
+        plays:
+          type: integer
+      required: [id, title, artist, duration, genre, isAiGenerated, plays]
+
+    MusicTracksResponse:
+      type: object
+      properties:
+        tracks:
+          type: array
+          items:
+            $ref: "#/components/schemas/MusicTrack"
+        currentlyPlaying:
+          type: string
+      required: [tracks]
+
+    ShopItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+        currency:
+          type: string
+          enum: [diamonds, gems, usd]
+        imageUrl:
+          type: string
+        category:
+          type: string
+        discount:
+          type: number
+        inCart:
+          type: boolean
+      required: [id, name, description, price, currency, category, inCart]
+
+    ShopItemsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShopItem"
+        cartCount:
+          type: integer
+        recommended:
+          type: array
+          items:
+            type: string
+      required: [items, cartCount, recommended]
+
+    AddToCartRequest:
+      type: object
+      properties:
+        itemId:
+          type: string
+        quantity:
+          type: integer
+      required: [itemId]
+
+    CartResponse:
+      type: object
+      properties:
+        cartCount:
+          type: integer
+        totalCost:
+          type: integer
+        currency:
+          type: string
+      required: [cartCount, totalCost, currency]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success, message]

@@ -1,0 +1,68 @@
+import { Switch, Route, Router as WouterRouter } from "wouter";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AppProvider } from "@/context/AppContext";
+import { AppLayout } from "@/components/layout/AppLayout";
+
+// Pages
+import Home from "@/pages/home";
+import Studio from "@/pages/studio";
+import StudioEditor from "@/pages/studio-editor";
+import Social from "@/pages/social";
+import Chat from "@/pages/chat";
+import Music from "@/pages/music";
+import Shop from "@/pages/shop";
+import Events from "@/pages/events";
+import Leaderboard from "@/pages/leaderboard";
+import Admin from "@/pages/admin";
+import Profile from "@/pages/profile";
+import NotFound from "@/pages/not-found";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+});
+
+function Router() {
+  return (
+    <AppLayout>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/studio" component={Studio} />
+        <Route path="/studio/editor" component={StudioEditor} />
+        <Route path="/social" component={Social} />
+        <Route path="/chat" component={Chat} />
+        <Route path="/music" component={Music} />
+        <Route path="/shop" component={Shop} />
+        <Route path="/events" component={Events} />
+        <Route path="/leaderboard" component={Leaderboard} />
+        <Route path="/admin" component={Admin} />
+        <Route path="/profile" component={Profile} />
+        <Route component={NotFound} />
+      </Switch>
+    </AppLayout>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppProvider>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </AppProvider>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
