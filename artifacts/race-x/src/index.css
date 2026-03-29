@@ -103,6 +103,13 @@
   --sidebar-accent: 270 100% 60% / 0.2;
   --sidebar-accent-foreground: 210 40% 98%;
   --sidebar-ring: 190 100% 50%;
+
+  /* Border variants (required by @theme inline) */
+  --muted-border: 240 30% 20%;
+  --accent-border: 320 100% 65%;
+  --destructive-border: 0 100% 65%;
+  --sidebar-primary-border: 190 100% 60%;
+  --sidebar-accent-border: 270 100% 70%;
 }
 
 @layer base {

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { 
   MonitorPlay, Users, MessageSquare, 
-  Music, ShoppingCart, Trophy, Zap
+  Music, ShoppingCart, Trophy, Zap, Home as HomeIcon
 } from "lucide-react";
 import { useGetModules, useGetEvents, useGetUserProfile } from "@workspace/api-client-react";
 
@@ -12,7 +12,7 @@ const MODULE_ICONS: Record<string, React.ElementType> = {
   chat: MessageSquare,
   music: Music,
   shop: ShoppingCart,
-  events: Trophy
+  events: Trophy,
 };
 
 export default function Home() {
@@ -101,7 +101,7 @@ export default function Home() {
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
         {enabledModules.map((mod, i) => {
-          const Icon = MODULE_ICONS[mod.icon] || Home;
+          const Icon = MODULE_ICONS[mod.id] || HomeIcon;
           const isPurple = i % 2 !== 0; // Alternate styles for visual interest
           
           return (
