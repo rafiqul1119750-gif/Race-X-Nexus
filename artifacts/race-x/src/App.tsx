@@ -19,6 +19,8 @@ import Events from "@/pages/events";
 import Leaderboard from "@/pages/leaderboard";
 import Admin from "@/pages/admin";
 import Profile from "@/pages/profile";
+import CreatorPortal from "@/pages/portal-creator";
+import UserPortal from "@/pages/portal-user";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -44,8 +46,12 @@ function Router() {
         <Route path="/shop" component={Shop} />
         <Route path="/events" component={Events} />
         <Route path="/leaderboard" component={Leaderboard} />
+        {/* Admin route — God Mode guard is enforced inside Admin component */}
         <Route path="/admin" component={Admin} />
         <Route path="/profile" component={Profile} />
+        {/* Dual Portal System */}
+        <Route path="/portal/creator" component={CreatorPortal} />
+        <Route path="/portal/user" component={UserPortal} />
         <Route component={NotFound} />
       </Switch>
     </AppLayout>
