@@ -2,8 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Aapka baaki ka custom CSS yahan niche aa sakta hai */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
 body {
   margin: 0;
-  font-family: inherit;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
 }
