@@ -1,34 +1,19 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import path from "path";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "src"),
-      "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+      '@': path.resolve(__dirname, './src'),
     },
-    dedupe: ["react", "react-dom"],
   },
-  root: path.resolve(import.meta.dirname),
+  // Humne server block hata diya hai taaki 'port is not defined' wala error na aaye
+  // Render Static Site ise khud handle kar legi
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: 'dist',
     emptyOutDir: true,
-  },
-  server: {
-    port,
-    host: "0.0.0.0",
-    allowedHosts: true,
-    fs: {
-      strict: true,
-      deny: ["**/.*"],
-    },
-  },
-  preview: {
-    port,
-    host: "0.0.0.0",
-    allowedHosts: true,
   },
 });
