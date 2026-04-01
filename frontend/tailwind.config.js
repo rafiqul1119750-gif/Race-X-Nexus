@@ -3,6 +3,7 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "../shared/**/*.{js,ts,jsx,tsx}" // Agar shared folder use kar rahe ho toh
   ],
   theme: {
     extend: {},
