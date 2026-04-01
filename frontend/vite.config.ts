@@ -7,13 +7,17 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
+      // Ye line @workspace errors ko fix karegi
+      "@workspace": path.resolve(__dirname, "../lib"), 
     },
   },
-  // Humne server block hata diya hai taaki 'port is not defined' wala error na aaye
-  // Render Static Site ise khud handle kar legi
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    rollupOptions: {
+      // Agar @workspace/api-client-react phir bhi error de, toh hum ise external bol denge
+      external: [], 
+    },
   },
 });
