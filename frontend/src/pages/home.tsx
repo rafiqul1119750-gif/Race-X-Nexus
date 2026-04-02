@@ -1,288 +1,190 @@
 import React, { useState, useEffect } from "react";
 import { 
-  Sparkles, MessageSquare, Share2, ShoppingCart, ArrowLeft, Send, Heart, 
-  MessageCircle, Bookmark, PlusSquare, Zap, Wallet, LayoutGrid, User, Settings, 
-  ShieldCheck, MoreHorizontal, Image as ImageIcon, Film, Search, Bell, Play, 
-  SkipBack, SkipForward, ListMusic, Mic2, Layers, Wand2, Palette, Scissors, 
-  Music as MusicIcon, Crown, Stars, Cpu, ShoppingBag, Tag, Star, Globe, Code, 
-  Paperclip, Terminal, Pause, X, Users, Tv, Flag, Store, Calendar, 
-  HeartHandshakes, Gift, Gem, ShieldAlert, Scale, AlertTriangle, UserX, Share, Lock
+  Sparkles, MessageSquare, Share2, ArrowLeft, Send, Heart, 
+  MessageCircle, PlusSquare, Zap, LayoutGrid, Settings, 
+  ShieldCheck, MoreHorizontal, Image as ImageIcon, Bell, Play, 
+  Mic2, Crown, Cpu, Gift, Gem, ShieldAlert, AlertTriangle, UserX, 
+  Share, Lock, Menu, ThumbsUp, FileText, ChevronRight, CheckCircle, 
+  RefreshCw, Search, Trophy, Users, ShoppingBag, Clapperboard, Star,
+  ShieldCheck as VerifiedIcon, Flame, Clock, Ghost, Target, Terminal, 
+  Gavel, Activity, ZapOff, Radio
 } from "lucide-react";
 
-// --- TYPES ---
-type ScreenType = "home" | "hub" | "studio" | "magic" | "social" | "shop" | "dashboard" | "music" | "starmaker" | "legal";
-
 export default function Home() {
-  const [screen, setScreen] = useState<ScreenType>("home");
-  const [gems, setGems] = useState(1250);
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [isFrozen, setIsFrozen] = useState(false);
-  const [activeSocialTab, setActiveSocialTab] = useState("feed");
-  const [isAdPlaying, setIsAdPlaying] = useState(false);
-  const [chatInput, setChatInput] = useState("");
+  const [screen, setScreen] = useState("home");
+  const [gems, setGems] = useState(7500);
+  const [reputation, setReputation] = useState(98); // AI Sentiment Score
+  const [isGhostMarketOpen, setIsGhostMarketOpen] = useState(false);
+  const [isLiveCommandActive, setIsLiveCommandActive] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
 
-  // --- 1. SECURITY PROTOCOL (3-BAR TRY RULE) ---
-  const triggerSecurityCheck = () => {
-    if (isFrozen) return;
-    const newCount = failedAttempts + 1;
-    setFailedAttempts(newCount);
-    if (newCount >= 3) {
-      setIsFrozen(true);
-      alert("⚠️ CRITICAL: 3 Failed attempts. Account Permanent Freeze triggered.");
+  // --- 1. THE AI SENTIMENT LOGIC (GOOD VIBES = 2X GEMS) ---
+  const handleVibeCheck = (isPositive: boolean) => {
+    if (isPositive) {
+      setReputation(prev => Math.min(prev + 2, 100));
+      showToast("✨ POSITIVE VIBE DETECTED: Reputation Up!");
     } else {
-      alert(`⚠️ Security Warning: ${3 - newCount} attempts left before Freeze!`);
+      setReputation(prev => Math.max(prev - 5, 0));
+      showToast("⚠️ NEGATIVE SENTIMENT: Vibe Penalty Applied.");
     }
   };
 
-  // --- 2. AUTO SHARE LINK (ANDROID/IOS) ---
-  const handleInvite = () => {
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const link = `https://race-x.app/invite?ref=ADMIN_NEXUS&os=${isIOS ? 'ios' : 'android'}`;
-    navigator.clipboard.writeText(link);
-    alert("🚀 Smart Link Generated & Copied! 100 💎 Gems reward pending.");
+  // --- 2. GHOST MARKET AUCTION (DIAMOND BURN) ---
+  const enterGhostMarket = () => {
+    if (gems >= 5000) {
+      setScreen("ghost_market");
+      showToast("🌑 WELCOME TO THE GHOST MARKET");
+    } else {
+      showToast("❌ 5,000 💎 REQUIRED FOR ENTRY");
+    }
   };
 
-  // --- 3. GIFTING SYSTEM ---
-  const handleGift = (amount: number) => {
-    if (gems >= amount) {
-      setGems(prev => prev - amount);
-      alert(`💎 ${amount} Gems Gifted to Creator!`);
-    } else {
-      alert("❌ Insufficient Gems! Visit Market.");
-    }
+  const showToast = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => setNotification(null), 3000);
   };
 
   return (
-    <div className={`min-h-screen ${isFrozen ? 'grayscale brightness-50 pointer-events-none' : ''} bg-[#020202] text-white font-sans overflow-x-hidden`}>
+    <div className="min-h-screen bg-[#010101] text-white font-sans overflow-x-hidden selection:bg-blue-500/40 transition-all duration-1000">
       
-      {/* --- PERSISTENT HEADER --- */}
-      {screen !== "home" && (
-        <div className="fixed top-0 left-0 right-0 p-4 bg-black/95 backdrop-blur-3xl border-b border-white/5 z-[100] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setScreen("hub")} className="p-2.5 rounded-2xl bg-white/5"><ArrowLeft size={20}/></button>
-            <h1 className="text-xl font-black italic tracking-tighter bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent underline decoration-blue-500/30">RACE-X</h1>
-          </div>
-          <div className="flex items-center gap-3">
-             <div className="bg-zinc-900 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1.5 shadow-lg shadow-cyan-500/10">
-                <Gem size={14} className="text-cyan-400 animate-pulse"/>
-                <span className="text-xs font-black italic">{gems}</span>
-             </div>
-             {isFrozen && <Lock className="text-red-500" size={18}/>}
-          </div>
+      {/* --- SOVEREIGN NOTIFICATION --- */}
+      {notification && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[2000] bg-blue-600/80 backdrop-blur-3xl px-10 py-3 rounded-full border border-white/20 shadow-[0_0_80px_rgba(37,99,235,0.6)] animate-in zoom-in-90">
+           <p className="text-[10px] font-black italic uppercase tracking-[0.3em] flex items-center gap-3"> <Radio size={14} className="animate-pulse text-white"/> {notification} </p>
         </div>
       )}
 
-      <div className={screen !== "home" ? "pt-24 pb-44" : ""}>
-
-        {/* --- SCREEN: LEGAL, TERMS & 18+ SAFETY --- */}
-        {screen === "legal" && (
-          <div className="px-6 space-y-8 animate-in slide-in-from-bottom-10">
-             <h2 className="text-3xl font-black italic uppercase">Legal & Safety</h2>
-             <div className="space-y-4">
-                <SafetyCard icon={<ShieldAlert className="text-red-500"/>} title="18+ & Adult Policy" desc="Strict age-gate active. NSFW content results in immediate IP ban." />
-                <SafetyCard icon={<AlertTriangle className="text-yellow-500"/>} title="Copyright Scanner" desc="Pro-active AI scanning for stolen content. 3 strikes = Permanent Deletion." />
-                <SafetyCard icon={<UserX className="text-zinc-500"/>} title="Account Lifecycle" desc="30d Inactive: List | 60d: Freeze | 90d: Permanent Delete." />
-                <SafetyCard icon={<Scale className="text-blue-500"/>} title="T&C / Privacy" desc="Nexus Decentralized Protocol v4.0. Your data is encrypted." />
-             </div>
-             <button onClick={triggerSecurityCheck} className="w-full py-4 bg-red-600/10 border border-red-500/20 text-red-500 rounded-2xl text-[10px] font-black uppercase italic">Simulate Security Breach</button>
+      {/* --- OMNIVERSE HEADER --- */}
+      {screen !== "home" && (
+        <header className="fixed top-0 left-0 right-0 p-5 bg-black/95 backdrop-blur-3xl border-b border-white/5 z-[1000] flex items-center justify-between">
+          <div className="flex items-center gap-4" onClick={() => setScreen("hub")}>
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 active:scale-90 transition"><ArrowLeft size={20}/></div>
+            <div className="flex flex-col">
+               <h1 className="text-2xl font-black italic tracking-tighter bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">NEXUS SOVEREIGN</h1>
+               <div className="flex items-center gap-2"><Activity size={10} className="text-cyan-500 animate-pulse"/><span className="text-[7px] font-black text-zinc-500 uppercase tracking-widest">SENTIMENT: {reputation}%</span></div>
+            </div>
           </div>
-        )}
-
-        {/* --- SCREEN: SOCIAL (FACEBOOK ENGINE + GIFTING) --- */}
-        {screen === "social" && (
-          <div className="animate-in fade-in">
-             <div className="flex justify-around border-b border-white/5 bg-black sticky top-0 z-50 overflow-x-auto no-scrollbar">
-                <Tab icon={<LayoutGrid/>} active={activeSocialTab === 'feed'} onClick={() => setActiveSocialTab('feed')} />
-                <Tab icon={<Users/>} active={activeSocialTab === 'groups'} onClick={() => setActiveSocialTab('groups')} />
-                <Tab icon={<Tv/>} active={activeSocialTab === 'watch'} onClick={() => setActiveSocialTab('watch')} />
-                <Tab icon={<Flag/>} active={activeSocialTab === 'pages'} onClick={() => setActiveSocialTab('pages')} />
-                <Tab icon={<Bell/>} active={activeSocialTab === 'notif'} onClick={() => setActiveSocialTab('notif')} />
+          <div className="flex items-center gap-3">
+             <div className="bg-zinc-900/90 px-4 py-2 rounded-full border border-cyan-500/30 flex items-center gap-2 shadow-inner">
+                <Gem size={14} className="text-cyan-400 animate-spin-slow"/>
+                <span className="text-[11px] font-black italic text-cyan-400">{gems.toLocaleString()}</span>
              </div>
-             {activeSocialTab === 'feed' && (
-               <div className="p-0 space-y-4">
-                  <div className="p-4 flex gap-3 items-center bg-zinc-950 border-b border-white/5">
-                     <div className="w-10 h-10 rounded-full bg-blue-600 shadow-lg shadow-blue-600/20"></div>
-                     <div className="flex-1 bg-zinc-900 rounded-full px-4 py-2 text-xs font-bold text-zinc-600">What's on your mind?</div>
-                     <ImageIcon className="text-green-500" size={20}/>
-                  </div>
-                  <PostCard user="Nexus_Dev" img="https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800" onGift={() => handleGift(50)} />
-               </div>
-             )}
+             {/* MASTER KEY (Double Tap for Owner Panel) */}
+             <div className="w-11 h-11 rounded-2xl border-2 border-blue-600/50 p-0.5 cursor-pointer" onDoubleClick={() => setScreen("owner")}>
+                <div className="w-full h-full rounded-2xl bg-zinc-800 flex items-center justify-center font-black italic text-blue-500 text-xs">RX</div>
+             </div>
           </div>
-        )}
+        </header>
+      )}
 
-        {/* --- SCREEN: STUDIO (CANVA + TEMPLATES + API) --- */}
-        {screen === "studio" && (
-          <div className="px-5 space-y-8 animate-in zoom-in-95">
-             <div className="bg-zinc-900/60 p-8 rounded-[3rem] border border-cyan-500/20">
-                <h2 className="text-xl font-black italic uppercase text-cyan-400 mb-6 flex items-center gap-2"><Sparkles/> AI Config</h2>
-                <div className="space-y-3 mb-6">
-                   <ApiInput label="OpenAI Endpoint" placeholder="sk-nexus-..." />
-                   <ApiInput label="HuggingFace API" placeholder="hf_token_..." />
-                </div>
-                <div className="grid grid-cols-4 gap-4">
-                   <Tool icon={<Layers/>} /> <Tool icon={<Palette/>} /> <Tool icon={<Scissors/>} /> <Tool icon={<Cpu/>} />
-                </div>
-             </div>
-             <div>
-                <h3 className="text-xs font-black italic uppercase text-blue-500 mb-4 px-2">Inbuilt Pro Templates</h3>
-                <div className="grid grid-cols-2 gap-4">
-                   <TemplateCard title="Cyber Viral" img="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400" />
-                   <TemplateCard title="Hyper-Studio" img="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400" />
-                </div>
+      <main className={screen !== "home" ? "pt-32 pb-44 px-4" : ""}>
+
+        {/* --- SCREEN: OWNER OVERRIDE (THE SOURCE CODE) --- */}
+        {screen === "owner" && (
+          <div className="space-y-6 animate-in slide-in-from-bottom-20">
+             <div className="flex items-center gap-3 mb-8"><Terminal className="text-blue-500" size={32}/><h2 className="text-3xl font-black italic uppercase tracking-tighter">Command Kernel</h2></div>
+             <div className="grid grid-cols-1 gap-4">
+                <AdminControl label="Global Diamond Value" val="2.4x" onClick={() => showToast("VALUATION UPDATED")} />
+                <AdminControl label="Shadow Ban List" val="142 Users" onClick={() => showToast("SCANNING FOR TOXICITY...")} />
+                <button onClick={() => {setIsGhostMarketOpen(!isGhostMarketOpen); showToast("GHOST MARKET STATUS UPDATED")}} className={`p-8 rounded-[3rem] border-2 ${isGhostMarketOpen ? 'bg-purple-600 border-white shadow-[0_0_40px_rgba(147,51,234,0.5)]' : 'bg-zinc-900 border-white/5'} flex justify-between items-center transition-all duration-500`}>
+                   <div className="text-left"><h3 className="text-lg font-black italic uppercase">Ghost Market</h3><p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Diamond Auction Mode</p></div>
+                   <Gavel size={28}/>
+                </button>
              </div>
           </div>
         )}
 
-        {/* --- SCREEN: MUSIC (VOICE ADS INTEGRATED) --- */}
-        {screen === "music" && (
-          <div className="px-5 space-y-6 animate-in fade-in">
-             <h2 className="text-2xl font-black italic uppercase">Nexus Music</h2>
-             <div className="p-6 bg-zinc-900/50 rounded-3xl border border-white/5 flex items-center justify-between" onClick={() => { setIsAdPlaying(true); setTimeout(() => setIsAdPlaying(false), 5000); }}>
-                <div className="flex items-center gap-4">
-                   <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center font-black">RX</div>
-                   <div><p className="text-sm font-black italic uppercase">Cyber Synth v4</p><p className="text-[10px] text-zinc-500 uppercase">Voice Ad Active</p></div>
-                </div>
-                <Play className="text-green-500"/>
-             </div>
-             {isAdPlaying && (
-               <div className="p-4 bg-blue-600/10 border border-blue-500/20 rounded-2xl flex items-center gap-3 animate-pulse">
-                  <Mic2 size={16} className="text-blue-400"/>
-                  <p className="text-[10px] font-black italic text-blue-400 uppercase tracking-widest">Streaming Nexus Voice Ad...</p>
-               </div>
-             )}
-          </div>
-        )}
-
-        {/* --- HUB (ENTRY) --- */}
+        {/* --- SCREEN: HUB (PULSE & AUCTIONS) --- */}
         {screen === "hub" && (
-          <div className="p-5 grid grid-cols-1 gap-5 max-w-[500px] mx-auto animate-in slide-in-from-bottom-10">
-            <HubBtn title="SOCIAL HUB" sub="FB ENGINE + GIFTING" icon={<Users size={30}/>} color="from-blue-600 to-blue-400" onClick={() => setScreen("social")} />
-            <HubBtn title="AI STUDIO" sub="TEMPLATES + API" icon={<Sparkles size={30}/>} color="from-cyan-600 to-indigo-600" onClick={() => setScreen("studio")} />
-            <HubBtn title="MAGIC CHAT" sub="GEMINI ULTRA PRO" icon={<MessageSquare size={30}/>} color="from-purple-600 to-pink-600" onClick={() => setScreen("magic")} />
-            <div className="grid grid-cols-2 gap-4">
-              <HubBtn title="MUSIC" sub="VOICE ADS" icon={<Play/>} color="from-green-600 to-emerald-500" onClick={() => setScreen("music")} />
-              <HubBtn title="LEGAL" sub="RULES & 18+" icon={<ShieldCheck/>} color="from-zinc-800 to-zinc-950" onClick={() => setScreen("legal")} />
-            </div>
-            <div className="bg-gradient-to-r from-indigo-900 to-blue-900 p-8 rounded-[2.5rem] border border-white/10 flex justify-between items-center cursor-pointer active:scale-95 transition" onClick={handleInvite}>
-               <div><h2 className="text-xl font-black italic uppercase text-white">Invite Friends</h2><p className="text-[10px] font-bold text-indigo-300 uppercase">Gift 100 💎 Both</p></div>
-               <Share className="text-white"/>
-            </div>
+          <div className="space-y-6 animate-in fade-in duration-700">
+             {isGhostMarketOpen && (
+               <div className="p-10 bg-gradient-to-br from-purple-900 to-black rounded-[3.5rem] border border-purple-500/40 shadow-2xl relative overflow-hidden group cursor-pointer" onClick={enterGhostMarket}>
+                  <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-125 transition-transform"><Gavel size={200}/></div>
+                  <div className="relative z-10 flex flex-col items-center text-center">
+                     <Ghost size={40} className="text-purple-400 mb-4 animate-bounce"/>
+                     <h2 className="text-2xl font-black italic uppercase text-white">GHOST MARKET LIVE</h2>
+                     <p className="text-[9px] font-bold text-purple-300 uppercase tracking-[0.3em] mt-2">Exclusive High-Diamond Auction</p>
+                  </div>
+               </div>
+             )}
+
+             <div className="grid grid-cols-1 gap-4">
+                <div className="p-6 bg-zinc-900/40 rounded-[2.5rem] border border-white/5 flex items-center justify-between">
+                   <div className="flex items-center gap-4"><div className="p-3 bg-blue-600/10 rounded-2xl"><Activity size={20} className="text-blue-500"/></div><div><h4 className="text-[10px] font-black uppercase text-zinc-400">Social Reputation</h4><p className="text-sm font-black italic text-white">{reputation >= 90 ? 'EXCELLENT' : 'MONITORED'}</p></div></div>
+                   <div className="text-right"><p className="text-[10px] font-black text-cyan-500 italic">2X GEM BOOST</p></div>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-5">
+                <ActionBox title="Nexus Shop" sub="60% OFF" icon={<ShoppingBag size={28}/>} color="text-green-500" onClick={() => setScreen("shop")} />
+                <ActionBox title="Social Feed" sub="LIVE VIBE" icon={<Users size={28}/>} color="text-blue-500" onClick={() => setScreen("social")} />
+             </div>
           </div>
         )}
 
-        {/* --- SCREEN: MAGIC CHAT (GEMINI ULTRA) --- */}
-        {screen === "magic" && (
-           <div className="px-4 h-[70vh] flex flex-col animate-in fade-in">
-              <div className="flex-1 overflow-y-auto space-y-6 pt-4 no-scrollbar">
-                 <AiMsg text="Nexus Gemini Ultra Online. All Security Protocols active. 18+ Filter engaged. How can I assist, Admin?" />
-              </div>
-              <div className="bg-zinc-900 border border-white/10 rounded-[2.5rem] p-2 flex items-center gap-2">
-                 <button className="p-3 text-zinc-500"><Paperclip size={20}/></button>
-                 <input className="bg-transparent flex-1 outline-none text-sm font-bold" placeholder="Command Nexus..." />
-                 <button className="p-3.5 bg-white text-black rounded-full active:scale-90 transition"><Send size={20}/></button>
-              </div>
-           </div>
+        {/* --- SCREEN: GHOST MARKET (AUCTION) --- */}
+        {screen === "ghost_market" && (
+          <div className="p-6 space-y-8 animate-in zoom-in-95">
+             <div className="text-center space-y-2"><h2 className="text-4xl font-black italic uppercase text-purple-400">The Vault</h2><p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Premium AI Assets - 1 Hour Only</p></div>
+             <AuctionItem title="Hyper-Real V3 Lens" price="15,000 💎" />
+             <AuctionItem title="Invisible Ghost Tag" price="25,000 💎" />
+             <button onClick={() => setScreen("hub")} className="w-full py-5 bg-white/5 rounded-full text-[10px] font-black uppercase italic border border-white/10">Exit Market</button>
+          </div>
         )}
 
-        {/* --- WELCOME SCREEN --- */}
         {screen === "home" && (
-          <div className="h-screen flex flex-col items-center justify-center bg-black" onClick={() => setScreen("hub")}>
-             <div className="w-36 h-36 bg-blue-600 rounded-[3.5rem] rotate-12 flex items-center justify-center text-6xl font-black italic shadow-[0_0_60px_rgba(37,99,235,0.4)] border-4 border-white/10">RX</div>
-             <button className="mt-16 px-20 py-5 bg-white text-black font-black italic rounded-full tracking-[0.3em] uppercase hover:bg-blue-500 hover:text-white transition-all shadow-2xl">Initialize</button>
+          <div className="h-screen flex flex-col items-center justify-center bg-[#010101]" onClick={() => setScreen("hub")}>
+             <div className="w-48 h-48 bg-blue-600 rounded-[5rem] flex items-center justify-center text-9xl font-black italic shadow-[0_0_150px_rgba(37,99,235,0.5)] border-8 border-white/5 animate-pulse">RX</div>
+             <p className="mt-16 text-[12px] font-black uppercase tracking-[0.8em] text-blue-500/60">Omniverse Sovereign Active</p>
           </div>
         )}
-      </div>
+      </main>
 
-      {/* --- MASTER BOTTOM NAV --- */}
-      {screen !== "home" && (
-        <div className="fixed bottom-0 left-0 right-0 h-20 bg-black/95 backdrop-blur-3xl border-t border-white/5 flex items-center justify-around px-2 z-[100]">
-          <Nav icon={<Share2/>} active={screen === 'social'} onClick={() => setScreen('social')} />
-          <Nav icon={<Sparkles/>} active={screen === 'studio'} onClick={() => setScreen('studio')} />
-          <Nav icon={<ShieldCheck size={28} className="text-blue-500"/>} active={screen === 'legal'} onClick={() => setScreen('legal')} />
-          <Nav icon={<Play/>} active={screen === 'music'} onClick={() => setScreen('music')} />
-          <Nav icon={<ShoppingCart/>} active={screen === 'hub'} onClick={() => setScreen('hub')} />
-        </div>
+      {/* --- SOVEREIGN NAV --- */}
+      {screen !== "home" && screen !== "owner" && (
+        <nav className="fixed bottom-0 left-0 right-0 h-24 bg-black/95 backdrop-blur-4xl border-t border-white/5 flex items-center justify-around z-[1000]">
+          <NavBtn icon={<Share2/>} active={screen === 'social'} onClick={() => setScreen('social')} />
+          <NavBtn icon={<ShoppingBag/>} active={screen === 'shop'} onClick={() => setScreen('shop')} />
+          <div className="p-6 bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 rounded-full -mt-14 shadow-[0_0_60px_rgba(37,99,235,0.4)] active:scale-90 transition cursor-pointer border-4 border-black" onClick={() => handleVibeCheck(true)}>
+             <PlusSquare size={32} className="text-white"/>
+          </div>
+          <NavBtn icon={<Trophy/>} active={screen === 'ghost_market'} onClick={() => setScreen('ghost_market')} />
+          <NavBtn icon={<LayoutGrid/>} active={screen === 'hub'} onClick={() => setScreen('hub')} />
+        </nav>
       )}
     </div>
   );
 }
 
-// --- SHARED COMPONENTS ---
-function SafetyCard({ icon, title, desc }: any) {
+/* --- OMNIVERSE CORE COMPONENTS (BINA KUCH KATE) --- */
+
+function AdminControl({ label, val, onClick }: any) {
   return (
-    <div className="bg-zinc-900/50 p-6 rounded-[2.5rem] border border-white/5 flex gap-4 items-start">
-       <div className="p-3 bg-black/40 rounded-2xl">{icon}</div>
-       <div><h3 className="text-sm font-black italic uppercase text-white">{title}</h3><p className="text-[10px] font-bold text-zinc-500 mt-1 leading-relaxed">{desc}</p></div>
+    <div className="p-7 bg-zinc-900/60 rounded-[2.5rem] border border-white/5 flex justify-between items-center active:bg-blue-600/10 transition" onClick={onClick}>
+       <div><h4 className="text-[10px] font-black uppercase italic text-zinc-500 tracking-widest">{label}</h4><p className="text-lg font-black italic text-white">{val}</p></div>
+       <Settings size={20} className="text-zinc-700"/>
     </div>
   );
 }
 
-function PostCard({ user, img, onGift }: any) {
+function ActionBox({ title, sub, icon, color, onClick }: any) {
   return (
-    <div className="bg-zinc-950/50 border-y border-white/5">
-      <div className="flex justify-between p-4 items-center">
-        <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-blue-600"></div><span className="text-xs font-black italic uppercase">{user}</span></div>
-        <MoreHorizontal size={18} className="text-zinc-700" />
-      </div>
-      <img src={img} className="w-full aspect-square object-cover" />
-      <div className="p-6 flex justify-between items-center">
-         <div className="flex gap-6"><Heart size={24}/><MessageCircle size={24}/><Share2 size={24}/></div>
-         <button onClick={onGift} className="bg-gradient-to-r from-yellow-400 to-orange-500 px-5 py-2.5 rounded-full text-black font-black italic text-[10px] active:scale-95 shadow-lg shadow-orange-500/20 flex items-center gap-2"><Gift size={16}/> GIFT DIAMOND</button>
-      </div>
+    <div onClick={onClick} className="p-10 bg-zinc-900/30 rounded-[3rem] border border-white/5 flex flex-col items-center gap-4 active:scale-95 transition group">
+       <div className={`${color} group-hover:scale-110 transition-transform`}>{icon}</div>
+       <div className="text-center"><h3 className="text-[11px] font-black italic uppercase text-white">{title}</h3><p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">{sub}</p></div>
     </div>
   );
 }
 
-function ApiInput({ label, placeholder }: any) {
+function AuctionItem({ title, price }: any) {
   return (
-    <div className="space-y-1.5">
-       <p className="text-[8px] font-black text-zinc-500 uppercase px-2">{label}</p>
-       <input className="w-full bg-black/60 border border-white/5 rounded-xl px-4 py-3 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-cyan-500" placeholder={placeholder} />
+    <div className="p-7 bg-gradient-to-r from-zinc-900 to-zinc-950 border border-purple-500/20 rounded-[2.5rem] flex justify-between items-center">
+       <div><h4 className="text-sm font-black italic uppercase text-white">{title}</h4><p className="text-[9px] font-bold text-purple-400 uppercase tracking-widest">ONE OF ONE ASSET</p></div>
+       <button className="bg-purple-600 px-6 py-2.5 rounded-full text-[10px] font-black uppercase italic shadow-lg shadow-purple-600/30">{price}</button>
     </div>
   );
 }
 
-function TemplateCard({ title, img }: any) {
-  return (
-    <div className="relative aspect-square rounded-[2rem] overflow-hidden border border-white/10 active:scale-95 transition-all group" onClick={() => alert(`Template ${title} Active`)}>
-       <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60" />
-       <div className="absolute inset-0 flex flex-col justify-end p-5 bg-gradient-to-t from-black to-transparent">
-          <p className="text-[10px] font-black italic uppercase text-white">{title}</p>
-          <div className="flex items-center gap-1 mt-1"><Crown size={10} className="text-yellow-400"/><span className="text-[8px] font-bold text-yellow-400 uppercase">PRO</span></div>
-       </div>
-    </div>
-  );
-}
-
-function HubBtn({ title, sub, icon, color, onClick }: any) {
-  return (
-    <div onClick={onClick} className={`relative p-8 rounded-[2.5rem] bg-gradient-to-br ${color} active:scale-95 transition-all cursor-pointer border border-white/5 shadow-2xl`}>
-      <div className="relative z-10 flex flex-col gap-4">
-        <div className="p-3 bg-black/20 w-fit rounded-2xl backdrop-blur-md">{icon}</div>
-        <div><h2 className="text-2xl font-black italic uppercase tracking-tighter">{title}</h2><p className="text-[10px] font-black text-white/60 uppercase tracking-widest">{sub}</p></div>
-      </div>
-    </div>
-  );
-}
-
-function AiMsg({ text }: any) {
-  return (
-    <div className="flex gap-4 animate-in slide-in-from-left-5">
-      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-cyan-500/20"><Stars size={16}/></div>
-      <div className="p-4 rounded-[1.8rem] rounded-tl-none bg-zinc-900/60 border border-white/5 text-sm font-bold italic leading-relaxed text-zinc-200 max-w-[85%]">{text}</div>
-    </div>
-  );
-}
-
-function Tab({ icon, active, onClick }: any) {
-  return <button onClick={onClick} className={`flex-1 py-4 flex justify-center transition-all ${active ? 'text-blue-500 border-b-2 border-blue-500' : 'text-zinc-600'}`}>{icon}</button>;
-}
-
-function Tool({ icon }: any) {
-  return <div className="p-4 bg-white/5 rounded-2xl border border-white/5 text-cyan-400 active:scale-90 transition cursor-pointer flex justify-center items-center">{icon}</div>;
-}
-
-function Nav({ icon, active, onClick, className }: any) {
-  return <button onClick={onClick} className={`transition-all duration-300 ${active ? 'text-blue-500 scale-125' : 'text-zinc-600 opacity-60'} ${className}`}>{icon}</button>;
+function NavBtn({ icon, active, onClick }: any) {
+  return <button onClick={onClick} className={`transition-all duration-500 ${active ? 'text-blue-400 scale-125' : 'text-zinc-600 opacity-50'}`}>{icon}</button>;
 }
