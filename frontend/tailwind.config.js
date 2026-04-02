@@ -3,10 +3,16 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "../shared/**/*.{js,ts,jsx,tsx}" // Agar shared folder use kar rahe ho toh
+    "./src/components/**/*.{js,ts,jsx,tsx}", // Ye line zaroori hai design ke liye
   ],
   theme: {
-    extend: {},
+    extend: {
+      // Yahan Shadcn ke animations load honge
+      animations: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
   },
   plugins: [],
 }
