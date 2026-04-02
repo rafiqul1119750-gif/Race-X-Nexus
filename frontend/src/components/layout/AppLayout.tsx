@@ -9,9 +9,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {isLoading ? (
         <SplashScreen onFinish={() => setIsLoading(false)} />
       ) : (
-        <div className="min-h-screen bg-[#050505] text-white">
-          {/* Aapka baaki layout code (Sidebar, Header etc.) yahan rahega */}
-          <main>{children}</main>
+        <div className="min-h-screen bg-[#050505] text-white selection:bg-blue-500/30">
+          {/* Main App Content Starts Here */}
+          <div className="animate-in fade-in duration-1000">
+            {children}
+          </div>
         </div>
       )}
     </>
