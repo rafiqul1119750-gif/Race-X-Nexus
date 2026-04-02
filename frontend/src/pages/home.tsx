@@ -1,154 +1,104 @@
 // ... [Pichle saare Imports same rahenge] ...
 
 export default function Home() {
-  // --- 1. CORE STATES (LOCAL PERSISTENCE) ---
-  const [screen, setScreen] = useState("home");
+  // --- 1. CORE STATES ---
+  const [screen, setScreen] = useState("splash"); // Default "splash" rakha hai
   const [gems, setGems] = useState(() => Number(localStorage.getItem("rx_gems")) || 7500);
-  const [reputation, setReputation] = useState(() => Number(localStorage.getItem("rx_vibe")) || 98);
-  const [isLocked, setIsLocked] = useState(true);
   const [notification, setNotification] = useState<string | null>(null);
+  const [isLocked, setIsLocked] = useState(true);
 
-  // --- 2. DYNAMIC API NODES ---
-  const [apiNodes, setApiNodes] = useState(() => {
-    const saved = localStorage.getItem("rx_nodes");
-    return saved ? JSON.parse(saved) : [
-      { id: 1, type: "AI", name: "Flux Engine", endpoint: "https://api.flux.ai", key: "FL-99" },
-      { id: 2, type: "MUSIC", name: "Nexus Stream", endpoint: "https://api.nexus.io", key: "NX-01" }
-    ];
-  });
-
-  // --- 3. AI & MUSIC ENGINE STATES ---
-  const [prompt, setPrompt] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isAudioAdPlaying, setIsAudioAdPlaying] = useState(false);
-  const [songCounter, setSongCounter] = useState(0);
-  const [currentTrack, setCurrentTrack] = useState({ title: "Nexus Horizon", artist: "AI Sovereign" });
-
-  // --- 4. SHOP & GHOST MARKET LOGIC (NEW: REAL BUYING) ---
-  const buyGems = (amount: number, price: string) => {
-    showToast(`💳 PROCESSING ${price}...`);
-    setTimeout(() => {
-      setGems(prev => prev + amount);
-      showToast(`✨ +${amount} GEMS ADDED TO VAULT`);
-    }, 2000);
-  };
-
-  // --- AUTO-SAVE (IMMORTAL DATA) ---
+  // --- 2. AUTO-TRANSITION (Splash to Hub) ---
   useEffect(() => {
-    localStorage.setItem("rx_gems", gems.toString());
-    localStorage.setItem("rx_vibe", reputation.toString());
-    localStorage.setItem("rx_nodes", JSON.stringify(apiNodes));
-  }, [gems, reputation, apiNodes]);
+    if (screen === "splash") {
+      const timer = setTimeout(() => {
+        setScreen("hub"); // 3 second baad apne aap Hub par le jayega
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [screen]);
 
-  const showToast = (msg: string) => {
-    setNotification(msg);
-    setTimeout(() => setNotification(null), 3000);
-  };
-
-  // ... [AI Generation & Music Logic same as before - BINA KUCH KATE] ...
+  // ... [Baki saari States & Logic (AI, Music, Shop) SAME rakho] ...
 
   return (
-    <div className="min-h-screen bg-[#010101] text-white font-sans transition-all overflow-hidden">
+    <div className="min-h-screen bg-[#010101] text-white font-sans overflow-hidden">
       
-      {/* NOTIFICATION */}
-      {notification && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[3000] bg-blue-600/90 backdrop-blur-3xl px-12 py-4 rounded-full border border-white/20 animate-in zoom-in-95">
-           <p className="text-[10px] font-black italic uppercase tracking-[0.3em] flex items-center gap-4"> <Zap size={16} className="animate-pulse"/> {notification} </p>
+      {/* 1. SPLASH SCREEN LAYER */}
+      {screen === "splash" && (
+        <div className="fixed inset-0 z-[5000] bg-black flex flex-col items-center justify-center animate-out fade-out duration-1000 delay-[2500ms]">
+           <div className="w-56 h-56 bg-blue-600 rounded-[5.5rem] flex items-center justify-center text-[10rem] font-black italic shadow-[0_0_150px_rgba(37,99,235,0.4)] animate-pulse">
+              RX
+           </div>
+           <p className="mt-20 text-[11px] font-black uppercase tracking-[1.2em] text-blue-500/50">
+              Nexus Sovereign Active
+           </p>
         </div>
       )}
 
-      {/* HEADER (Diamonds & RX Logo) */}
-      {screen !== "home" && (
-        <header className="fixed top-0 left-0 right-0 p-6 bg-black/95 backdrop-blur-3xl border-b border-white/5 z-[2000] flex items-center justify-between">
-           <div className="flex items-center gap-4" onClick={() => setScreen("hub")}>
-              <div className="p-3 bg-white/5 rounded-2xl"><ArrowLeft size={20}/></div>
-              <h1 className="text-2xl font-black italic text-blue-500">NEXUS X</h1>
+      {/* 2. GLOBAL HEADER (Splash ke baad hi dikhega) */}
+      {screen !== "splash" && (
+        <header className="fixed top-0 left-0 right-0 p-6 bg-black/95 backdrop-blur-3xl border-b border-white/5 z-[2000] flex justify-between items-center animate-in fade-in duration-500">
+           <div className="flex items-center gap-3" onClick={() => setScreen("hub")}>
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-black">RX</div>
+              <h1 className="text-xl font-black italic text-blue-500 tracking-tighter uppercase">Nexus</h1>
            </div>
-           <div className="flex items-center gap-3">
-              <div className="bg-zinc-900 px-5 py-2 rounded-full border border-cyan-500/30 flex items-center gap-2">
-                 <Gem size={14} className="text-cyan-400"/><span className="text-[11px] font-black italic">{gems.toLocaleString()}</span>
+           <div className="flex gap-3">
+              <div className="bg-zinc-900 px-4 py-2 rounded-full border border-cyan-500/30 flex items-center gap-2">
+                 <Gem size={12} className="text-cyan-400"/><span className="text-[10px] font-black italic">{gems.toLocaleString()}</span>
               </div>
-              <div className="w-12 h-12 rounded-2xl border-2 border-blue-600/50 p-0.5 cursor-pointer" onDoubleClick={() => setScreen("owner")}>
-                 <div className="w-full h-full rounded-2xl bg-zinc-800 flex items-center justify-center font-black text-blue-500 text-xs">RX</div>
+              <div className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center" onDoubleClick={() => setScreen("owner")}>
+                 <Settings size={16} className="text-zinc-600"/>
               </div>
            </div>
         </header>
       )}
 
-      <main className={screen !== "home" ? "pt-36 pb-48 px-4 h-screen overflow-y-auto" : ""}>
-
-        {/* --- OWNER SCREEN (WITH LOCK) --- */}
-        {screen === "owner" && (
-          <div className="space-y-8 animate-in slide-in-from-bottom-20 pb-32">
-             {isLocked ? (
-                <div className="p-12 bg-zinc-900/60 rounded-[4rem] text-center space-y-8 border border-white/5">
-                   <Fingerprint size={80} className="mx-auto text-blue-600 animate-pulse"/>
-                   <input type="password" placeholder="Admin Pin" onChange={(e) => e.target.value === "0000" && setIsLocked(false)} className="w-full bg-black/60 p-6 rounded-3xl text-center outline-none border border-white/10" />
-                </div>
-             ) : (
-                <div className="space-y-6">
-                   <h2 className="text-3xl font-black italic uppercase px-2">Node Manager</h2>
-                   {apiNodes.map((node: any) => (
-                      <div key={node.id} className="p-8 bg-zinc-900/60 border-l-4 border-l-blue-600 rounded-[3rem] space-y-4">
-                         <input value={node.name} className="bg-transparent text-sm font-black italic text-white outline-none w-full" />
-                         <div className="bg-black/40 p-4 rounded-xl border border-white/5 flex gap-3 text-[10px] font-mono text-blue-400 truncate">{node.endpoint}</div>
-                         <div className="bg-black/40 p-4 rounded-xl border border-white/5 flex gap-3 text-[10px] font-mono text-cyan-400 truncate">{node.key}</div>
-                      </div>
-                   ))}
-                   <button onClick={() => { setIsLocked(true); showToast("💾 NODES SYNCED"); }} className="w-full py-8 bg-white text-black rounded-[3rem] font-black italic uppercase text-xs">Save & Lock Kernel</button>
-                </div>
-             )}
-          </div>
-        )}
-
-        {/* --- SHOP SCREEN (NEW: WORKING PURCHASES) --- */}
-        {screen === "shop" && (
-          <div className="space-y-8 animate-in fade-in pb-32">
-             <div className="p-10 bg-gradient-to-br from-green-900/20 to-black rounded-[3rem] border border-green-500/20 text-center">
-                <ShoppingBag size={40} className="mx-auto text-green-500 mb-4"/>
-                <h2 className="text-3xl font-black italic uppercase">Nexus Vault</h2>
-             </div>
-             <div className="grid grid-cols-1 gap-4">
-                <button onClick={() => buyGems(5000, "₹499")} className="p-8 bg-zinc-900/40 border border-white/5 rounded-[2.5rem] flex justify-between items-center active:scale-95 transition">
-                   <div className="flex items-center gap-4"><Gem className="text-cyan-400"/><span className="font-black italic">5,000 GEMS</span></div>
-                   <span className="text-xs font-black text-green-500 bg-green-500/10 px-4 py-2 rounded-full">₹499</span>
-                </button>
-                <button onClick={() => buyGems(15000, "₹999")} className="p-8 bg-zinc-900/40 border border-white/5 rounded-[2.5rem] flex justify-between items-center active:scale-95 transition border-l-4 border-l-yellow-500">
-                   <div className="flex items-center gap-4"><Gem className="text-yellow-500"/><span className="font-black italic">15,000 GEMS</span></div>
-                   <span className="text-xs font-black text-green-500 bg-green-500/10 px-4 py-2 rounded-full">₹999</span>
-                </button>
-             </div>
-          </div>
-        )}
-
-        {/* --- HUB (AI STUDIO, MUSIC, ETC) --- */}
+      {/* 3. MAIN CONTENT AREA */}
+      <main className={`transition-all duration-500 ${screen !== "splash" ? "pt-32 pb-44 px-4 h-screen overflow-y-auto" : "h-screen"}`}>
+        
+        {/* HUB SCREEN */}
         {screen === "hub" && (
-           <div className="grid grid-cols-2 gap-5 animate-in fade-in">
-              <ActionBox title="AI Studio" sub="GENERATOR" icon={<Wand2 size={28}/>} color="text-blue-500" onClick={() => setScreen("ai_studio")} />
-              <ActionBox title="Music Node" sub="STREAMING" icon={<Music size={28}/>} color="text-purple-500" onClick={() => setScreen("music")} />
-              <ActionBox title="Market" sub="SHOP" icon={<ShoppingBag size={28}/>} color="text-green-500" onClick={() => setScreen("shop")} />
-              <ActionBox title="Owner" sub="KERNEL" icon={<Terminal size={28}/>} color="text-zinc-500" onClick={() => setScreen("owner")} />
-           </div>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5">
+             <div className="grid grid-cols-2 gap-4">
+                <ActionBox title="AI Studio" sub="CREATE" icon={<Wand2/>} color="text-blue-500" onClick={() => setScreen("ai_studio")} />
+                <ActionBox title="Music" sub="STREAM" icon={<Music/>} color="text-purple-500" onClick={() => setScreen("music")} />
+                <ActionBox title="Shop" sub="COUPONS" icon={<ShoppingBag/>} color="text-green-500" onClick={() => setScreen("shop")} />
+                <ActionBox title="Status" sub="VIBE" icon={<Flame/>} color="text-orange-500" onClick={() => setScreen("hub")} />
+             </div>
+             
+             {/* AFFILIATE SECTION */}
+             <div className="mt-10 space-y-4">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 px-2">Store Redirects</h3>
+                <button onClick={() => window.open("https://amazon.in", "_blank")} className="w-full p-8 bg-zinc-900/40 border border-white/5 rounded-[3rem] flex justify-between items-center active:scale-95 transition">
+                   <span className="font-black italic text-white uppercase text-sm">Amazon Store</span>
+                   <ExternalLink size={20} className="text-zinc-700"/>
+                </button>
+             </div>
+          </div>
         )}
 
-        {/* ... [AI Studio & Music screens same as before] ... */}
+        {/* ... [Baki Screens: shop, ai_studio, music, owner ka code same rahega] ... */}
 
       </main>
 
-      {/* FOOTER NAV */}
-      {screen !== "home" && screen !== "owner" && (
-        <nav className="fixed bottom-0 left-0 right-0 h-28 bg-black/95 backdrop-blur-5xl border-t border-white/5 flex items-center justify-around z-[2000]">
+      {/* 4. GLOBAL NAVIGATION (Splash ke baad hi dikhega) */}
+      {screen !== "splash" && screen !== "owner" && (
+        <nav className="fixed bottom-0 left-0 right-0 h-28 bg-black/95 backdrop-blur-5xl border-t border-white/5 flex items-center justify-around z-[2000] px-4 animate-in slide-in-from-bottom-10">
            <NavBtn icon={<LayoutGrid size={24}/>} active={screen === 'hub'} onClick={() => setScreen('hub')} />
            <NavBtn icon={<Wand2 size={24}/>} active={screen === 'ai_studio'} onClick={() => setScreen('ai_studio')} />
-           <div className="p-7 bg-blue-600 rounded-full -mt-20 border-4 border-black" onClick={() => setScreen("ai_studio")}><PlusSquare size={38} className="text-white"/></div>
+           <div className="p-7 bg-blue-600 rounded-full -mt-20 border-4 border-black shadow-2xl active:scale-90 transition" onClick={() => showToast("📺 AD ENGINE READY")}>
+              <Play size={38} className="text-white ml-1 fill-white"/>
+           </div>
            <NavBtn icon={<Music size={24}/>} active={screen === 'music'} onClick={() => setScreen('music')} />
            <NavBtn icon={<ShoppingBag size={24}/>} active={screen === 'shop'} onClick={() => setScreen('shop')} />
         </nav>
       )}
+
+      {/* NOTIFICATION */}
+      {notification && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[4000] bg-blue-600 px-10 py-4 rounded-full shadow-2xl animate-in zoom-in-90">
+           <p className="text-[10px] font-black uppercase tracking-widest">{notification}</p>
+        </div>
+      )}
     </div>
   );
 }
-
-// ... [Sub-components ActionBox & NavBtn same as before] ...
