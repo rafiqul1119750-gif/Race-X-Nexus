@@ -1,135 +1,188 @@
-import { useState } from "react";
-import { Sparkles, MessageSquare, Share2 } from "lucide-react";
+import React, { useState } from "react";
+import { Sparkles, MessageSquare, Share2, ShoppingCart, ArrowLeft } from "lucide-react";
+
+type ScreenType = "home" | "hub" | "studio" | "magic" | "social" | "shop";
 
 export default function Home() {
-  const [screen, setScreen] = useState<"home" | "hub" | "studio" | "magic" | "social">("home");
+  const [screen, setScreen] = useState<ScreenType>("home");
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
 
-      {/* 🔥 BACKGROUND */}
-      <div className="absolute inset-0 -z-10">
-        <div className="w-full h-full bg-gradient-to-br from-black via-[#050510] to-black"></div>
-        <div className="absolute w-[500px] h-[500px] bg-purple-600/20 blur-[150px] top-0 left-0 animate-pulse"></div>
-        <div className="absolute w-[400px] h-[400px] bg-cyan-500/20 blur-[120px] bottom-0 right-0 animate-pulse"></div>
-      </div>
+      {/* BACK BUTTON */}
+      {screen !== "home" && (
+        <button
+          onClick={() => setScreen("hub")}
+          className="absolute top-5 left-5 z-50 p-2 rounded-full bg-white/10 backdrop-blur"
+        >
+          <ArrowLeft />
+        </button>
+      )}
 
-      {/* 🔥 SPLASH */}
+      {/* HOME */}
       {screen === "home" && (
-        <div className="flex flex-col items-center justify-center h-screen">
-
+        <Center>
           <FloatingLogo />
-
-          <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            RACE-X
-          </h1>
-
-          <p className="text-zinc-500 text-sm mt-2 tracking-widest">
-            THE FUTURE OF CREATION
-          </p>
-
-          <button
-            onClick={() => setScreen("hub")}
-            className="mt-10 px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 shadow-[0_0_25px_#00ffff] active:scale-95"
-          >
-            ENTER
-          </button>
-        </div>
+          <Title />
+          <button onClick={() => setScreen("hub")} className="btn">ENTER</button>
+        </Center>
       )}
 
-      {/* 🔥 HUB */}
+      {/* HUB */}
       {screen === "hub" && (
-        <div className="p-6 space-y-6">
-
+        <div className="p-6 grid gap-6">
           <GlassCard title="STUDIO" icon={<Sparkles />} onClick={() => setScreen("studio")} />
-          <GlassCard title="MAGIC" icon={<MessageSquare />} onClick={() => setScreen("magic")} />
+          <GlassCard title="MAGIC AI" icon={<MessageSquare />} onClick={() => setScreen("magic")} />
           <GlassCard title="SOCIAL" icon={<Share2 />} onClick={() => setScreen("social")} />
-
+          <GlassCard title="RX SHOP" icon={<ShoppingCart />} onClick={() => setScreen("shop")} />
         </div>
       )}
 
-      {/* MODULES */}
-      {screen === "studio" && <Screen title="STUDIO" />}
-      {screen === "magic" && <Screen title="MAGIC AI" />}
-      {screen === "social" && <Screen title="SOCIAL FEED" />}
+      {/* PAGES */}
+      {screen === "studio" && <Studio />}
+      {screen === "magic" && <Magic />}
+      {screen === "social" && <Social />}
+      {screen === "shop" && <Shop />}
     </div>
   );
 }
 
-{/* 🔥 FLOATING LOGO */}
+/* ---------- COMMON UI ---------- */
+
+function Center({ children }: { children: React.ReactNode }) {
+  return <div className="flex flex-col items-center justify-center h-screen gap-4">{children}</div>;
+}
+
+function Title() {
+  return (
+    <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+      RACE-X
+    </h1>
+  );
+}
+
 function FloatingLogo() {
   return (
-    <div className="relative mb-8 animate-bounce">
-      <div className="absolute w-40 h-40 rounded-full bg-gradient-to-tr from-cyan-400 via-purple-500 to-pink-500 blur-2xl opacity-40"></div>
-
-      <div className="w-40 h-40 rounded-full flex items-center justify-center text-5xl font-black bg-black border border-white/10 shadow-[0_0_50px_#00ffff] relative z-10">
-        RX
-      </div>
-    </div>
+    <div className="mb-6 text-5xl font-black animate-bounce">RX</div>
   );
 }
 
-{/* 🔥 TYPES */}
-type GlassCardProps = {
-  title: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-};
-
-{/* 🔥 3D GLASS CARD */}
-function GlassCard({ title, icon, onClick }: GlassCardProps) {
-
-  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const rotateX = -(y / rect.height - 0.5) * 20;
-    const rotateY = (x / rect.width - 0.5) * 20;
-
-    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-  };
-
-  const reset = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.currentTarget.style.transform = "rotateX(0) rotateY(0) scale(1)";
-  };
-
+function GlassCard({ title, icon, onClick }: any) {
   return (
     <div
       onClick={onClick}
-      onMouseMove={handleMove}
-      onMouseLeave={reset}
-      className="
-      p-10 rounded-[2rem] text-center
-      bg-white/5 backdrop-blur-2xl border border-white/10
-      shadow-[0_20px_80px_rgba(0,0,0,0.8)]
-      transition-all duration-300
-      relative overflow-hidden
-      "
-      style={{ transformStyle: "preserve-3d" }}
+      className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl text-center active:scale-95 transition"
     >
-      <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 via-purple-500/20 to-pink-500/20 blur-2xl"></div>
-
-      <div className="relative z-10 flex flex-col items-center gap-4">
-        <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-xl shadow-inner">
-          {icon}
-        </div>
-        <h2 className="text-xl font-black tracking-widest">{title}</h2>
-      </div>
+      <div className="mb-3">{icon}</div>
+      <h2 className="font-bold">{title}</h2>
     </div>
   );
 }
 
-{/* 🔥 SCREEN */}
-type ScreenProps = {
-  title: string;
-};
+/* ---------- FEATURES (WORKING BASIC LOGIC) ---------- */
 
-function Screen({ title }: ScreenProps) {
+/* 🎬 STUDIO */
+function Studio() {
+  const [text, setText] = useState("");
+
   return (
-    <div className="flex items-center justify-center h-screen">
-      <h1 className="text-3xl font-black">{title}</h1>
+    <Page title="RX STUDIO">
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Create something..."
+        className="input"
+      />
+      <button className="btn">Generate</button>
+    </Page>
+  );
+}
+
+/* 🤖 MAGIC AI */
+function Magic() {
+  const [msg, setMsg] = useState("");
+  const [chat, setChat] = useState<string[]>([]);
+
+  const send = () => {
+    if (!msg) return;
+    setChat([...chat, msg]);
+    setMsg("");
+  };
+
+  return (
+    <Page title="MAGIC AI">
+      <div className="space-y-2">
+        {chat.map((c, i) => (
+          <div key={i} className="bg-white/10 p-2 rounded">{c}</div>
+        ))}
+      </div>
+
+      <input value={msg} onChange={(e) => setMsg(e.target.value)} className="input" />
+      <button onClick={send} className="btn">Send</button>
+    </Page>
+  );
+}
+
+/* 🌐 SOCIAL */
+function Social() {
+  const [posts, setPosts] = useState<string[]>([]);
+  const [post, setPost] = useState("");
+
+  const addPost = () => {
+    if (!post) return;
+    setPosts([post, ...posts]);
+    setPost("");
+  };
+
+  return (
+    <Page title="SOCIAL">
+      <input value={post} onChange={(e) => setPost(e.target.value)} className="input" />
+      <button onClick={addPost} className="btn">Post</button>
+
+      {posts.map((p, i) => (
+        <div key={i} className="bg-white/10 p-2 mt-2 rounded">{p}</div>
+      ))}
+    </Page>
+  );
+}
+
+/* 🛒 RX SHOP */
+function Shop() {
+  const items = ["Premium Theme", "AI Boost", "Pro Badge"];
+
+  return (
+    <Page title="RX SHOP">
+      {items.map((item, i) => (
+        <div key={i} className="bg-white/10 p-4 rounded flex justify-between">
+          <span>{item}</span>
+          <button className="btn-small">Buy</button>
+        </div>
+      ))}
+    </Page>
+  );
+}
+
+/* ---------- PAGE LAYOUT ---------- */
+
+function Page({ title, children }: any) {
+  return (
+    <div className="p-6 space-y-4">
+      <h1 className="text-2xl font-bold">{title}</h1>
+      {children}
     </div>
   );
+}
+
+/* ---------- STYLES ---------- */
+
+const styles = `
+.btn { padding:10px 20px; background:linear-gradient(to right, cyan, purple); border-radius:20px; }
+.btn-small { padding:6px 12px; background:purple; border-radius:10px; }
+.input { width:100%; padding:10px; border-radius:10px; background:#111; }
+`;
+
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.innerHTML = styles;
+  document.head.appendChild(style);
 }
