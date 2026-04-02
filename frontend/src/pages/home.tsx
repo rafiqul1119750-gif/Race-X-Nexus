@@ -1,180 +1,135 @@
-import { useState, useEffect } from "react";
-import {
-  Sparkles, MessageSquare, Share2, Music, ShoppingBag,
-  Heart, MessageCircle, Send, Wallet, TrendingUp, Layers,
-  MoreHorizontal, Bookmark, Play
-} from "lucide-react";
+import { useState } from "react";
+import { Sparkles, MessageSquare, Share2 } from "lucide-react";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("social");
-
-  // GLOBAL STATES
-  const [wallet, setWallet] = useState(1250);
-  const [notifications, setNotifications] = useState(3);
-  const [posts, setPosts] = useState([]);
-  const [messages, setMessages] = useState([]);
-
-  // MOCK DATA LOAD (Appwrite ready)
-  useEffect(() => {
-    setPosts([
-      { user: "NEXUS_CORE", img: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800", likes: "125K" },
-      { user: "AI_MASTER", img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800", likes: "89K" }
-    ]);
-
-    setMessages([
-      { from: "ai", text: "NEXUS AI READY." }
-    ]);
-  }, []);
+  const [screen, setScreen] = useState<"home" | "hub" | "studio" | "magic" | "social">("home");
 
   return (
-    <div className="pb-32 bg-black min-h-screen text-white">
+    <div className="min-h-screen bg-black text-white overflow-hidden relative">
 
-      {/* NAV */}
-      <nav className="flex justify-around py-4 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
-        <TabBtn label="SOCIAL" active={activeTab === "social"} onClick={() => setActiveTab("social")} icon={<Share2 size={20} />} />
-        <TabBtn label="STUDIO" active={activeTab === "studio"} onClick={() => setActiveTab("studio")} icon={<Sparkles size={20} />} />
-        <TabBtn label="MAGIC" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} icon={<MessageSquare size={20} />} />
-        <TabBtn label="MUSIC" active={activeTab === "music"} onClick={() => setActiveTab("music")} icon={<Music size={20} />} />
-        <TabBtn label="SHOP" active={activeTab === "shop"} onClick={() => setActiveTab("shop")} icon={<ShoppingBag size={20} />} />
-      </nav>
-
-      <div className="p-4 space-y-6 max-w-[500px] mx-auto">
-
-        {/* SOCIAL */}
-        {activeTab === "social" && (
-          <>
-            <div className="grid grid-cols-2 gap-3">
-              <HubCard title="AI STUDIO" desc="CREATE" onClick={() => setActiveTab("studio")} icon={<Sparkles />} />
-              <HubCard title="WALLET" desc={`${wallet} 💎`} icon={<Wallet />} />
-              <HubCard title="TRENDS" desc="VIRAL" icon={<TrendingUp />} />
-              <HubCard title="ASSETS" desc="VAULT" icon={<Layers />} />
-            </div>
-
-            {posts.map((p, i) => (
-              <PostItem key={i} {...p} />
-            ))}
-          </>
-        )}
-
-        {/* STUDIO */}
-        {activeTab === "studio" && (
-          <Studio wallet={wallet} setWallet={setWallet} />
-        )}
-
-        {/* CHAT */}
-        {activeTab === "chat" && (
-          <MagicChat messages={messages} setMessages={setMessages} />
-        )}
-
-        {/* MUSIC */}
-        {activeTab === "music" && <MusicModule />}
-
-        {/* SHOP */}
-        {activeTab === "shop" && <ShopModule wallet={wallet} setWallet={setWallet} />}
-
+      {/* 🔥 BACKGROUND */}
+      <div className="absolute inset-0 -z-10">
+        <div className="w-full h-full bg-gradient-to-br from-black via-[#050510] to-black"></div>
+        <div className="absolute w-[500px] h-[500px] bg-purple-600/20 blur-[150px] top-0 left-0 animate-pulse"></div>
+        <div className="absolute w-[400px] h-[400px] bg-cyan-500/20 blur-[120px] bottom-0 right-0 animate-pulse"></div>
       </div>
-    </div>
-  );
-}
 
-// ---------- COMPONENTS ----------
+      {/* 🔥 SPLASH */}
+      {screen === "home" && (
+        <div className="flex flex-col items-center justify-center h-screen">
 
-function TabBtn({ label, active, onClick, icon }) {
-  return (
-    <button onClick={onClick} className={`text-xs ${active ? "text-blue-500" : "text-zinc-500"}`}>
-      {icon}
-      <div>{label}</div>
-    </button>
-  );
-}
+          <FloatingLogo />
 
-function HubCard({ title, desc, icon, onClick }) {
-  return (
-    <div onClick={onClick} className="p-4 bg-zinc-900 rounded-xl">
-      {icon}
-      <h3>{title}</h3>
-      <p>{desc}</p>
-    </div>
-  );
-}
+          <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            RACE-X
+          </h1>
 
-function PostItem({ user, img, likes }) {
-  return (
-    <div className="bg-zinc-900 rounded-xl overflow-hidden">
-      <div className="p-3 flex justify-between">
-        <span>{user}</span>
-        <MoreHorizontal size={16} />
-      </div>
-      <img src={img} />
-      <div className="p-3 flex justify-between">
-        <div className="flex gap-3">
-          <Heart /><MessageCircle /><Send />
+          <p className="text-zinc-500 text-sm mt-2 tracking-widest">
+            THE FUTURE OF CREATION
+          </p>
+
+          <button
+            onClick={() => setScreen("hub")}
+            className="mt-10 px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 shadow-[0_0_25px_#00ffff] active:scale-95"
+          >
+            ENTER
+          </button>
         </div>
-        <Bookmark />
+      )}
+
+      {/* 🔥 HUB */}
+      {screen === "hub" && (
+        <div className="p-6 space-y-6">
+
+          <GlassCard title="STUDIO" icon={<Sparkles />} onClick={() => setScreen("studio")} />
+          <GlassCard title="MAGIC" icon={<MessageSquare />} onClick={() => setScreen("magic")} />
+          <GlassCard title="SOCIAL" icon={<Share2 />} onClick={() => setScreen("social")} />
+
+        </div>
+      )}
+
+      {/* MODULES */}
+      {screen === "studio" && <Screen title="STUDIO" />}
+      {screen === "magic" && <Screen title="MAGIC AI" />}
+      {screen === "social" && <Screen title="SOCIAL FEED" />}
+    </div>
+  );
+}
+
+{/* 🔥 FLOATING LOGO */}
+function FloatingLogo() {
+  return (
+    <div className="relative mb-8 animate-bounce">
+      <div className="absolute w-40 h-40 rounded-full bg-gradient-to-tr from-cyan-400 via-purple-500 to-pink-500 blur-2xl opacity-40"></div>
+
+      <div className="w-40 h-40 rounded-full flex items-center justify-center text-5xl font-black bg-black border border-white/10 shadow-[0_0_50px_#00ffff] relative z-10">
+        RX
       </div>
-      <p className="p-3">{likes} interactions</p>
     </div>
   );
 }
 
-// ---------- MODULES ----------
+{/* 🔥 TYPES */}
+type GlassCardProps = {
+  title: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+};
 
-function Studio({ wallet, setWallet }) {
-  const generate = () => {
-    if (wallet < 10) return alert("Not enough gems");
-    setWallet(wallet - 10);
-    alert("AI GENERATED");
+{/* 🔥 3D GLASS CARD */}
+function GlassCard({ title, icon, onClick }: GlassCardProps) {
+
+  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const rotateX = -(y / rect.height - 0.5) * 20;
+    const rotateY = (x / rect.width - 0.5) * 20;
+
+    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+  };
+
+  const reset = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.transform = "rotateX(0) rotateY(0) scale(1)";
   };
 
   return (
-    <div>
-      <textarea placeholder="Describe AI output..." className="w-full bg-black p-3" />
-      <button onClick={generate}>Generate (10 💎)</button>
-    </div>
-  );
-}
+    <div
+      onClick={onClick}
+      onMouseMove={handleMove}
+      onMouseLeave={reset}
+      className="
+      p-10 rounded-[2rem] text-center
+      bg-white/5 backdrop-blur-2xl border border-white/10
+      shadow-[0_20px_80px_rgba(0,0,0,0.8)]
+      transition-all duration-300
+      relative overflow-hidden
+      "
+      style={{ transformStyle: "preserve-3d" }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 via-purple-500/20 to-pink-500/20 blur-2xl"></div>
 
-function MagicChat({ messages, setMessages }) {
-  const [input, setInput] = useState("");
-
-  const send = () => {
-    if (!input) return;
-    setMessages([...messages, { from: "user", text: input }]);
-    setInput("");
-  };
-
-  return (
-    <div>
-      <div className="h-60 overflow-auto">
-        {messages.map((m, i) => (
-          <div key={i}>{m.text}</div>
-        ))}
+      <div className="relative z-10 flex flex-col items-center gap-4">
+        <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-xl shadow-inner">
+          {icon}
+        </div>
+        <h2 className="text-xl font-black tracking-widest">{title}</h2>
       </div>
-      <input value={input} onChange={e => setInput(e.target.value)} />
-      <button onClick={send}>Send</button>
     </div>
   );
 }
 
-function MusicModule() {
-  return (
-    <div>
-      <h2>Music Player</h2>
-      <Play />
-    </div>
-  );
-}
+{/* 🔥 SCREEN */}
+type ScreenProps = {
+  title: string;
+};
 
-function ShopModule({ wallet, setWallet }) {
-  const buy = () => {
-    setWallet(wallet - 100);
-    alert("Purchased");
-  };
-
+function Screen({ title }: ScreenProps) {
   return (
-    <div>
-      <h2>Shop</h2>
-      <button onClick={buy}>Buy Item (100 💎)</button>
+    <div className="flex items-center justify-center h-screen">
+      <h1 className="text-3xl font-black">{title}</h1>
     </div>
   );
 }
