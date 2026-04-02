@@ -1,93 +1,56 @@
-import { Link } from "wouter";
-import { Zap, Sparkles, Globe, Music, Plus, ShoppingBag } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from "lucide-react";
 
 export default function Home() {
+  const stories = [1, 2, 3, 4, 5, 6];
+  const posts = [
+    { id: 1, user: "nexus_ai", img: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800", likes: "12.5k", caption: "Generated this cinematic world in Race-X AI Studio! 🚀" },
+    { id: 2, user: "cyber_punk", img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800", likes: "8k", caption: "The future is here. #RaceX #Nexus" }
+  ];
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      {/* Header Section - New Branding */}
-      <section className="flex items-center gap-4 p-2">
-        <div className="relative">
-          <img 
-            src="https://github.com/shadcn.png" 
-            className="w-16 h-16 rounded-2xl border-2 border-blue-500/50 p-1"
-            alt="User"
-          />
-          <div className="absolute -bottom-1 -right-1 bg-blue-600 rounded-lg px-1.5 py-0.5 text-[8px] font-bold shadow-[0_0_10px_rgba(37,99,235,0.8)]">
-            LVL 1
-          </div>
-        </div>
-        <div>
-          <h2 className="text-2xl font-black tracking-tight text-white italic">
-            Welcome to <span className="text-blue-500">Race-X-Nexus</span>
-          </h2>
-          <div className="flex gap-3 mt-1">
-            <span className="text-xs text-zinc-400 flex items-center gap-1 text-shadow-sm">💎 0 Diamonds</span>
-            <span className="text-xs text-zinc-400 flex items-center gap-1 text-shadow-sm">💠 0 Gems</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Action Banner */}
-      <section className="relative group overflow-hidden rounded-3xl aspect-[16/7] glass-card flex flex-col justify-end p-6 border-blue-500/20 shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10"></div>
-        <img 
-          src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80" 
-          className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700"
-          alt="Nexus Studio"
-        />
-        <div className="relative z-20">
-          <h1 className="text-3xl font-black italic tracking-tighter text-white leading-none mb-2">RACE-X: THE FUTURE<br/>OF CREATION</h1>
-          <button className="bg-white text-black px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 hover:bg-blue-500 hover:text-white transition-all neon-glow">
-            <Plus size={14} /> NEW PROJECT
-          </button>
-        </div>
-      </section>
-
-      {/* Feature Grid - Full RX Branding */}
-      <section className="grid grid-cols-1 gap-4">
-        {/* RX STUDIO */}
-        <Link href="/studio">
-          <a className="group flex items-center justify-between p-5 rounded-2xl bg-cyan-400 text-black font-black italic tracking-tighter hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(34,211,238,0.4)]">
-            <span className="text-2xl uppercase">RX Studio</span>
-            <Zap className="fill-black" size={28} />
-          </a>
-        </Link>
-
-        {/* RX MAGIC */}
-        <Link href="/chat">
-          <a className="group flex items-center justify-between p-5 rounded-2xl bg-[#0A0A0A] text-cyan-400 border border-cyan-400/30 font-black italic tracking-tighter hover:bg-[#111] transition-all shadow-[0_0_15px_rgba(34,211,238,0.15)]">
-            <span className="text-2xl uppercase italic">RX Magic</span>
-            <Sparkles className="text-cyan-400" size={28} />
-          </a>
-        </Link>
-
-        {/* RX SOCIAL */}
-        <Link href="/social">
-          <a className="group flex items-center justify-between p-5 rounded-2xl bg-[#A855F7] text-white font-black italic tracking-tighter hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(168,85,247,0.4)]">
-            <span className="text-2xl uppercase italic">RX Social</span>
-            <Globe className="text-white" size={28} />
-          </a>
-        </Link>
-
-        {/* RX MUSIC (Updated from RX Media) */}
-        <Link href="/music">
-          <a className="group flex items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-cyan-400 to-[#A855F7] text-black font-black italic tracking-tighter hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)]">
-            <div className="flex flex-col">
-              <span className="text-2xl uppercase italic leading-none">RX Music</span>
-              <span className="text-[10px] font-medium tracking-normal opacity-80 italic">Indian Songs & AI Voices</span>
+    <div className="py-4 space-y-6">
+      {/* STORIES SECTION */}
+      <div className="flex gap-4 overflow-x-auto px-4 no-scrollbar pb-2">
+        {stories.map((s) => (
+          <div key={s} className="flex flex-col items-center gap-1 min-w-[70px]">
+            <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
+              <div className="w-full h-full rounded-full bg-black border-2 border-black overflow-hidden">
+                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${s}`} alt="story" />
+              </div>
             </div>
-            <Music className="text-black" size={28} />
-          </a>
-        </Link>
+            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter">User_{s}</span>
+          </div>
+        ))}
+      </div>
 
-        {/* RX SHOP */}
-        <Link href="/shop">
-          <a className="group flex items-center justify-between p-5 rounded-2xl bg-[#0A0A0A] text-yellow-400 border border-yellow-400/30 font-black italic tracking-tighter hover:bg-[#111] transition-all shadow-[0_0_15px_rgba(250,204,21,0.2)]">
-            <span className="text-2xl uppercase italic">RX Shop</span>
-            <ShoppingBag className="text-yellow-400" size={28} />
-          </a>
-        </Link>
-      </section>
+      {/* FEED POSTS */}
+      {posts.map((post) => (
+        <div key={post.id} className="border-b border-white/5 pb-4">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-zinc-800" />
+              <span className="text-sm font-black italic uppercase">{post.user}</span>
+            </div>
+            <MoreHorizontal size={20} className="text-zinc-500" />
+          </div>
+          
+          <img src={post.img} className="w-full aspect-square object-cover" alt="post" />
+
+          <div className="px-4 py-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-4">
+                <Heart size={26} className="hover:text-red-500 cursor-pointer" />
+                <MessageCircle size={26} className="hover:text-blue-400 cursor-pointer" />
+                <Send size={26} className="hover:text-green-400 cursor-pointer" />
+              </div>
+              <Bookmark size={26} />
+            </div>
+            <p className="text-sm font-black italic">{post.likes} likes</p>
+            <p className="text-sm"><span className="font-black italic mr-2">{post.user}</span> {post.caption}</p>
+            <p className="text-[10px] text-zinc-600 font-bold uppercase mt-2">View all 145 comments</p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
