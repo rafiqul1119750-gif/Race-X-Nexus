@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Zap, Sparkles, Globe, Library, Plus } from "lucide-react";
+import { Zap, Sparkles, Globe, Library, Plus, ShoppingBag } from "lucide-react";
 
 export default function Home() {
   return (
@@ -34,40 +34,55 @@ export default function Home() {
           alt="Studio Background"
         />
         <div className="relative z-20">
-          <h1 className="text-3xl font-black italic tracking-tighter text-white leading-none mb-2">RACE-X: THE FUTURE<br/>OF CREATION</h1>
-          <button className="bg-white text-black px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 hover:bg-blue-500 hover:text-white transition-colors">
+          <h1 className="text-3xl font-black italic tracking-tighter text-white leading-none mb-2 text-shadow-lg">RACE-X: THE FUTURE<br/>OF CREATION</h1>
+          <button className="bg-white text-black px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 hover:bg-blue-500 hover:text-white transition-colors neon-glow">
             <Plus size={14} /> NEW PROJECT
           </button>
         </div>
       </section>
 
-      {/* Feature Grid - Neon Buttons Style */}
+      {/* Feature Grid - Every Card with RX Branding */}
       <section className="grid grid-cols-1 gap-4">
+        {/* RX STUDIO */}
         <Link href="/studio">
           <a className="group flex items-center justify-between p-5 rounded-2xl bg-cyan-400 text-black font-black italic tracking-tighter hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)]">
-            <span className="text-2xl uppercase">Studio</span>
+            <span className="text-2xl uppercase">RX Studio</span>
             <Zap className="fill-black" size={28} />
           </a>
         </Link>
 
+        {/* RX MAGIC */}
         <Link href="/chat">
-          <a className="group flex items-center justify-between p-5 rounded-2xl bg-[#1A1A1A] text-cyan-400 border border-cyan-400/30 font-black italic tracking-tighter hover:bg-[#222] transition-all shadow-[0_0_15px_rgba(34,211,238,0.1)]">
-            <span className="text-2xl uppercase italic">Magic</span>
+          <a className="group flex items-center justify-between p-5 rounded-2xl bg-[#121212] text-cyan-400 border border-cyan-400/30 font-black italic tracking-tighter hover:bg-[#1a1a1a] transition-all shadow-[0_0_15px_rgba(34,211,238,0.1)]">
+            <span className="text-2xl uppercase italic">RX Magic</span>
             <Sparkles className="text-cyan-400" size={28} />
           </a>
         </Link>
 
+        {/* RX SOCIAL */}
         <Link href="/social">
           <a className="group flex items-center justify-between p-5 rounded-2xl bg-[#A855F7] text-white font-black italic tracking-tighter hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-            <span className="text-2xl uppercase italic">Social</span>
+            <span className="text-2xl uppercase italic">RX Social</span>
             <Globe className="text-white" size={28} />
           </a>
         </Link>
 
+        {/* RX MEDIA */}
         <Link href="/music">
           <a className="group flex items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-cyan-400 to-[#A855F7] text-black font-black italic tracking-tighter hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(34,211,238,0.2)]">
-            <span className="text-2xl uppercase italic leading-none">Media Library <br/><span className="text-[10px] font-medium tracking-normal opacity-70">(Millions of Indian Songs & Voices)</span></span>
+            <div className="flex flex-col">
+              <span className="text-2xl uppercase italic leading-none">RX Media</span>
+              <span className="text-[10px] font-medium tracking-normal opacity-70">Millions of Indian Songs & Voices</span>
+            </div>
             <Library className="text-black" size={28} />
+          </a>
+        </Link>
+
+        {/* RX SHOP */}
+        <Link href="/shop">
+          <a className="group flex items-center justify-between p-5 rounded-2xl bg-[#121212] text-yellow-400 border border-yellow-400/30 font-black italic tracking-tighter hover:bg-[#1a1a1a] transition-all shadow-[0_0_15px_rgba(250,204,21,0.1)]">
+            <span className="text-2xl uppercase italic">RX Shop</span>
+            <ShoppingBag className="text-yellow-400" size={28} />
           </a>
         </Link>
       </section>
