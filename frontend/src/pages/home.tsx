@@ -116,7 +116,7 @@ const Social=({showToast}:any)=>{
   useEffect(()=>{load()},[]);
   const load=async()=>{
     let p=await DB.get("posts");
-    p.sort((a:any,b:any)=>(b.likes - a.likes));
+    p.sort((a:any,b:any)=>(b.likes - a.likes)); // simple algo
     setPosts(p);
     setFollowing(JSON.parse(localStorage.getItem("following")||"[]"));
   };
