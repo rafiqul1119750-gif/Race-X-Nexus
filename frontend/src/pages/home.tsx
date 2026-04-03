@@ -1,248 +1,150 @@
-import React, { useEffect, useState, useRef } from "react";
+// ... [Pichle saare Imports same rakho] ...
 
-export default function App() {
+export default function Home() {
+  const [screen, setScreen] = useState("splash"); // 1. Start with Splash
+  const [gems, setGems] = useState(() => Number(localStorage.getItem("rx_gems")) || 7500);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [isLocked, setIsLocked] = useState(true);
 
-  // ===== GLOBAL =====
-  const [screen, setScreen] = useState("splash");
-  const [loading, setLoading] = useState(true);
-
-  // ===== USER =====
-  const [user, setUser] = useState<string | null>(null);
-  const [gems, setGems] = useState(2000);
-
-  // ===== AI =====
-  const [aiInput, setAiInput] = useState("");
-  const [aiChat, setAiChat] = useState<string[]>([]);
-  const [aiLoading, setAiLoading] = useState(false);
-  const OPENAI_API_KEY = "YOUR_OPENAI_API_KEY";
-
-  // ===== MUSIC =====
-  const [song, setSong] = useState("None");
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const tracks = [
-    { name: "RX Theme", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-    { name: "Cyber Beat", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }
-  ];
-
-  // ===== SHOP =====
-  const [owned, setOwned] = useState<string[]>([]);
-  const API = "http://localhost:3000";
-
-  // ===== SOCIAL =====
-  const [posts, setPosts] = useState<string[]>([]);
-  const [postInput, setPostInput] = useState("");
-
-  // ===== ADS =====
-  const [showAd, setShowAd] = useState(false);
-
-  // ===== SPLASH =====
+  // --- 2. THE FIX: FORCE TRANSITION TO HUB ---
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-      setScreen("login");
-    }, 2000);
-  }, []);
-
-  // ===== AI REAL =====
-  const sendAI = async () => {
-    if (!aiInput) return;
-
-    setAiChat((p) => [...p, "🧑 " + aiInput]);
-    setAiLoading(true);
-
-    try {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: "You are RX AI futuristic assistant." },
-            { role: "user", content: aiInput }
-          ]
-        })
-      });
-
-      const data = await res.json();
-      const reply = data?.choices?.[0]?.message?.content || "No response";
-
-      setAiChat((p) => [...p, "🤖 " + reply]);
-    } catch {
-      setAiChat((p) => [...p, "⚠️ AI Error"]);
+    if (screen === "splash") {
+      const timer = setTimeout(() => {
+        setScreen("hub"); // 3 Second baad Hub aana hi chahiye
+      }, 3000);
+      return () => clearTimeout(timer);
     }
+  }, [screen]);
 
-    setAiInput("");
-    setAiLoading(false);
-  };
-
-  // ===== MUSIC =====
-  const playTrack = (url: string, name: string) => {
-    if (audioRef.current) audioRef.current.pause();
-
-    const audio = new Audio(url);
-    audioRef.current = audio;
-
-    audio.play();
-    setSong(name);
-    setIsPlaying(true);
-
-    audio.onended = () => setIsPlaying(false);
-  };
-
-  // ===== SHOP =====
-  const buyItem = async (item: string, price: number) => {
-    if (gems < price) return;
-
-    await fetch(`${API}/buy`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ item, price })
-    });
-
-    setGems((g) => g - price);
-    setOwned((o) => [...o, item]);
-
-    triggerAd();
-  };
-
-  // ===== SOCIAL =====
-  const addPost = () => {
-    if (!postInput) return;
-    setPosts([postInput, ...posts]);
-    setPostInput("");
-  };
-
-  // ===== ADS =====
-  const triggerAd = () => {
-    setShowAd(true);
-    setTimeout(() => setShowAd(false), 3000);
-  };
-
-  // ===== GOD MODE =====
-  const godMode = () => {
-    setGems(999999);
-    setOwned(["ALL"]);
-  };
+  // ... [Baki Logic: watchAdAndEarn, redeemCoupon, generateAIImage same rakho] ...
 
   return (
-    <div className="bg-black text-white min-h-screen p-4">
-
-      {/* SPLASH */}
-      {loading && <h1 className="text-3xl text-center mt-40">🚀 RX Loading...</h1>}
-
-      {/* LOGIN */}
-      {!loading && screen === "login" && (
-        <div className="text-center mt-40">
-          <h1 className="text-2xl mb-4">RX Login</h1>
-          <button onClick={() => { setUser("RX User"); setScreen("home"); }}
-            className="bg-blue-600 px-6 py-2 rounded">
-            Enter
-          </button>
+    <div className="min-h-screen bg-[#010101] text-white font-sans overflow-hidden">
+      
+      {/* --- LAYER 1: SPLASH (Z-INDEX 5000) --- */}
+      {screen === "splash" && (
+        <div className="fixed inset-0 z-[5000] bg-black flex flex-col items-center justify-center animate-out fade-out duration-1000 delay-[2500ms]">
+           <div className="w-56 h-56 bg-blue-600 rounded-[5.5rem] flex items-center justify-center text-[10rem] font-black italic shadow-[0_0_150px_rgba(37,99,235,0.4)] animate-pulse">
+              RX
+           </div>
+           <p className="mt-20 text-[11px] font-black uppercase tracking-[1.2em] text-blue-500/50">
+              Nexus Sovereign Active
+           </p>
         </div>
       )}
 
-      {/* HOME */}
-      {screen === "home" && (
-        <div className="space-y-3">
-          <h1>Welcome {user}</h1>
-          <p>💎 {gems}</p>
-
-          <button onClick={() => setScreen("studio")} className="bg-pink-600 p-2 rounded">RX Studio</button>
-          <button onClick={() => setScreen("social")} className="bg-cyan-600 p-2 rounded">RX Social</button>
-          <button onClick={() => setScreen("magic")} className="bg-indigo-600 p-2 rounded">RX Magic</button>
-          <button onClick={() => setScreen("music")} className="bg-purple-600 p-2 rounded">RX Music</button>
-          <button onClick={() => setScreen("shop")} className="bg-yellow-600 p-2 rounded">RX Shop</button>
-          <button onClick={() => setScreen("owner")} className="bg-red-600 p-2 rounded">Owner</button>
-        </div>
+      {/* --- LAYER 2: GLOBAL HEADER (Visible after splash) --- */}
+      {screen !== "splash" && (
+        <header className="fixed top-0 left-0 right-0 p-6 bg-black/95 backdrop-blur-3xl border-b border-white/5 z-[2000] flex justify-between items-center animate-in fade-in">
+           <div className="flex items-center gap-3" onClick={() => setScreen("hub")}>
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-black">RX</div>
+              <h1 className="text-xl font-black italic text-blue-500">NEXUS</h1>
+           </div>
+           <div className="flex gap-3">
+              <div className="bg-zinc-900 px-4 py-2 rounded-full border border-cyan-500/30 flex items-center gap-2">
+                 <Gem size={12} className="text-cyan-400"/><span className="text-[10px] font-black">{gems.toLocaleString()}</span>
+              </div>
+              <div className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center" onDoubleClick={() => setScreen("owner")}>
+                 <Settings size={16} className="text-zinc-600"/>
+              </div>
+           </div>
+        </header>
       )}
 
-      {/* STUDIO */}
-      {screen === "studio" && (
-        <div>
-          <h1>🎬 RX Studio</h1>
-          <input value={aiInput} onChange={(e) => setAiInput(e.target.value)} />
-          <button onClick={sendAI}>Generate</button>
-          {aiChat.map((m, i) => <div key={i}>{m}</div>)}
-        </div>
+      {/* --- LAYER 3: MAIN HUB & SCREENS --- */}
+      {screen !== "splash" && (
+        <main className="pt-32 pb-44 px-4 h-screen overflow-y-auto animate-in fade-in duration-700">
+          
+          {/* HUB SCREEN (The missing part) */}
+          {screen === "hub" && (
+            <div className="space-y-8">
+               <div className="grid grid-cols-2 gap-4">
+                  <ActionBox title="AI Studio" sub="CREATE" icon={<Wand2/>} color="text-blue-500" onClick={() => setScreen("ai_studio")} />
+                  <ActionBox title="Music" sub="STREAM" icon={<Music/>} color="text-purple-500" onClick={() => setScreen("music")} />
+                  <ActionBox title="Shop" sub="COUPONS" icon={<ShoppingBag/>} color="text-green-500" onClick={() => setScreen("shop")} />
+                  <ActionBox title="Nexus" sub="CORE" icon={<Flame/>} color="text-orange-500" onClick={() => setScreen("hub")} />
+               </div>
+               
+               <div className="mt-8 space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 px-2">Earning Nodes</h3>
+                  <button onClick={() => window.open("https://amazon.in", "_blank")} className="w-full p-8 bg-zinc-900/40 border border-white/5 rounded-[3rem] flex justify-between items-center active:scale-95 transition">
+                     <span className="font-black italic text-white uppercase text-sm">Amazon Partner</span>
+                     <ExternalLink size={20} className="text-zinc-700"/>
+                  </button>
+                  <button onClick={() => window.open("https://flipkart.com", "_blank")} className="w-full p-8 bg-zinc-900/40 border border-white/5 rounded-[3rem] flex justify-between items-center active:scale-95 transition">
+                     <span className="font-black italic text-white uppercase text-sm">Flipkart Partner</span>
+                     <ExternalLink size={20} className="text-zinc-700"/>
+                  </button>
+               </div>
+            </div>
+          )}
+
+          {/* SHOP SCREEN */}
+          {screen === "shop" && (
+            <div className="space-y-6">
+               <div className="p-10 bg-zinc-900/40 rounded-[4rem] text-center border border-white/5">
+                  <Ticket size={40} className="mx-auto text-blue-500 mb-4"/>
+                  <h2 className="text-2xl font-black italic uppercase">Coupon Vault</h2>
+               </div>
+               {/* [Coupons Mapping same as before] */}
+            </div>
+          )}
+
+          {/* AI STUDIO SCREEN */}
+          {screen === "ai_studio" && (
+            <div className="space-y-6">
+               <div className="p-10 bg-zinc-900/40 rounded-[4rem] text-center border border-white/5">
+                  <Wand2 size={40} className="mx-auto text-blue-500 mb-4 animate-pulse"/>
+                  <h2 className="text-2xl font-black italic uppercase">AI Studio</h2>
+               </div>
+               <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Describe..." className="w-full bg-zinc-900/40 border border-white/10 rounded-[3rem] p-8 text-sm outline-none" />
+               <button onClick={generateAIImage} className="w-full py-8 bg-blue-600 rounded-[3rem] font-black uppercase text-xs">Generate (500 Gems)</button>
+            </div>
+          )}
+
+          {/* MUSIC SCREEN */}
+          {screen === "music" && (
+             <div className="text-center py-10">
+                <Disc size={150} className="mx-auto text-blue-500/20 mb-10 animate-spin-slow" />
+                <h2 className="text-2xl font-black italic">Nexus Stream</h2>
+                <p className="text-xs text-zinc-500 mt-4 uppercase font-bold">Premium AI Audio</p>
+             </div>
+          )}
+
+          {/* OWNER PANEL */}
+          {screen === "owner" && (
+            <div className="p-8 space-y-6">
+               <h2 className="text-2xl font-black italic text-blue-500">ADMIN KERNEL</h2>
+               <div className="p-8 bg-zinc-900/60 rounded-[3rem] border border-white/5">
+                  <p className="text-[10px] font-mono text-blue-400">System Secure: {isLocked ? "YES" : "NO"}</p>
+               </div>
+            </div>
+          )}
+
+        </main>
       )}
 
-      {/* SOCIAL */}
-      {screen === "social" && (
-        <div>
-          <h1>🌐 RX Social</h1>
-          <input value={postInput} onChange={(e) => setPostInput(e.target.value)} />
-          <button onClick={addPost}>Post</button>
-
-          {posts.map((p, i) => (
-            <div key={i} className="bg-zinc-800 p-2 mt-2">{p}</div>
-          ))}
-        </div>
+      {/* --- LAYER 4: GLOBAL FOOTER (Visible after splash) --- */}
+      {screen !== "splash" && screen !== "owner" && (
+        <nav className="fixed bottom-0 left-0 right-0 h-28 bg-black/95 backdrop-blur-5xl border-t border-white/5 flex items-center justify-around z-[2000] px-4">
+           <NavBtn icon={<LayoutGrid size={24}/>} active={screen === 'hub'} onClick={() => setScreen('hub')} />
+           <NavBtn icon={<Wand2 size={24}/>} active={screen === 'ai_studio'} onClick={() => setScreen('ai_studio')} />
+           <div className="p-7 bg-blue-600 rounded-full -mt-20 border-4 border-black shadow-2xl active:scale-90 transition cursor-pointer" onClick={watchAdAndEarn}>
+              <Play size={38} className="text-white ml-1 fill-white"/>
+           </div>
+           <NavBtn icon={<Music size={24}/>} active={screen === 'music'} onClick={() => setScreen('music')} />
+           <NavBtn icon={<ShoppingBag size={24}/>} active={screen === 'shop'} onClick={() => setScreen('shop')} />
+        </nav>
       )}
 
-      {/* MAGIC CHAT */}
-      {screen === "magic" && (
-        <div>
-          <h1>✨ RX Magic Chat</h1>
-          {aiChat.map((m, i) => <div key={i}>{m}</div>)}
-
-          <input value={aiInput} onChange={(e) => setAiInput(e.target.value)} />
-          <button onClick={sendAI}>
-            {aiLoading ? "Thinking..." : "Ask AI"}
-          </button>
+      {/* NOTIFICATION */}
+      {notification && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[4000] bg-blue-600 px-10 py-4 rounded-full shadow-2xl animate-in zoom-in-90">
+           <p className="text-[10px] font-black uppercase tracking-widest text-white">{notification}</p>
         </div>
       )}
-
-      {/* MUSIC */}
-      {screen === "music" && (
-        <div>
-          <h1>🎵 RX Music</h1>
-          <p>{song}</p>
-
-          {tracks.map((t, i) => (
-            <button key={i} onClick={() => playTrack(t.url, t.name)}>
-              ▶ {t.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* SHOP */}
-      {screen === "shop" && (
-        <div>
-          <h1>🛒 RX Shop</h1>
-
-          {[
-            { name: "Pro Badge", price: 500 },
-            { name: "AI Boost", price: 1200 },
-            { name: "Premium Theme", price: 2000 }
-          ].map((item, i) => (
-            <button key={i} onClick={() => buyItem(item.name, item.price)}>
-              {item.name} ({item.price})
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* OWNER */}
-      {screen === "owner" && (
-        <div>
-          <h1>👑 Owner Panel</h1>
-          <button onClick={godMode}>GOD MODE</button>
-        </div>
-      )}
-
-      {/* ADS */}
-      {showAd && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-2 rounded">
-          🚀 RX Ad
-        </div>
-      )}
-
     </div>
   );
 }
+
+// ... [ActionBox aur NavBtn sub-components same rakho] ...
