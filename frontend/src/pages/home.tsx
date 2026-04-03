@@ -1,134 +1,181 @@
-import React, { useState } from "react";
+// ⚠️ BIG FILE — READY FRONTEND SUPER APP
+
+import React, { useState, useEffect } from "react";
 import {
-  Home,
-  Video,
-  Users,
-  MessageCircle,
-  Music,
-  ShoppingBag,
-  Sparkles,
-  Zap,
+  Home, Video, Users, MessageCircle, Music, ShoppingBag, Settings, Shield
 } from "lucide-react";
 
+/* ================= API SYSTEM ================= */
+type APIConfig = {
+  name: string;
+  key: string;
+  url: string;
+  enabled: boolean;
+};
+
+const defaultAPIs: APIConfig[] = [
+  { name: "OpenAI", key: "", url: "https://api.openai.com/v1", enabled: false },
+  { name: "Appwrite", key: "", url: "", enabled: false },
+];
+
+/* ================= MAIN ================= */
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState("hub");
+  const [page, setPage] = useState("splash");
 
-  const Card = ({ title, icon, onClick, gradient }: any) => (
-    <div
-      onClick={onClick}
-      className={`rounded-2xl p-5 mb-4 cursor-pointer backdrop-blur-xl bg-white/10 border border-white/20 shadow-xl transition-all duration-300 hover:scale-105`}
-      style={{
-        background: gradient,
-      }}
-    >
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-white">{title}</h2>
-        {icon}
-      </div>
-    </div>
-  );
+  const [apis, setApis] = useState<APIConfig[]>(() => {
+    const saved = localStorage.getItem("rx_apis");
+    return saved ? JSON.parse(saved) : defaultAPIs;
+  });
 
-  return (
-    <div className="min-h-screen bg-black text-white flex flex-col justify-between">
-      
-      {/* HEADER */}
-      <div className="p-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Creator</h1>
-          <p className="text-sm text-gray-400">0 Diamonds • 0 Gems</p>
-        </div>
-      </div>
+  useEffect(() => {
+    localStorage.setItem("rx_apis", JSON.stringify(apis));
+  }, [apis]);
 
-      {/* MAIN HUB */}
-      <div className="px-4 pb-20">
-        
-        {/* HERO */}
-        <div className="rounded-3xl p-6 mb-6 backdrop-blur-xl bg-white/10 border border-white/20 shadow-lg">
-          <h1 className="text-3xl font-extrabold mb-2">
-            RACE-X: THE FUTURE OF CREATION
-          </h1>
-          <button className="mt-3 px-5 py-2 bg-white text-black rounded-full font-semibold">
-            + NEW PROJECT
-          </button>
-        </div>
+  useEffect(() => {
+    setTimeout(() => setPage("hub"), 2000);
+  }, []);
 
-        {/* RX STUDIO */}
-        <Card
-          title="STUDIO"
-          icon={<Zap />}
-          gradient="linear-gradient(135deg, #00f2fe, #4facfe)"
-          onClick={() => setActiveTab("studio")}
-        />
+  if (page === "splash") return <Splash />;
+  if (page === "studio") return <Studio />;
+  if (page === "social") return <Social />;
+  if (page === "chat") return <Chat apis={apis} />;
+  if (page === "music") return <MusicPlayer />;
+  if (page === "shop") return <Shop />;
+  if (page === "settings") return <SettingsPage />;
+  if (page === "god") return <GodMode apis={apis} setApis={setApis} />;
 
-        {/* RX MAGIC CHAT */}
-        <Card
-          title="MAGIC"
-          icon={<Sparkles />}
-          gradient="linear-gradient(135deg, #141e30, #243b55)"
-          onClick={() => setActiveTab("chat")}
-        />
-
-        {/* RX SOCIAL */}
-        <Card
-          title="SOCIAL"
-          icon={<Users />}
-          gradient="linear-gradient(135deg, #8e2de2, #4a00e0)"
-          onClick={() => setActiveTab("social")}
-        />
-
-        {/* RX MUSIC */}
-        <Card
-          title="MEDIA LIBRARY"
-          icon={<Music />}
-          gradient="linear-gradient(135deg, #00c6ff, #0072ff)"
-          onClick={() => setActiveTab("music")}
-        />
-
-        {/* RX SHOP */}
-        <Card
-          title="SHOP"
-          icon={<ShoppingBag />}
-          gradient="linear-gradient(135deg, #f7971e, #ffd200)"
-          onClick={() => setActiveTab("shop")}
-        />
-
-        {/* ADS SYSTEM */}
-        <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-          <p className="text-sm text-gray-400">Ad Space (Banner / Reward Ads)</p>
-        </div>
-
-        {/* GOD MODE */}
-        <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30">
-          <h2 className="font-bold text-red-400">GOD MODE</h2>
-          <p className="text-sm text-gray-300">
-            Feature Control • API Input • User Management
-          </p>
-        </div>
-
-        {/* LEGAL */}
-        <div className="mt-6 text-xs text-gray-500 text-center">
-          Terms & Conditions • Privacy Policy • Safety Scanner
-        </div>
-      </div>
-
-      {/* BOTTOM NAV */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 flex justify-around py-3">
-        
-        <NavItem icon={<Home />} label="Hub" onClick={() => setActiveTab("hub")} />
-        <NavItem icon={<Video />} label="Studio" onClick={() => setActiveTab("studio")} />
-        <NavItem icon={<Users />} label="Social" onClick={() => setActiveTab("social")} />
-        <NavItem icon={<MessageCircle />} label="Chat" onClick={() => setActiveTab("chat")} />
-        <NavItem icon={<Music />} label="Music" onClick={() => setActiveTab("music")} />
-        <NavItem icon={<ShoppingBag />} label="Shop" onClick={() => setActiveTab("shop")} />
-      
-      </div>
-    </div>
-  );
+  return <Hub setPage={setPage} />;
 }
 
-const NavItem = ({ icon, label, onClick }: any) => (
-  <div onClick={onClick} className="flex flex-col items-center text-xs cursor-pointer">
-    {icon}
-    <span>{label}</span>
+/* ================= SPLASH ================= */
+const Splash = () => (
+  <div className="h-screen flex flex-col justify-center items-center bg-black text-white">
+    <h1 className="text-5xl font-bold">RX</h1>
+    <p className="text-gray-400">Race-X Omniverse</p>
+  </div>
+);
+
+/* ================= HUB ================= */
+const Hub = ({ setPage }: any) => (
+  <div className="p-4 bg-black text-white min-h-screen pb-20">
+    <h1 className="text-2xl font-bold mb-4">RX HUB</h1>
+
+    <Btn t="Studio" onClick={()=>setPage("studio")} />
+    <Btn t="Social" onClick={()=>setPage("social")} />
+    <Btn t="Chat" onClick={()=>setPage("chat")} />
+    <Btn t="Music" onClick={()=>setPage("music")} />
+    <Btn t="Shop" onClick={()=>setPage("shop")} />
+    <Btn t="Settings" onClick={()=>setPage("settings")} />
+    <Btn t="God Mode" onClick={()=>setPage("god")} />
+
+    <BottomNav setPage={setPage}/>
+  </div>
+);
+
+const Btn = ({t,onClick}:any)=>(
+  <div onClick={onClick} className="p-4 mb-3 bg-white/10 rounded-xl cursor-pointer">{t}</div>
+);
+
+/* ================= SOCIAL ================= */
+const Social = () => {
+  const [posts,setPosts]=useState<any[]>([]);
+  const [text,setText]=useState("");
+
+  return (
+    <Page title="Social">
+      <input className="input" value={text} onChange={e=>setText(e.target.value)} />
+      <button className="btn" onClick={()=>{setPosts([{text},...posts]);setText("")}}>Post</button>
+
+      {posts.map((p,i)=><div key={i} className="card">{p.text}</div>)}
+    </Page>
+  );
+};
+
+/* ================= CHAT ================= */
+const Chat = ({apis}:any)=>{
+  const [msg,setMsg]=useState("");
+  const [chat,setChat]=useState<any[]>([]);
+
+  const send=()=>{
+    setChat([...chat,{user:msg},{bot:"AI Ready (connect API)"}]);
+    setMsg("");
+  };
+
+  return(
+    <Page title="Chat">
+      {chat.map((c,i)=><div key={i}>{c.user||c.bot}</div>)}
+      <input className="input" value={msg} onChange={e=>setMsg(e.target.value)}/>
+      <button className="btn" onClick={send}>Send</button>
+    </Page>
+  );
+};
+
+/* ================= MUSIC ================= */
+const MusicPlayer = () => {
+  const tracks=[
+    {title:"Song 1",url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"},
+    {title:"Song 2",url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"},
+  ];
+
+  const [i,setI]=useState(0);
+  const [audio]=useState(new Audio(tracks[0].url));
+  const [play,setPlay]=useState(false);
+
+  useEffect(()=>{audio.src=tracks[i].url;if(play)audio.play();},[i]);
+
+  return(
+    <Page title="Music">
+      <h2>{tracks[i].title}</h2>
+      <button className="btn" onClick={()=>{audio.play();setPlay(true)}}>Play</button>
+      <button className="btn" onClick={()=>{audio.pause();setPlay(false)}}>Pause</button>
+      <button className="btn" onClick={()=>setI((i+1)%tracks.length)}>Next</button>
+    </Page>
+  );
+};
+
+/* ================= SHOP ================= */
+const Shop = () => (
+  <Page title="Shop">
+    <div className="card">RX Item ₹100 <button className="btn">Buy</button></div>
+  </Page>
+);
+
+/* ================= SETTINGS ================= */
+const SettingsPage = () => (
+  <Page title="Settings">
+    <div className="card">Terms & Conditions</div>
+    <div className="card">Privacy Policy</div>
+    <div className="card">Safety Scanner</div>
+  </Page>
+);
+
+/* ================= GOD MODE ================= */
+const GodMode = ({apis,setApis}:any)=>(
+  <Page title="God Mode">
+    {apis.map((a:any,i:number)=>(
+      <div key={i} className="card">
+        <input value={a.name} onChange={e=>{a.name=e.target.value;setApis([...apis])}}/>
+        <input value={a.url} onChange={e=>{a.url=e.target.value;setApis([...apis])}}/>
+        <input value={a.key} onChange={e=>{a.key=e.target.value;setApis([...apis])}}/>
+      </div>
+    ))}
+  </Page>
+);
+
+/* ================= COMMON ================= */
+const Page = ({title,children}:any)=>(
+  <div className="p-4 bg-black text-white min-h-screen">
+    <h1 className="text-xl font-bold mb-3">{title}</h1>
+    {children}
+  </div>
+);
+
+const BottomNav=({setPage}:any)=>(
+  <div className="fixed bottom-0 left-0 right-0 flex justify-around bg-black p-3">
+    <div onClick={()=>setPage("hub")}><Home/></div>
+    <div onClick={()=>setPage("social")}><Users/></div>
+    <div onClick={()=>setPage("chat")}><MessageCircle/></div>
+    <div onClick={()=>setPage("music")}><Music/></div>
+    <div onClick={()=>setPage("shop")}><ShoppingBag/></div>
   </div>
 );
