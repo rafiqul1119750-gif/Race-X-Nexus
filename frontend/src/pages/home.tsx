@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   LayoutGrid, Video, Users, MessageSquare, Music, ShoppingBag,
-  Settings, Crown, Share2, User
+  Settings, Crown, Share2, User, ArrowLeft
 } from "lucide-react";
 
 /* ================= MAIN ================= */
@@ -13,7 +13,7 @@ export default function Home() {
   const [role, setRole] = useState<"user" | "admin">("user");
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1500);
+    setTimeout(() => setLoading(false), 1200);
   }, []);
 
   const showToast = (msg: string) => {
@@ -23,7 +23,7 @@ export default function Home() {
 
   const toggleRole = () => {
     setRole(role === "user" ? "admin" : "user");
-    showToast("Switched to " + (role === "user" ? "Admin" : "User"));
+    showToast("Switched");
   };
 
   if (loading) {
@@ -38,8 +38,12 @@ export default function Home() {
     <div className="bg-black text-white min-h-screen">
 
       {/* HEADER */}
-      <div className="fixed top-0 w-full flex justify-between p-4 bg-black/70 backdrop-blur-xl border-b border-white/10 z-50">
+      <div className="fixed top-0 w-full flex justify-between items-center p-4 bg-black/70 backdrop-blur-xl border-b border-white/10 z-50">
+
         <div className="flex items-center gap-2">
+          {tab !== "hub" && (
+            <ArrowLeft onClick={()=>setTab("hub")} className="cursor-pointer"/>
+          )}
           {role === "admin" ? <Crown className="text-yellow-400"/> : <User />}
           <h1 className="font-black text-cyan-400 uppercase">RX {tab}</h1>
         </div>
@@ -88,24 +92,28 @@ export default function Home() {
 const Hub = ({ setTab, role }: any) => (
   <div className="grid grid-cols-2 gap-4">
 
-    <Glass title="RX Studio" onClick={()=>setTab("studio")} />
-    <Glass title="RX Magic" onClick={()=>setTab("magic")} />
-    <Glass title="RX Social" onClick={()=>setTab("social")} />
-    <Glass title="RX Chat" onClick={()=>setTab("chat")} />
-    <Glass title="RX Music" onClick={()=>setTab("music")} />
-    <Glass title="RX Shop" onClick={()=>setTab("shop")} />
+    <Glass title="RX Studio" color="from-cyan-400 to-blue-600" onClick={()=>setTab("studio")} />
+    <Glass title="RX Magic" color="from-purple-500 to-pink-600" onClick={()=>setTab("magic")} />
+    <Glass title="RX Social" color="from-green-400 to-emerald-600" onClick={()=>setTab("social")} />
+    <Glass title="RX Chat" color="from-yellow-400 to-orange-500" onClick={()=>setTab("chat")} />
+    <Glass title="RX Music" color="from-pink-500 to-red-500" onClick={()=>setTab("music")} />
+    <Glass title="RX Shop" color="from-indigo-500 to-purple-700" onClick={()=>setTab("shop")} />
+    <Glass title="Profile" color="from-gray-400 to-gray-600" onClick={()=>setTab("profile")} />
 
     {role==="admin" && (
-      <Glass title="Admin Control" onClick={()=>setTab("admin")} />
+      <Glass title="Admin Control" color="from-red-500 to-rose-700" onClick={()=>setTab("admin")} />
     )}
 
   </div>
 );
 
-const Glass = ({ title, onClick }: any) => (
+const Glass = ({ title, color, onClick }: any) => (
   <div
     onClick={onClick}
-    className="h-28 flex items-center justify-center rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 cursor-pointer hover:scale-105 transition"
+    className={`h-28 flex items-center justify-center rounded-2xl text-sm font-bold
+    bg-gradient-to-br ${color}
+    backdrop-blur-xl border border-white/20 shadow-xl
+    cursor-pointer hover:scale-105 active:scale-95 transition`}
   >
     {title}
   </div>
@@ -113,7 +121,7 @@ const Glass = ({ title, onClick }: any) => (
 
 /* ================= PROFILE ================= */
 const Profile = ({ showToast }: any) => {
-  const [username] = useState("rx_user");
+  const username = "rx_user";
 
   const share = () => {
     const link = `https://rx.app/user/${username}`;
@@ -123,11 +131,8 @@ const Profile = ({ showToast }: any) => {
 
   return (
     <div className="space-y-3">
-      <div className="bg-zinc-900 p-4 rounded-xl">
-        <h2 className="text-lg font-bold">@{username}</h2>
-      </div>
-
-      <button onClick={share} className="w-full bg-blue-500 p-3 rounded-xl flex justify-center gap-2">
+      <div className="bg-zinc-900 p-4 rounded-xl">@{username}</div>
+      <button onClick={share} className="bg-blue-500 p-3 rounded-xl w-full flex justify-center gap-2">
         <Share2 /> Share Profile
       </button>
     </div>
@@ -140,8 +145,6 @@ const AdminPanel = ({ showToast }: any) => {
 
   return (
     <div>
-      <h2 className="font-bold text-xl mb-2">Omniverse Control</h2>
-
       <button onClick={()=>setApis([...apis,{name:"",url:""}])} className="bg-green-500 p-2 rounded-xl">
         Add API
       </button>
@@ -154,7 +157,7 @@ const AdminPanel = ({ showToast }: any) => {
       ))}
 
       <button onClick={()=>showToast("Saved")} className="mt-3 bg-blue-500 p-2 rounded-xl">
-        Save Config
+        Save
       </button>
     </div>
   );
@@ -162,7 +165,7 @@ const AdminPanel = ({ showToast }: any) => {
 
 /* ================= OTHER MODULES ================= */
 const Studio = ({ showToast }: any) => (
-  <button onClick={()=>showToast("AI Generated")} className="bg-cyan-400 p-3 rounded-xl w-full">Generate</button>
+  <button onClick={()=>showToast("Generated")} className="bg-cyan-400 p-3 rounded-xl w-full">Generate</button>
 );
 
 const Magic = ({ showToast }: any) => (
@@ -174,11 +177,11 @@ const Social = ({ showToast }: any) => (
 );
 
 const Chat = ({ showToast }: any) => (
-  <button onClick={()=>showToast("Message Sent")} className="bg-yellow-500 p-3 rounded-xl w-full">Send</button>
+  <button onClick={()=>showToast("Sent")} className="bg-yellow-500 p-3 rounded-xl w-full">Send</button>
 );
 
 const MusicPlayer = ({ showToast }: any) => (
-  <button onClick={()=>showToast("Playing")} className="bg-pink-500 p-3 rounded-xl w-full">Play Music</button>
+  <button onClick={()=>showToast("Playing")} className="bg-pink-500 p-3 rounded-xl w-full">Play</button>
 );
 
 const Shop = ({ showToast }: any) => (
@@ -187,7 +190,7 @@ const Shop = ({ showToast }: any) => (
 
 /* ================= NAV ================= */
 const Nav = ({ icon, onClick, active }: any) => (
-  <button onClick={onClick} className={`${active ? "text-cyan-400" : "text-white/60"}`}>
+  <button onClick={onClick} className={`${active ? "text-cyan-400 scale-110" : "text-white/60"} transition`}>
     {icon}
   </button>
 );
