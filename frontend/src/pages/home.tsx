@@ -1,196 +1,216 @@
 import React, { useState, useEffect } from "react";
 import {
-  LayoutGrid, Video, Users, MessageSquare, Music, ShoppingBag,
-  Settings, Crown, Share2, User, ArrowLeft
+  LayoutGrid, Users, MessageSquare, Music, ShoppingBag,
+  Crown, Share2, User, ArrowLeft, Heart, ImagePlus, Bell
 } from "lucide-react";
 
-/* ================= MAIN ================= */
-export default function Home() {
+/* ================= APPWRITE ================= */
+const APPWRITE_ENDPOINT = "https://cloud.appwrite.io/v1";
+const APPWRITE_PROJECT = "YOUR_PROJECT_ID";
+const DATABASE_ID = "YOUR_DB_ID";
+const STORAGE_BUCKET = "YOUR_BUCKET_ID";
 
-  const [tab, setTab] = useState("hub");
-  const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState("");
-  const [role, setRole] = useState<"user" | "admin">("user");
+let db:any=null;
+let storage:any=null;
+let realtime:any=null;
+let appwriteAvailable=false;
 
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1200);
-  }, []);
+try{
+  const { Client, Databases, Storage } = require("appwrite");
+  const client=new Client().setEndpoint(APPWRITE_ENDPOINT).setProject(APPWRITE_PROJECT);
+  db=new Databases(client);
+  storage=new Storage(client);
+  realtime=client.subscribe;
+  appwriteAvailable=true;
+}catch{}
 
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(""), 2000);
-  };
-
-  const toggleRole = () => {
-    setRole(role === "user" ? "admin" : "user");
-    showToast("Switched");
-  };
-
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-black text-cyan-400 text-5xl font-black">
-        RX
-      </div>
-    );
+/* ================= HYBRID DB ================= */
+const DB={
+  async get(key:string){
+    if(appwriteAvailable){
+      try{
+        const res=await db.listDocuments(DATABASE_ID,key);
+        return res.documents;
+      }catch{}
+    }
+    return JSON.parse(localStorage.getItem(key)||"[]");
+  },
+  async add(key:string,data:any){
+    if(appwriteAvailable){
+      try{ await db.createDocument(DATABASE_ID,key,"unique()",data); }catch{}
+    }
+    const old=JSON.parse(localStorage.getItem(key)||"[]");
+    localStorage.setItem(key,JSON.stringify([data,...old]));
+  },
+  async update(key:string,data:any[]){
+    localStorage.setItem(key,JSON.stringify(data));
   }
+};
 
-  return (
-    <div className="bg-black text-white min-h-screen">
+/* ================= MAIN ================= */
+export default function Home(){
 
-      {/* HEADER */}
-      <div className="fixed top-0 w-full flex justify-between items-center p-4 bg-black/70 backdrop-blur-xl border-b border-white/10 z-50">
+  const [tab,setTab]=useState("hub");
+  const [role,setRole]=useState<"user"|"admin">("user");
+  const [toast,setToast]=useState("");
 
-        <div className="flex items-center gap-2">
-          {tab !== "hub" && (
-            <ArrowLeft onClick={()=>setTab("hub")} className="cursor-pointer"/>
-          )}
-          {role === "admin" ? <Crown className="text-yellow-400"/> : <User />}
-          <h1 className="font-black text-cyan-400 uppercase">RX {tab}</h1>
+  const showToast=(t:string)=>{
+    setToast(t);
+    setTimeout(()=>setToast(""),2000);
+  };
+
+  return(
+    <div className="min-h-screen text-white bg-gradient-to-br from-black via-zinc-900 to-black">
+
+      <div className="fixed top-0 w-full flex justify-between p-4 bg-white/10 backdrop-blur-xl">
+        <div className="flex gap-2 items-center">
+          {tab!=="hub" && <ArrowLeft onClick={()=>setTab("hub")}/>}
+          {role==="admin"?<Crown/>:<User/>}
+          RX {tab}
         </div>
-
-        <button onClick={toggleRole} className="text-xs bg-white text-black px-3 py-1 rounded-xl">
-          Switch
-        </button>
+        <div className="flex gap-3">
+          <Bell onClick={()=>setTab("notif")}/>
+          <button onClick={()=>setRole(role==="user"?"admin":"user")}>Switch</button>
+        </div>
       </div>
 
-      {/* MAIN */}
-      <main className="pt-20 pb-28 px-4 space-y-3">
-
-        {tab === "hub" && <Hub setTab={setTab} role={role} />}
-        {tab === "profile" && <Profile showToast={showToast} />}
-        {tab === "studio" && <Studio showToast={showToast} />}
-        {tab === "magic" && <Magic showToast={showToast} />}
-        {tab === "social" && <Social showToast={showToast} />}
-        {tab === "chat" && <Chat showToast={showToast} />}
-        {tab === "music" && <MusicPlayer showToast={showToast} />}
-        {tab === "shop" && <Shop showToast={showToast} />}
-        {tab === "admin" && role==="admin" && <AdminPanel showToast={showToast} />}
-
+      <main className="pt-16 pb-24 px-3 space-y-4">
+        {tab==="hub" && <Hub setTab={setTab} role={role}/>}
+        {tab==="social" && <Social showToast={showToast}/>}
+        {tab==="reels" && <Reels/>}
+        {tab==="notif" && <Notifications/>}
+        {tab==="profile" && <Profile/>}
       </main>
 
-      {/* NAV */}
-      <nav className="fixed bottom-0 w-full flex justify-around p-3 bg-black/80 backdrop-blur-xl border-t border-white/10">
-        <Nav icon={<LayoutGrid />} active={tab==="hub"} onClick={()=>setTab("hub")} />
-        <Nav icon={<Users />} active={tab==="social"} onClick={()=>setTab("social")} />
-        <Nav icon={<MessageSquare />} active={tab==="chat"} onClick={()=>setTab("chat")} />
-        <Nav icon={<Music />} active={tab==="music"} onClick={()=>setTab("music")} />
-        <Nav icon={<User />} active={tab==="profile"} onClick={()=>setTab("profile")} />
+      <nav className="fixed bottom-0 w-full flex justify-around bg-white/10 backdrop-blur-xl p-3">
+        <Nav icon={<LayoutGrid/>} onClick={()=>setTab("hub")}/>
+        <Nav icon={<Users/>} onClick={()=>setTab("social")}/>
+        <Nav icon={<Music/>} onClick={()=>setTab("reels")}/>
+        <Nav icon={<User/>} onClick={()=>setTab("profile")}/>
       </nav>
 
-      {/* TOAST */}
-      {toast && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-2 rounded-xl">
-          {toast}
-        </div>
-      )}
-
+      {toast && <div className="fixed bottom-20 bg-white text-black p-2 rounded">{toast}</div>}
     </div>
   );
 }
 
 /* ================= HUB ================= */
-const Hub = ({ setTab, role }: any) => (
-  <div className="grid grid-cols-2 gap-4">
-
-    <Glass title="RX Studio" color="from-cyan-400 to-blue-600" onClick={()=>setTab("studio")} />
-    <Glass title="RX Magic" color="from-purple-500 to-pink-600" onClick={()=>setTab("magic")} />
-    <Glass title="RX Social" color="from-green-400 to-emerald-600" onClick={()=>setTab("social")} />
-    <Glass title="RX Chat" color="from-yellow-400 to-orange-500" onClick={()=>setTab("chat")} />
-    <Glass title="RX Music" color="from-pink-500 to-red-500" onClick={()=>setTab("music")} />
-    <Glass title="RX Shop" color="from-indigo-500 to-purple-700" onClick={()=>setTab("shop")} />
-    <Glass title="Profile" color="from-gray-400 to-gray-600" onClick={()=>setTab("profile")} />
-
-    {role==="admin" && (
-      <Glass title="Admin Control" color="from-red-500 to-rose-700" onClick={()=>setTab("admin")} />
-    )}
-
+const Hub=({setTab}:any)=>(
+  <div className="grid grid-cols-2 gap-3">
+    <Btn t="Feed" onClick={()=>setTab("social")}/>
+    <Btn t="Reels" onClick={()=>setTab("reels")}/>
+    <Btn t="Profile" onClick={()=>setTab("profile")}/>
   </div>
 );
 
-const Glass = ({ title, color, onClick }: any) => (
-  <div
-    onClick={onClick}
-    className={`h-28 flex items-center justify-center rounded-2xl text-sm font-bold
-    bg-gradient-to-br ${color}
-    backdrop-blur-xl border border-white/20 shadow-xl
-    cursor-pointer hover:scale-105 active:scale-95 transition`}
-  >
-    {title}
-  </div>
-);
+const Btn=({t,onClick}:any)=>(<div onClick={onClick} className="bg-white/10 p-5 rounded-xl">{t}</div>);
+const Nav=({icon,onClick}:any)=>(<button onClick={onClick}>{icon}</button>);
 
-/* ================= PROFILE ================= */
-const Profile = ({ showToast }: any) => {
-  const username = "rx_user";
+/* ================= SOCIAL ================= */
+const Social=({showToast}:any)=>{
 
-  const share = () => {
-    const link = `https://rx.app/user/${username}`;
-    navigator.clipboard.writeText(link);
-    showToast("Link Copied");
+  const [posts,setPosts]=useState<any[]>([]);
+  const [text,setText]=useState("");
+  const [following,setFollowing]=useState<string[]>([]);
+
+  useEffect(()=>{load()},[]);
+  const load=async()=>{
+    let p=await DB.get("posts");
+    p.sort((a:any,b:any)=>(b.likes - a.likes));
+    setPosts(p);
+    setFollowing(JSON.parse(localStorage.getItem("following")||"[]"));
   };
 
-  return (
-    <div className="space-y-3">
-      <div className="bg-zinc-900 p-4 rounded-xl">@{username}</div>
-      <button onClick={share} className="bg-blue-500 p-3 rounded-xl w-full flex justify-center gap-2">
-        <Share2 /> Share Profile
-      </button>
-    </div>
-  );
-};
+  const post=async()=>{
+    if(!text) return;
+    const data={user:"You",text,likes:0,comments:[]};
+    await DB.add("posts",data);
+    setText("");
+    showToast("Posted");
+    load();
+  };
 
-/* ================= ADMIN ================= */
-const AdminPanel = ({ showToast }: any) => {
-  const [apis,setApis]=useState<any[]>([]);
+  const follow=(user:string)=>{
+    let f=[...following,user];
+    setFollowing(f);
+    localStorage.setItem("following",JSON.stringify(f));
+    DB.add("notifications",{text:`You followed ${user}`});
+  };
 
-  return (
+  const like=(i:number)=>{
+    const updated=[...posts];
+    updated[i].likes++;
+    setPosts(updated);
+    DB.update("posts",updated);
+    DB.add("notifications",{text:"Someone liked a post"});
+  };
+
+  return(
     <div>
-      <button onClick={()=>setApis([...apis,{name:"",url:""}])} className="bg-green-500 p-2 rounded-xl">
-        Add API
-      </button>
+      <input value={text} onChange={e=>setText(e.target.value)} placeholder="Post..." className="w-full p-2"/>
+      <button onClick={post} className="bg-blue-500 w-full p-2 mt-2">Post</button>
 
-      {apis.map((a,i)=>(
-        <div key={i} className="bg-zinc-900 p-3 mt-2 rounded-xl">
-          <input placeholder="API Name" className="w-full mb-2 bg-black p-2 rounded"/>
-          <input placeholder="API URL" className="w-full bg-black p-2 rounded"/>
+      {posts.map((p,i)=>(
+        <div key={i} className="bg-white/10 p-3 mt-3 rounded-xl">
+          <b>{p.user}</b>
+          <button onClick={()=>follow(p.user)} className="ml-2 text-blue-400">Follow</button>
+          <p>{p.text}</p>
+
+          <button onClick={()=>like(i)}><Heart/> {p.likes}</button>
+
+          {p.comments.map((c:any,j:number)=><div key={j}>{c}</div>)}
         </div>
       ))}
-
-      <button onClick={()=>showToast("Saved")} className="mt-3 bg-blue-500 p-2 rounded-xl">
-        Save
-      </button>
     </div>
   );
 };
 
-/* ================= OTHER MODULES ================= */
-const Studio = ({ showToast }: any) => (
-  <button onClick={()=>showToast("Generated")} className="bg-cyan-400 p-3 rounded-xl w-full">Generate</button>
-);
+/* ================= REELS ================= */
+const Reels=()=>{
+  const [videos,setVideos]=useState<any[]>([]);
 
-const Magic = ({ showToast }: any) => (
-  <button onClick={()=>showToast("Magic Run")} className="bg-purple-500 p-3 rounded-xl w-full">Run AI</button>
-);
+  useEffect(()=>{
+    DB.get("reels").then(setVideos);
+  },[]);
 
-const Social = ({ showToast }: any) => (
-  <button onClick={()=>showToast("Posted")} className="bg-green-500 p-3 rounded-xl w-full">Post</button>
-);
+  return(
+    <div className="space-y-5">
+      {videos.map((v,i)=>(
+        <video key={i} src={v.url} controls className="w-full rounded-xl"/>
+      ))}
+    </div>
+  );
+};
 
-const Chat = ({ showToast }: any) => (
-  <button onClick={()=>showToast("Sent")} className="bg-yellow-500 p-3 rounded-xl w-full">Send</button>
-);
+/* ================= NOTIFICATIONS ================= */
+const Notifications=()=>{
+  const [notifs,setNotifs]=useState<any[]>([]);
 
-const MusicPlayer = ({ showToast }: any) => (
-  <button onClick={()=>showToast("Playing")} className="bg-pink-500 p-3 rounded-xl w-full">Play</button>
-);
+  useEffect(()=>{
+    DB.get("notifications").then(setNotifs);
+  },[]);
 
-const Shop = ({ showToast }: any) => (
-  <button onClick={()=>showToast("Added")} className="bg-indigo-500 p-3 rounded-xl w-full">Buy</button>
-);
+  return(
+    <div>
+      {notifs.map((n,i)=>(
+        <div key={i} className="bg-white/10 p-2 mt-2 rounded">{n.text}</div>
+      ))}
+    </div>
+  );
+};
 
-/* ================= NAV ================= */
-const Nav = ({ icon, onClick, active }: any) => (
-  <button onClick={onClick} className={`${active ? "text-cyan-400 scale-110" : "text-white/60"} transition`}>
-    {icon}
-  </button>
-);
+/* ================= PROFILE ================= */
+const Profile=()=>{
+  const [followers,setFollowers]=useState<any[]>([]);
+
+  useEffect(()=>{
+    setFollowers(JSON.parse(localStorage.getItem("following")||"[]"));
+  },[]);
+
+  return(
+    <div>
+      <h2>Followers</h2>
+      {followers.map((f,i)=><div key={i}>{f}</div>)}
+    </div>
+  );
+};
