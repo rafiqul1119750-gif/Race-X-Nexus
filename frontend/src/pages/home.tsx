@@ -1,130 +1,134 @@
 import React, { useState } from "react";
-import { 
-  Zap, Sparkles, Globe, Library, Plus, Gem, 
-  LayoutGrid, Video, Users, MessageSquare, Music, ShoppingBag,
-  Settings, Heart, MessageCircle, Send, Play, Disc
+import {
+  Home,
+  Video,
+  Users,
+  MessageCircle,
+  Music,
+  ShoppingBag,
+  Sparkles,
+  Zap,
 } from "lucide-react";
 
-export default function Home() {
+export default function HomePage() {
   const [activeTab, setActiveTab] = useState("hub");
-  const [wallet] = useState(7500);
+
+  const Card = ({ title, icon, onClick, gradient }: any) => (
+    <div
+      onClick={onClick}
+      className={`rounded-2xl p-5 mb-4 cursor-pointer backdrop-blur-xl bg-white/10 border border-white/20 shadow-xl transition-all duration-300 hover:scale-105`}
+      style={{
+        background: gradient,
+      }}
+    >
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold text-white">{title}</h2>
+        {icon}
+      </div>
+    </div>
+  );
 
   return (
-    <div className="bg-black min-h-screen text-white font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white flex flex-col justify-between">
       
-      {/* --- GLOBAL HEADER (Hamesha Rahega) --- */}
-      <div className="p-6 pt-12 flex items-center justify-between fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-3xl z-[3000]">
-        <div className="flex items-center gap-4" onClick={() => setActiveTab("hub")}>
-          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center font-black text-xs shadow-[0_0_20px_rgba(37,99,235,0.3)]">RX</div>
-          <div>
-            <h2 className="text-xl font-black italic text-blue-500 uppercase tracking-tighter">{activeTab}</h2>
-            <div className="flex gap-3">
-              <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">{wallet} GEMS</span>
-            </div>
-          </div>
+      {/* HEADER */}
+      <div className="p-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Creator</h1>
+          <p className="text-sm text-gray-400">0 Diamonds • 0 Gems</p>
         </div>
-        <Settings size={20} className="text-zinc-700" />
       </div>
 
-      {/* --- MAIN CONTENT SWITCHER --- */}
-      <main className="pt-32 pb-44 px-5 max-w-[500px] mx-auto min-h-screen">
+      {/* MAIN HUB */}
+      <div className="px-4 pb-20">
         
-        {/* 1. RX HUB (Main Menu) */}
-        {activeTab === "hub" && (
-          <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="rounded-[2.5rem] bg-gradient-to-br from-blue-900/40 via-zinc-900 to-black p-10 border border-white/5 shadow-2xl mb-8">
-              <h1 className="text-4xl font-black italic uppercase leading-[0.85] tracking-tighter">RX: <br /> <span className="text-blue-500">THE FUTURE</span></h1>
-              <button className="mt-8 bg-white text-black px-8 py-3.5 rounded-full font-black text-[11px] uppercase active:scale-95 transition">+ NEW PROJECT</button>
-            </div>
+        {/* HERO */}
+        <div className="rounded-3xl p-6 mb-6 backdrop-blur-xl bg-white/10 border border-white/20 shadow-lg">
+          <h1 className="text-3xl font-extrabold mb-2">
+            RACE-X: THE FUTURE OF CREATION
+          </h1>
+          <button className="mt-3 px-5 py-2 bg-white text-black rounded-full font-semibold">
+            + NEW PROJECT
+          </button>
+        </div>
 
-            <HubCard title="RX Studio" color="bg-cyan-400" icon={<Zap size={35} className="text-black fill-black"/>} onClick={() => setActiveTab("studio")} />
-            <HubCard title="RX Magic" color="bg-[#121415] border-2 border-cyan-400/40 text-cyan-400" icon={<Sparkles size={35}/>} onClick={() => setActiveTab("magic")} />
-            <HubCard title="RX Social" color="bg-[#9333EA]" icon={<Globe size={35}/>} onClick={() => setActiveTab("social")} />
-            <HubCard title="RX Library" color="bg-gradient-to-r from-cyan-400 to-[#9333EA] text-black" icon={<Library size={35}/>} onClick={() => setActiveTab("library")} />
-            <HubCard title="RX Shop" color="bg-[#F97316]" icon={<ShoppingBag size={35} className="fill-white"/>} onClick={() => setActiveTab("shop")} />
-          </div>
-        )}
+        {/* RX STUDIO */}
+        <Card
+          title="STUDIO"
+          icon={<Zap />}
+          gradient="linear-gradient(135deg, #00f2fe, #4facfe)"
+          onClick={() => setActiveTab("studio")}
+        />
 
-        {/* 2. RX STUDIO (AI Generator) */}
-        {activeTab === "studio" && (
-          <div className="space-y-6 animate-in slide-in-from-bottom-5">
-            <h2 className="text-2xl font-black italic uppercase">Materializer</h2>
-            <textarea placeholder="Describe your vision..." className="w-full bg-zinc-900 border border-white/10 rounded-[2.5rem] p-8 text-sm font-black italic outline-none min-h-[200px]" />
-            <button className="w-full py-8 bg-cyan-400 text-black rounded-[2.5rem] font-black uppercase text-xs shadow-xl active:scale-95 transition">Materialize Asset</button>
-          </div>
-        )}
+        {/* RX MAGIC CHAT */}
+        <Card
+          title="MAGIC"
+          icon={<Sparkles />}
+          gradient="linear-gradient(135deg, #141e30, #243b55)"
+          onClick={() => setActiveTab("chat")}
+        />
 
-        {/* 3. RX SOCIAL (Feed) */}
-        {activeTab === "social" && (
-          <div className="space-y-6 animate-in slide-in-from-right-5">
-             <PostItem user="RX_SYSTEM" likes="2.5M" img="https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800" />
-             <PostItem user="NEXUS_CORE" likes="890K" img="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800" />
-          </div>
-        )}
+        {/* RX SOCIAL */}
+        <Card
+          title="SOCIAL"
+          icon={<Users />}
+          gradient="linear-gradient(135deg, #8e2de2, #4a00e0)"
+          onClick={() => setActiveTab("social")}
+        />
 
-        {/* 4. RX SHOP (Marketplace) */}
-        {activeTab === "shop" && (
-          <div className="grid grid-cols-2 gap-4 animate-in zoom-in-95">
-             <ShopItem title="1,000 GEMS" price="₹99" />
-             <ShopItem title="5,000 GEMS" price="₹399" />
-             <ShopItem title="RX PREMIUM" price="₹999/mo" />
-          </div>
-        )}
+        {/* RX MUSIC */}
+        <Card
+          title="MEDIA LIBRARY"
+          icon={<Music />}
+          gradient="linear-gradient(135deg, #00c6ff, #0072ff)"
+          onClick={() => setActiveTab("music")}
+        />
 
-      </main>
+        {/* RX SHOP */}
+        <Card
+          title="SHOP"
+          icon={<ShoppingBag />}
+          gradient="linear-gradient(135deg, #f7971e, #ffd200)"
+          onClick={() => setActiveTab("shop")}
+        />
 
-      {/* --- GLOBAL BOTTOM NAV --- */}
-      <nav className="fixed bottom-0 left-0 right-0 h-24 bg-zinc-900/95 backdrop-blur-3xl border-t border-white/5 flex items-center justify-around px-4 z-[5000]">
-        <NavIcon label="Hub" icon={<LayoutGrid size={22}/>} active={activeTab === 'hub'} onClick={() => setActiveTab('hub')} />
-        <NavIcon label="Studio" icon={<Video size={22}/>} active={activeTab === 'studio'} onClick={() => setActiveTab('studio')} />
-        <NavIcon label="Social" icon={<Users size={22}/>} active={activeTab === 'social'} onClick={() => setActiveTab('social')} />
-        <NavIcon label="Chat" icon={<MessageSquare size={22}/>} active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} />
-        <NavIcon label="Music" icon={<Music size={22}/>} active={activeTab === 'music'} onClick={() => setActiveTab('music')} />
-        <NavIcon label="Shop" icon={<ShoppingBag size={22}/>} active={activeTab === 'shop'} onClick={() => setActiveTab('shop')} />
-      </nav>
-    </div>
-  );
-}
+        {/* ADS SYSTEM */}
+        <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+          <p className="text-sm text-gray-400">Ad Space (Banner / Reward Ads)</p>
+        </div>
 
-// --- REUSABLE COMPONENTS ---
+        {/* GOD MODE */}
+        <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30">
+          <h2 className="font-bold text-red-400">GOD MODE</h2>
+          <p className="text-sm text-gray-300">
+            Feature Control • API Input • User Management
+          </p>
+        </div>
 
-function HubCard({ title, color, icon, onClick }: any) {
-  return (
-    <div onClick={onClick} className={`${color} rounded-[2.2rem] p-9 flex justify-between items-center active:scale-95 transition-all cursor-pointer shadow-xl`}>
-      <h2 className="text-4xl font-black italic uppercase tracking-tighter leading-none">{title}</h2>
-      {icon}
-    </div>
-  );
-}
+        {/* LEGAL */}
+        <div className="mt-6 text-xs text-gray-500 text-center">
+          Terms & Conditions • Privacy Policy • Safety Scanner
+        </div>
+      </div>
 
-function PostItem({ user, likes, img }: any) {
-  return (
-    <div className="bg-zinc-900/40 border border-white/5 rounded-[3rem] overflow-hidden">
-      <div className="p-5 font-black italic text-[11px] uppercase tracking-widest text-blue-500">{user}</div>
-      <img src={img} className="w-full aspect-square object-cover" />
-      <div className="p-6 flex justify-between items-center">
-        <div className="flex gap-6"><Heart size={22}/><MessageCircle size={22}/><Send size={22}/></div>
-        <span className="text-[10px] font-black italic text-zinc-500">{likes}</span>
+      {/* BOTTOM NAV */}
+      <div className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 flex justify-around py-3">
+        
+        <NavItem icon={<Home />} label="Hub" onClick={() => setActiveTab("hub")} />
+        <NavItem icon={<Video />} label="Studio" onClick={() => setActiveTab("studio")} />
+        <NavItem icon={<Users />} label="Social" onClick={() => setActiveTab("social")} />
+        <NavItem icon={<MessageCircle />} label="Chat" onClick={() => setActiveTab("chat")} />
+        <NavItem icon={<Music />} label="Music" onClick={() => setActiveTab("music")} />
+        <NavItem icon={<ShoppingBag />} label="Shop" onClick={() => setActiveTab("shop")} />
+      
       </div>
     </div>
   );
 }
 
-function ShopItem({ title, price }: any) {
-  return (
-    <div className="bg-zinc-900 p-8 rounded-[2rem] border border-white/5 text-center">
-       <Gem size={30} className="mx-auto text-orange-500 mb-4" />
-       <h3 className="text-[10px] font-black uppercase mb-2">{title}</h3>
-       <button className="w-full py-3 bg-white text-black rounded-full font-black text-[9px] uppercase">{price}</button>
-    </div>
-  );
-}
-
-function NavIcon({ icon, label, active, onClick }: any) {
-  return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1.5 transition-all ${active ? 'text-blue-500' : 'text-zinc-500'}`}>
-      <div className={`${active ? 'bg-blue-500/10 p-2.5 rounded-xl border border-blue-500/20' : 'p-1'}`}>{icon}</div>
-      <span className="text-[8px] font-black uppercase tracking-tighter">{label}</span>
-    </button>
-  );
-}
+const NavItem = ({ icon, label, onClick }: any) => (
+  <div onClick={onClick} className="flex flex-col items-center text-xs cursor-pointer">
+    {icon}
+    <span>{label}</span>
+  </div>
+);
