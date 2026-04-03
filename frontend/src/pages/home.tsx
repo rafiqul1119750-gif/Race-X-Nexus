@@ -1,126 +1,135 @@
 import React, { useState } from "react";
 import { 
-  Sparkles, MessageSquare, Share2, Music, ShoppingBag, 
-  Heart, MessageCircle, Send, Gem, Play, Wand2, Disc, 
-  Settings, LayoutGrid, Flame, Zap, MoreHorizontal, Bookmark
+  Zap, Sparkles, Globe, Library, Plus, Gem, 
+  LayoutGrid, Video, Users, MessageSquare, Music, ShoppingBag,
+  ChevronRight
 } from "lucide-react";
 
 export default function Home() {
-  // Direct state "hub" - Koi condition nahi
-  const [activeTab, setActiveTab] = useState("hub"); 
-  const [wallet, setWallet] = useState(7500);
+  const [activeTab, setActiveTab] = useState("hub");
 
   return (
-    <div className="bg-[#010101] min-h-screen text-white font-sans overflow-x-hidden">
+    <div className="bg-black min-h-screen text-white font-sans selection:bg-cyan-500/30">
       
-      {/* 1. FIXED HEADER (Hamesha Visible) */}
-      <header className="fixed top-0 left-0 right-0 p-6 bg-black/80 backdrop-blur-3xl border-b border-white/5 z-[2000] flex justify-between items-center">
-         <div className="flex items-center gap-3" onClick={() => setActiveTab("hub")}>
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-black">RX</div>
-            <h1 className="text-xl font-black italic text-blue-500 uppercase tracking-tighter">Nexus</h1>
-         </div>
-         <div className="flex items-center gap-3">
-            <div className="bg-zinc-900 px-4 py-2 rounded-full border border-blue-500/20 flex items-center gap-2">
-               <Gem size={14} className="text-blue-400"/><span className="text-xs font-black italic">{wallet.toLocaleString()}</span>
+      {/* --- 1. PROFILE & CURRENCY ROW --- */}
+      <div className="p-6 pt-12 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="w-14 h-14 rounded-2xl bg-zinc-800 overflow-hidden border border-white/10 shadow-lg">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" />
             </div>
-            <Settings size={18} className="text-zinc-700 ml-2" />
-         </div>
-      </header>
+            <div className="absolute -bottom-1 -right-1 bg-blue-600 px-2 py-0.5 rounded-md text-[8px] font-black border-2 border-black">
+              LVL 1
+            </div>
+          </div>
+          <div>
+            <h2 className="text-2xl font-black tracking-tighter text-blue-500 italic uppercase">Creator</h2>
+            <div className="flex gap-3 mt-0.5">
+              <div className="flex items-center gap-1">
+                <Gem size={10} className="text-cyan-400" />
+                <span className="text-[9px] font-black text-zinc-500 uppercase">0 Diamonds</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Gem size={10} className="text-blue-400" />
+                <span className="text-[9px] font-black text-zinc-500 uppercase">0 Gems</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center border border-white/5">
+           <Plus size={20} className="text-zinc-500" />
+        </div>
+      </div>
 
-      {/* 2. MAIN HUB / CONTENT AREA */}
-      <main className="pt-32 pb-40 px-4 max-w-[500px] mx-auto min-h-screen">
+      {/* --- 2. MAIN HUB CONTENT --- */}
+      <main className="px-5 pb-36 space-y-5">
         
-        {/* --- HUB SECTION --- */}
-        {activeTab === "hub" && (
-          <div className="space-y-8 animate-in fade-in">
-             <div className="grid grid-cols-2 gap-5">
-                <HubCard title="SOCIAL" desc="FEED" icon={<Share2 size={24}/>} color="text-blue-500" onClick={() => setActiveTab("social")} />
-                <HubCard title="STUDIO" desc="CREATE" icon={<Wand2 size={24}/>} color="text-purple-500" onClick={() => setActiveTab("studio")} />
-                <HubCard title="MUSIC" desc="STREAM" icon={<Music size={24}/>} color="text-green-500" onClick={() => setActiveTab("music")} />
-                <HubCard title="SHOP" desc="COUPONS" icon={<ShoppingBag size={24}/>} color="text-orange-500" onClick={() => setActiveTab("shop")} />
-             </div>
-             
-             {/* REVENUE CARD */}
-             <div className="p-10 bg-gradient-to-br from-zinc-900 to-black rounded-[3.5rem] border border-white/5 flex justify-between items-center shadow-2xl mt-10 active:scale-95 transition cursor-pointer">
-                <div>
-                   <h3 className="font-black italic text-sm uppercase">Revenue Node</h3>
-                   <p className="text-[9px] text-zinc-500 uppercase font-bold mt-1 tracking-widest">Instant 500 Gems</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                   <Play size={20} className="text-white fill-white ml-1"/>
-                </div>
-             </div>
+        {/* BANNER: THE FUTURE OF CREATION */}
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-blue-900/40 via-zinc-900 to-black p-10 border border-white/5 shadow-2xl group">
+          <div className="relative z-10">
+            <h1 className="text-4xl font-black italic uppercase leading-[0.9] tracking-tighter w-full mb-6">
+              Race-X: The Future <br /> <span className="text-blue-500">of Creation</span>
+            </h1>
+            <button className="bg-white text-black px-8 py-3.5 rounded-full flex items-center gap-2 font-black text-[11px] uppercase shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-95 transition">
+              <Plus size={18} strokeWidth={4} /> New Project
+            </button>
           </div>
-        )}
+          {/* Background Decorative Element */}
+          <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-600/10 blur-[80px] rounded-full"></div>
+        </div>
 
-        {/* --- SOCIAL SECTION --- */}
-        {activeTab === "social" && (
-          <div className="space-y-6 animate-in slide-in-from-right-5">
-             <PostItem user="NEXUS_CORE" img="https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800" likes="125K" />
-             <PostItem user="AI_MASTER" img="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800" likes="89K" />
+        {/* --- GRID BUTTONS --- */}
+        
+        {/* RX STUDIO */}
+        <div 
+          onClick={() => setActiveTab("studio")}
+          className="bg-cyan-400 rounded-[2rem] p-8 flex justify-between items-center active:scale-[0.97] transition-all cursor-pointer shadow-[0_15px_30px_rgba(34,211,238,0.2)]"
+        >
+          <div className="flex flex-col">
+            <h2 className="text-4xl font-black italic uppercase text-black tracking-tighter leading-none">Studio</h2>
+            <span className="text-[10px] font-black text-black/50 mt-1 uppercase italic">Professional Tools</span>
           </div>
-        )}
+          <Zap size={38} className="text-black fill-black" />
+        </div>
 
-        {/* --- STUDIO SECTION --- */}
-        {activeTab === "studio" && (
-          <div className="space-y-6 animate-in slide-in-from-bottom-5">
-             <textarea placeholder="Describe Vision..." className="w-full bg-zinc-900/40 border border-white/10 rounded-[3rem] p-8 text-sm font-black italic outline-none min-h-[200px]" />
-             <button className="w-full py-8 bg-blue-600 rounded-[3rem] font-black uppercase text-xs shadow-xl active:scale-95 transition">Generate (500 💎)</button>
+        {/* MAGIC AI */}
+        <div className="bg-[#121415] rounded-[2rem] p-8 flex justify-between items-center border-2 border-cyan-400/30 active:scale-[0.97] transition-all cursor-pointer group">
+          <div className="flex flex-col">
+            <h2 className="text-4xl font-black italic uppercase text-cyan-400 tracking-tighter leading-none">Magic</h2>
+            <span className="text-[10px] font-black text-cyan-400/40 mt-1 uppercase italic">AI Materializer</span>
           </div>
-        )}
+          <Sparkles size={38} className="text-cyan-400 group-hover:rotate-12 transition-transform" />
+        </div>
+
+        {/* RX SOCIAL */}
+        <div 
+          onClick={() => setActiveTab("social")}
+          className="bg-[#9333EA] rounded-[2rem] p-8 flex justify-between items-center active:scale-[0.97] transition-all cursor-pointer shadow-[0_15px_30px_rgba(147,51,234,0.2)]"
+        >
+          <div className="flex flex-col">
+            <h2 className="text-4xl font-black italic uppercase text-white tracking-tighter leading-none">Social</h2>
+            <span className="text-[10px] font-black text-white/40 mt-1 uppercase italic">Community Hub</span>
+          </div>
+          <Globe size={38} className="text-white" />
+        </div>
+
+        {/* MEDIA LIBRARY */}
+        <div className="bg-gradient-to-r from-cyan-400 to-[#9333EA] rounded-[2rem] p-8 flex justify-between items-center active:scale-[0.97] transition-all cursor-pointer overflow-hidden relative shadow-2xl">
+          <div className="relative z-10 flex flex-col">
+            <h2 className="text-4xl font-black italic uppercase text-black tracking-tighter leading-none">Library</h2>
+            <span className="text-[10px] font-black text-black/60 mt-1 uppercase italic">Millions of Sounds & Voices</span>
+          </div>
+          <Library size={38} className="text-black relative z-10" />
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-white/10 opacity-20"></div>
+        </div>
 
       </main>
 
-      {/* 3. BOTTOM NAVIGATION (Hamesha Visible) */}
-      <nav className="fixed bottom-0 left-0 right-0 h-28 bg-black/95 backdrop-blur-3xl border-t border-white/5 flex items-center justify-around z-[2000] px-4">
-         <NavBtn label="HUB" active={activeTab === 'hub'} onClick={() => setActiveTab('hub')} icon={<LayoutGrid size={24}/>} />
-         <NavBtn label="SOCIAL" active={activeTab === 'social'} onClick={() => setActiveTab('social')} icon={<Share2 size={24}/>} />
-         <div className="p-7 bg-blue-600 rounded-full -mt-20 border-4 border-black shadow-2xl active:scale-90 transition cursor-pointer" onClick={() => setActiveTab("chat")}>
-            <MessageSquare size={32} className="text-white fill-white"/>
-         </div>
-         <NavBtn label="STUDIO" active={activeTab === 'studio'} onClick={() => setActiveTab('studio')} icon={<Wand2 size={24}/>} />
-         <NavBtn label="SHOP" active={activeTab === 'shop'} onClick={() => setActiveTab('shop')} icon={<ShoppingBag size={24}/>} />
-      </nav>
+      {/* --- 3. PREMIUM BOTTOM NAVIGATION --- */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 z-[4000]">
+        <nav className="h-22 bg-zinc-900/90 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 flex items-center justify-around px-4 py-3 shadow-2xl">
+          <NavIcon label="Hub" icon={<LayoutGrid size={20}/>} active={activeTab === 'hub'} onClick={() => setActiveTab('hub')} />
+          <NavIcon label="Studio" icon={<Video size={20}/>} active={activeTab === 'studio'} onClick={() => setActiveTab('studio')} />
+          <NavIcon label="Social" icon={<Users size={20}/>} active={activeTab === 'social'} onClick={() => setActiveTab('social')} />
+          <NavIcon label="Chat" icon={<MessageSquare size={20}/>} active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} />
+          <NavIcon label="Music" icon={<Music size={20}/>} active={activeTab === 'music'} onClick={() => setActiveTab('music')} />
+          <NavIcon label="Shop" icon={<ShoppingBag size={20}/>} active={activeTab === 'shop'} onClick={() => setActiveTab('shop')} />
+        </nav>
+      </div>
 
     </div>
   );
 }
 
-// --- SUB COMPONENTS ---
-
-function NavBtn({ label, active, onClick, icon }: any) {
+// Sub-component for Navigation
+function NavIcon({ icon, label, active, onClick }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-all duration-300 ${active ? 'text-blue-500 scale-125' : 'text-zinc-700'}`}>
-       {icon}
-       <span className="text-[7px] font-black tracking-widest uppercase">{label}</span>
+    <button onClick={onClick} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${active ? 'text-blue-500 scale-110' : 'text-zinc-500'}`}>
+      <div className={`${active ? 'bg-blue-500/15 p-2.5 rounded-xl border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'p-2'}`}>
+        {icon}
+      </div>
+      <span className={`text-[8px] font-black uppercase tracking-tighter ${active ? 'opacity-100' : 'opacity-50'}`}>{label}</span>
     </button>
-  );
-}
-
-function HubCard({ title, desc, icon, color, onClick }: any) {
-  return (
-    <div onClick={onClick} className="p-8 bg-zinc-900/40 border border-white/5 rounded-[3rem] flex flex-col items-center gap-4 active:scale-95 transition-all shadow-inner cursor-pointer">
-       <div className={color}>{icon}</div>
-       <div className="text-center">
-          <h3 className="text-[11px] font-black italic text-zinc-500 uppercase">{title}</h3>
-          <p className="text-[12px] font-black uppercase text-white tracking-tighter">{desc}</p>
-       </div>
-    </div>
-  );
-}
-
-function PostItem({ user, img, likes }: any) {
-  return (
-    <div className="bg-zinc-900/30 border border-white/5 rounded-[3rem] overflow-hidden mb-4">
-       <div className="p-5 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-black text-[9px]">RX</div>
-          <span className="text-[11px] font-black italic tracking-widest uppercase">{user}</span>
-       </div>
-       <img src={img} className="w-full aspect-square object-cover" />
-       <div className="p-6">
-          <div className="flex gap-6 mb-2"><Heart size={20} /><MessageCircle size={20} /><Send size={20} /></div>
-          <p className="text-[10px] font-black italic text-blue-500 uppercase">{likes} Interactions</p>
-       </div>
-    </div>
   );
 }
