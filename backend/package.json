@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --loader ts-node/esm backend/index.js",
+    "dev": "node backend/index.js",
     "build": "node ./build.mjs",
-    "render-start": "node --loader ts-node/esm src/setup-db.ts && node dist/index.mjs",
+    "render-start": "node src/setup-db.js && node dist/index.mjs",
     "start": "node dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "setup-db": "node --loader ts-node/esm src/setup-db.ts"
+    "setup-db": "node src/setup-db.js"
   },
   "dependencies": {
     "@workspace/api-zod": "workspace:*",
@@ -32,7 +32,6 @@
     "esbuild-plugin-pino": "^2.3.3",
     "pino-pretty": "^13",
     "thread-stream": "3.1.0",
-    "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }
 }
