@@ -2,11 +2,39 @@ import { useState } from "react";
 import { SplashScreen } from "./SplashScreen";
 import { 
   Home, Search, PlusSquare, Play, MessageCircle, 
-  Heart, User, Bell, Menu, Sparkles, Bookmark, Settings 
+  Heart, User, Bell, Menu, Sparkles, Bookmark, Settings, X 
 } from "lucide-react";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false); // Post modal ke liye
+  const [postContent, setPostContent] = useState("");
+
+  // POST BHEJNE KA FUNCTION
+  const handlePostSubmit = async () => {
+    if(!postContent) return;
+    
+    try {
+      const response = await fetch("https://your-race-x-backend.onrender.com/api/social/post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: postContent,
+          user_id: "current_user_id", // Yahan login user ki ID aayegi
+          user_name: "Race-X Creator",
+          image_url: ""
+        })
+      });
+
+      if(response.ok) {
+        alert("Race-X par post live ho gayi! 🔥");
+        setIsPostModalOpen(false);
+        setPostContent("");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (isLoading) return <SplashScreen onFinish={() => setIsLoading(false)} />;
 
@@ -24,7 +52,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <NavItem icon={<Play />} label="Reels" />
           <NavItem icon={<MessageCircle />} label="Messages" />
           <NavItem icon={<Bell />} label="Notifications" />
-          <NavItem icon={<PlusSquare />} label="Create" />
+          {/* CREATE BUTTON - Desktop */}
+          <div onClick={() => setIsPostModalOpen(true)}>
+            <NavItem icon={<PlusSquare />} label="Create" />
+          </div>
           <NavItem icon={<Sparkles />} label="AI Studio" color="text-blue-400" />
           <NavItem icon={<User />} label="Profile" />
         </nav>
@@ -43,10 +74,35 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-black border-t border-white/10 flex items-center justify-around z-50">
         <Home size={28} className="text-blue-500" />
         <Search size={28} />
-        <PlusSquare size={28} />
+        {/* CREATE BUTTON - Mobile */}
+        <PlusSquare size={28} onClick={() => setIsPostModalOpen(true)} className="cursor-pointer" />
         <Play size={28} />
         <div className="w-8 h-8 rounded-full bg-zinc-800 border border-white/20" />
       </nav>
+
+      {/* --- CREATE POST MODAL (Overlay) --- */}
+      {isPostModalOpen && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-4">
+          <div className="bg-zinc-900 w-full max-w-md border border-blue-500/30 rounded-2xl p-6 shadow-2xl shadow-blue-500/10">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-black italic text-blue-500">NEW POST</h3>
+              <X className="cursor-pointer" onClick={() => setIsPostModalOpen(false)} />
+            </div>
+            <textarea 
+              className="w-full bg-black border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-blue-500 min-h-[150px]"
+              placeholder="What's happening in your Race-X world?"
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)}
+            />
+            <button 
+              onClick={handlePostSubmit}
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl transition-all"
+            >
+              RACE IT! 🚀
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
