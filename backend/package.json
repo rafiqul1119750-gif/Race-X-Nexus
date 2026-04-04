@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node backend/index.js",
+    "dev": "node src/setup-db.js && node backend/index.js",
     "build": "node ./build.mjs",
     "render-start": "node src/setup-db.js && node dist/index.mjs",
     "start": "node dist/index.mjs",
