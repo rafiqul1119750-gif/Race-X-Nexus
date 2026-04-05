@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  Zap, Sparkles, Globe, Library, Plus, Gem,
-  LayoutGrid, Video, Users, MessageSquare, Music, ShoppingBag,
-  Settings, Heart, MessageCircle, Send, Play, Disc, ArrowLeft, Bell, Crown, 
-  Pause, Activity, ShoppingCart, X, Eye, EyeOff, Image as ImageIcon, 
-  Search, MoreHorizontal, Share2, Mic, Music2, Scissors, Wand2, Star, 
-  Filter, CreditCard, Package, Truck, ExternalLink
+  Zap, Sparkles, Plus, Gem, LayoutGrid, Video, MessageSquare, Music, ShoppingBag,
+  Settings, Heart, MessageCircle, Send, Play, X, Image as ImageIcon, 
+  Search, MoreHorizontal, Share2, Bell, Crown, ShoppingCart, User, 
+  Mic, Music2, Scissors, Wand2, Star, Filter, CreditCard, Package, 
+  Truck, ExternalLink, Smile, Camera, Globe, Bookmark, History, 
+  Flame, Menu, MoreVertical, ChevronRight, Layers, Volume2
 } from "lucide-react";
 import { account, ID } from "@/lib/appwrite";
 
-/* ================= FULL NEXUS ENGINE ================= */
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState("social");
@@ -17,8 +16,8 @@ export default function Home() {
   const [posts, setPosts] = useState<any[]>([]);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [postContent, setPostContent] = useState("");
-  const [playingId, setPlayingId] = useState<any>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [msgInput, setMsgInput] = useState("");
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
 
   const RENDER_API = "https://race-x-nexus.onrender.com/api/social";
 
@@ -29,7 +28,7 @@ export default function Home() {
         setUser({ ...activeUser, gems: 7500 });
         fetchFeed();
       } catch (err) { setUser(null); }
-      finally { setTimeout(() => setShowSplash(false), 1800); }
+      finally { setTimeout(() => setShowSplash(false), 1500); }
     };
     initApp();
   }, []);
@@ -58,168 +57,208 @@ export default function Home() {
   if (!user) return <AuthScreen setUser={setUser} />;
 
   return (
-    <div className="bg-black min-h-screen text-white font-sans selection:bg-blue-600/30 overflow-hidden">
+    <div className="bg-[#0f0f0f] min-h-screen text-white font-sans overflow-x-hidden">
       
-      {/* --- TOP DYNAMIC NAVIGATION --- */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-zinc-900/90 backdrop-blur-2xl border-b border-white/5 z-[5000] flex justify-between items-center px-6">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl font-black italic text-blue-600 tracking-tighter">RX</span>
-          <div className="hidden md:flex bg-zinc-800 px-4 py-2 rounded-full items-center gap-2">
-            <Search size={16} className="text-zinc-500" />
-            <input placeholder={`Search in ${activeTab}...`} className="bg-transparent outline-none text-xs w-48" />
-          </div>
+      {/* --- TOP NAVBAR (FB STYLE) --- */}
+      <header className="fixed top-0 left-0 right-0 h-14 bg-[#1c1c1c] border-b border-white/10 z-[5000] flex justify-between items-center px-4">
+        <div className="flex items-center gap-2">
+           <span className="text-2xl font-black italic text-blue-500 tracking-tighter">RACE-X</span>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] font-black text-cyan-400 tracking-widest">{user.gems} GEMS</span>
-            <div className="w-16 h-1 bg-zinc-800 rounded-full mt-1"><div className="h-full bg-cyan-400 w-[70%]" /></div>
-          </div>
-          <Bell size={20} className="text-zinc-400 cursor-pointer" />
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 border border-white/10" />
+        <div className="flex gap-2">
+          <div className="p-2 bg-zinc-800 rounded-full hover:bg-zinc-700 cursor-pointer"><Search size={20} /></div>
+          <div className="p-2 bg-zinc-800 rounded-full hover:bg-zinc-700 cursor-pointer" onClick={() => setActiveTab('chat')}><MessageSquare size={20} /></div>
         </div>
       </header>
 
-      {/* --- MAIN CONTENT SWITCHER --- */}
-      <main className="pt-20 pb-32 max-w-[650px] mx-auto h-screen overflow-y-auto scrollbar-hide">
+      {/* --- MAIN NAVIGATION SWITCHER --- */}
+      <main className="pt-14 pb-24 max-w-[600px] mx-auto min-h-screen border-x border-white/5 bg-black">
 
         {/* 1. RX SOCIAL (FACEBOOK CLONE) */}
         {activeTab === "social" && (
-          <div className="space-y-4 animate-in fade-in duration-500">
-            {/* Facebook style Create Box */}
-            <div className="mx-4 bg-zinc-900 rounded-3xl p-5 border border-white/5 shadow-xl">
-              <div className="flex gap-4 items-center">
-                <div className="w-11 h-11 rounded-full bg-blue-600 shrink-0" />
-                <button onClick={() => setIsPostModalOpen(true)} className="w-full bg-zinc-800 text-zinc-500 text-left px-6 py-3 rounded-full text-sm font-bold">What's on your mind, Racer?</button>
+          <div className="animate-in fade-in duration-500">
+            {/* FB Story Section */}
+            <div className="flex gap-2 p-4 overflow-x-auto scrollbar-hide bg-[#1c1c1c] mb-2">
+               <div className="min-w-[100px] h-40 bg-zinc-800 rounded-xl relative overflow-hidden shrink-0 border border-white/5">
+                  <div className="h-2/3 bg-blue-600" />
+                  <div className="absolute bottom-2 w-full text-center text-[10px] font-bold">Create Story</div>
+                  <div className="absolute top-24 left-1/2 -translate-x-1/2 w-8 h-8 bg-blue-500 rounded-full border-4 border-[#1c1c1c] flex items-center justify-center"><Plus size={16}/></div>
+               </div>
+               {[1,2,3,4].map(i => (
+                 <div key={i} className="min-w-[100px] h-40 bg-zinc-700 rounded-xl shrink-0 relative overflow-hidden shadow-lg">
+                    <img src={`https://picsum.photos/seed/st${i}/200/300`} className="w-full h-full object-cover" />
+                    <div className="absolute top-2 left-2 w-8 h-8 rounded-full border-2 border-blue-500 bg-black" />
+                 </div>
+               ))}
+            </div>
+
+            {/* FB Post Box */}
+            <div className="bg-[#1c1c1c] p-4 mb-2 border-y border-white/5">
+              <div className="flex gap-3 items-center">
+                <div className="w-10 h-10 rounded-full bg-blue-600 shrink-0" />
+                <button onClick={() => setIsPostModalOpen(true)} className="flex-1 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 text-left px-4 py-2.5 rounded-full text-sm">What's on your mind, {user.name.split(' ')[0]}?</button>
               </div>
-              <div className="flex mt-4 pt-4 border-t border-white/5 justify-around">
-                <button className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase"><ImageIcon size={16} className="text-green-500"/> Photo</button>
-                <button className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase"><Video size={16} className="text-red-500"/> Reel</button>
-                <button className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase"><Wand2 size={16} className="text-blue-500"/> AI Magic</button>
+              <div className="flex mt-4 pt-2 border-t border-zinc-800 justify-around">
+                <button className="flex items-center gap-2 text-xs font-bold text-zinc-400"><ImageIcon size={18} className="text-green-500"/> Photo</button>
+                <button className="flex items-center gap-2 text-xs font-bold text-zinc-400"><Video size={18} className="text-red-500"/> Reel</button>
+                <button className="flex items-center gap-2 text-xs font-bold text-zinc-400"><Smile size={18} className="text-yellow-500"/> Activity</button>
               </div>
             </div>
-            {/* Feed Posts */}
-            {posts.map((p: any) => <SocialCard key={p.id} post={p} />)}
+
+            {/* FB Timeline Feed */}
+            <div className="space-y-2">
+               {posts.map((p) => <FBPostCard key={p.id} post={p} />)}
+            </div>
           </div>
         )}
 
-        {/* 2. RX STUDIO (AI TOOLS) */}
+        {/* 2. RX STUDIO (CANVA + AI TOOLS) */}
         {activeTab === "studio" && (
-          <div className="px-6 space-y-6 animate-in slide-in-from-bottom-5">
-            <h2 className="text-2xl font-black italic text-cyan-400 uppercase tracking-tighter">AI Creative Suite</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <StudioTool title="Canva AI" desc="Design Visuals" icon={<ImageIcon className="text-pink-500"/>} />
-              <StudioTool title="RX Voice" desc="Voice Cloning" icon={<Mic className="text-blue-500"/>} />
-              <StudioTool title="Music Gen" desc="Text to Track" icon={<Music2 className="text-purple-500"/>} />
-              <StudioTool title="FX Studio" desc="Sound Effects" icon={<Zap className="text-yellow-500"/>} />
-            </div>
-            <div className="bg-gradient-to-r from-blue-900/40 to-black p-8 rounded-[3rem] border border-blue-500/20 relative overflow-hidden">
-               <Sparkles className="absolute top-4 right-4 text-blue-500 opacity-30" size={60} />
-               <h3 className="text-xl font-black italic mb-2 uppercase">Magic Clip Editor</h3>
-               <p className="text-xs text-zinc-400 mb-6">Convert long videos into AI-optimized Reels automatically.</p>
-               <button className="bg-blue-600 px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest">Open Editor</button>
-            </div>
+          <div className="p-5 space-y-6 animate-in slide-in-from-bottom-5">
+             <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-black italic uppercase text-cyan-400">Creative Studio</h2>
+                <Layers className="text-zinc-500" />
+             </div>
+             <div className="grid grid-cols-2 gap-4">
+                <StudioBtn title="AI Canvas" icon={<ImageIcon className="text-pink-500"/>} bg="bg-pink-500/10" />
+                <StudioBtn title="Voice Lab" icon={<Mic className="text-blue-500"/>} bg="bg-blue-500/10" />
+                <StudioBtn title="Sound FX" icon={<Volume2 className="text-yellow-500"/>} bg="bg-yellow-500/10" />
+                <StudioBtn title="Clip Editor" icon={<Scissors className="text-green-500"/>} bg="bg-green-500/10" />
+             </div>
+             <div className="bg-[#1c1c1c] rounded-3xl p-6 border border-white/10 relative overflow-hidden">
+                <div className="absolute -right-4 -bottom-4 opacity-10"><Wand2 size={120} /></div>
+                <h3 className="text-lg font-black mb-1">AI Voice Cloning</h3>
+                <p className="text-xs text-zinc-500 mb-6 uppercase tracking-widest font-bold">11Labs Engine Integrated</p>
+                <button className="bg-cyan-500 text-black px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest">Start Cloning</button>
+             </div>
           </div>
         )}
 
-        {/* 3. RX MUSIC (SPOTIFY CLONE) */}
-        {activeTab === "music" && (
-          <div className="px-6 space-y-8 animate-in fade-in">
-             <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-black italic uppercase tracking-tighter text-blue-500">Music Vault</h2>
-                <Filter size={20} className="text-zinc-500" />
-             </div>
-             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                {["Trending", "AI Beats", "Lo-Fi", "Phonk", "Old School"].map(t => (
-                  <button key={t} className="bg-zinc-900 px-6 py-2 rounded-full text-[10px] font-black uppercase whitespace-nowrap border border-white/5">{t}</button>
+        {/* 3. RX MAGIC CHAT (GEMINI CLONE) */}
+        {activeTab === "chat" && (
+          <div className="flex flex-col h-[75vh] animate-in fade-in">
+             <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="bg-zinc-900/50 p-4 rounded-2xl border border-blue-500/20 max-w-[80%]">
+                   <p className="text-sm font-bold text-blue-400 mb-2">RX-Magic AI</p>
+                   <p className="text-sm">Hello {user.name}, how can I help you in the Nexus today? ⚡</p>
+                </div>
+                {chatHistory.map((c, i) => (
+                  <div key={i} className={`flex ${c.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                     <div className={`p-4 rounded-2xl max-w-[85%] text-sm font-bold ${c.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>{c.text}</div>
+                  </div>
                 ))}
+             </div>
+             <div className="p-4 bg-[#1c1c1c] flex gap-2 items-center">
+                <div className="flex-1 bg-black rounded-full px-5 py-3 flex items-center gap-3 border border-white/10">
+                   <Sparkles size={18} className="text-blue-500" />
+                   <input 
+                    value={msgInput}
+                    onChange={(e) => setMsgInput(e.target.value)}
+                    placeholder="Ask Gemini anything..." 
+                    className="bg-transparent border-none outline-none text-sm w-full" 
+                   />
+                </div>
+                <button className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center"><Send size={18}/></button>
+             </div>
+          </div>
+        )}
+
+        {/* 4. RX MUSIC (SPOTIFY CLONE) */}
+        {activeTab === "music" && (
+          <div className="p-5 space-y-6 animate-in slide-in-from-right-4">
+             <h2 className="text-3xl font-black italic uppercase text-green-500">Spotify Vault</h2>
+             <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gradient-to-br from-indigo-900 to-black p-5 rounded-2xl border border-white/5 h-48 flex flex-col justify-end">
+                   <h4 className="font-black text-lg">Daily Mix 1</h4>
+                   <p className="text-[10px] uppercase font-bold text-zinc-400">Made for you</p>
+                </div>
+                <div className="bg-gradient-to-br from-green-900 to-black p-5 rounded-2xl border border-white/5 h-48 flex flex-col justify-end">
+                   <h4 className="font-black text-lg">Nexus Phonk</h4>
+                   <p className="text-[10px] uppercase font-bold text-zinc-400">AI Beats</p>
+                </div>
              </div>
              <div className="space-y-4">
-                {[1,2,3,4,5].map(i => (
-                  <div key={i} className="flex items-center justify-between p-4 bg-zinc-900/40 rounded-3xl border border-white/5 hover:bg-zinc-800 transition">
+                {[1,2,3,4].map(i => (
+                  <div key={i} className="flex items-center justify-between p-3 hover:bg-white/5 rounded-xl group transition">
                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-zinc-800 rounded-xl overflow-hidden relative group">
-                           <img src={`https://picsum.photos/seed/${i}/200`} className="w-full h-full object-cover" />
-                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100"><Play size={20} /></div>
+                        <div className="w-12 h-12 bg-zinc-800 rounded relative overflow-hidden">
+                           <img src={`https://picsum.photos/seed/mus${i}/100`} />
+                           <Play className="absolute inset-0 m-auto opacity-0 group-hover:opacity-100 transition" size={20}/>
                         </div>
                         <div>
-                           <h4 className="font-bold text-sm">Nexus Track #{i}</h4>
-                           <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">AI Symphony • 3:45</p>
+                           <h4 className="font-bold text-sm">Nexus Track {i}</h4>
+                           <p className="text-[10px] font-bold text-zinc-500 uppercase">AI Artist • 3:20</p>
                         </div>
                      </div>
-                     <MoreHorizontal size={20} className="text-zinc-600" />
+                     <MoreHorizontal className="text-zinc-600" />
                   </div>
                 ))}
              </div>
           </div>
         )}
 
-        {/* 4. RX SHOP (AMAZON CLONE) */}
+        {/* 5. RX SHOP (AMAZON CLONE) */}
         {activeTab === "shop" && (
-          <div className="px-6 space-y-6 animate-in slide-in-from-right-4">
-             <div className="bg-orange-500 p-6 rounded-[2.5rem] flex justify-between items-center relative overflow-hidden">
-                <ShoppingBag className="absolute -right-4 -bottom-4 text-white/20" size={100} />
-                <div>
-                   <h2 className="text-2xl font-black italic uppercase">Flash Deals</h2>
-                   <p className="text-[10px] font-black uppercase tracking-widest text-white/80">Up to 80% Off AI Gear</p>
-                </div>
-                <button className="bg-white text-orange-500 px-6 py-2 rounded-full font-black text-[10px] uppercase z-10">Shop Now</button>
-             </div>
-             <div className="grid grid-cols-2 gap-4 pb-20">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="bg-zinc-900 rounded-[2rem] p-4 border border-white/5">
-                     <div className="w-full aspect-square bg-zinc-800 rounded-2xl mb-4 overflow-hidden">
-                        <img src={`https://picsum.photos/seed/shop${i}/300`} className="w-full h-full object-cover" />
-                     </div>
-                     <h4 className="text-xs font-bold line-clamp-1">RX-Pro Headset Neon Gen-4</h4>
-                     <div className="flex items-center gap-2 mt-2">
-                        <span className="text-blue-500 font-black">₹4,999</span>
-                        <span className="text-[8px] text-zinc-500 line-through">₹9,999</span>
-                     </div>
-                     <button className="w-full mt-4 bg-zinc-800 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-blue-600 transition">Add to Cart</button>
-                  </div>
-                ))}
-             </div>
-          </div>
+           <div className="p-4 space-y-4 animate-in fade-in">
+              <div className="bg-[#1c1c1c] p-4 rounded-xl flex items-center gap-3 border border-white/10">
+                 <Search size={20} className="text-zinc-500" />
+                 <input placeholder="Search Flipkart/Amazon..." className="bg-transparent outline-none text-sm w-full" />
+              </div>
+              <div className="bg-yellow-500 rounded-2xl p-6 flex justify-between items-center text-black">
+                 <div>
+                    <h3 className="text-2xl font-black italic">BIG SAVING DAYS</h3>
+                    <p className="text-xs font-bold uppercase tracking-tighter">Min. 70% Off AI Gadgets</p>
+                 </div>
+                 <ChevronRight size={40} />
+              </div>
+              <div className="grid grid-cols-2 gap-3 pb-20">
+                 {[1,2,3,4].map(i => (
+                   <div key={i} className="bg-[#1c1c1c] rounded-2xl p-3 border border-white/5">
+                      <div className="aspect-square bg-zinc-800 rounded-xl mb-3 overflow-hidden">
+                         <img src={`https://picsum.photos/seed/sh${i}/300`} className="w-full h-full object-cover" />
+                      </div>
+                      <h4 className="text-xs font-bold truncate">RX-Nexus Smart Watch v{i}</h4>
+                      <div className="flex items-center gap-2 mt-2">
+                         <span className="text-green-500 font-bold">₹1,499</span>
+                         <span className="text-[9px] text-zinc-500 line-through font-bold">₹3,999</span>
+                      </div>
+                      <button className="w-full mt-3 bg-yellow-500 text-black py-2 rounded-lg font-black text-[9px] uppercase tracking-widest active:scale-95 transition">Add to Cart</button>
+                   </div>
+                 ))}
+              </div>
+           </div>
         )}
 
       </main>
 
-      {/* --- REAL-LOOK BOTTOM NAVIGATION --- */}
-      <nav className="fixed bottom-0 left-0 right-0 h-20 bg-black/95 backdrop-blur-3xl border-t border-white/10 flex items-center justify-around px-2 z-[5000]">
-        <NavIcon label="Social" icon={<LayoutGrid size={24}/>} active={activeTab === 'social'} onClick={() => setActiveTab('social')} />
-        <NavIcon label="Studio" icon={<Zap size={24}/>} active={activeTab === 'studio'} onClick={() => setActiveTab('studio')} />
-        <div onClick={() => setIsPostModalOpen(true)} className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center -mt-10 shadow-2xl shadow-blue-600/40 border-4 border-black active:scale-95 transition cursor-pointer">
-          <Plus size={28} className="text-white" />
-        </div>
-        <NavIcon label="Music" icon={<Music size={24}/>} active={activeTab === 'music'} onClick={() => setActiveTab('music')} />
-        <NavIcon label="Shop" icon={<ShoppingBag size={24}/>} active={activeTab === 'shop'} onClick={() => setActiveTab('shop')} />
+      {/* --- FOOTER NAV (INSTA STYLE) --- */}
+      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-[#1c1c1c]/95 backdrop-blur-2xl border-t border-white/10 flex items-center justify-around px-2 z-[5000]">
+        <NavIcon icon={<LayoutGrid size={26}/>} active={activeTab === 'social'} onClick={() => setActiveTab('social')} />
+        <NavIcon icon={<Zap size={26}/>} active={activeTab === 'studio'} onClick={() => setActiveTab('studio')} />
+        <div onClick={() => setIsPostModalOpen(true)} className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center -mt-8 shadow-2xl border-4 border-black active:scale-90 transition"><Plus size={28}/></div>
+        <NavIcon icon={<Music size={26}/>} active={activeTab === 'music'} onClick={() => setActiveTab('music')} />
+        <NavIcon icon={<ShoppingBag size={26}/>} active={activeTab === 'shop'} onClick={() => setActiveTab('shop')} />
       </nav>
 
-      {/* --- CREATE POST OVERLAY --- */}
+      {/* FB Post Modal */}
       {isPostModalOpen && (
-        <div className="fixed inset-0 bg-black/98 z-[6000] flex items-center justify-center p-6 backdrop-blur-xl">
-           <div className="bg-zinc-900 w-full max-w-lg rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl shadow-blue-500/10">
-              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-zinc-800/40">
-                 <h2 className="font-black italic uppercase text-blue-500 tracking-tighter">Broadcasting Live</h2>
+        <div className="fixed inset-0 bg-black/95 z-[6000] flex items-center justify-center p-6 backdrop-blur-md">
+           <div className="bg-[#1c1c1c] w-full max-w-lg rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+              <div className="p-4 border-b border-zinc-800 flex justify-between items-center">
+                 <h2 className="font-bold text-center w-full">Create Post</h2>
                  <X onClick={() => setIsPostModalOpen(false)} className="text-zinc-500 cursor-pointer" />
               </div>
-              <div className="p-8">
+              <div className="p-5">
+                 <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-blue-600" />
+                    <div><p className="font-bold text-sm">{user.name}</p><div className="flex items-center gap-1 text-zinc-500 text-[10px] font-bold bg-zinc-800 px-2 py-0.5 rounded-md"><Globe size={10}/> Public</div></div>
+                 </div>
                  <textarea 
                     value={postContent}
                     onChange={(e) => setPostContent(e.target.value)}
-                    placeholder="Sync your thoughts to the Nexus..." 
-                    className="w-full bg-transparent text-xl font-bold border-none outline-none min-h-[220px] resize-none placeholder:text-zinc-700"
+                    placeholder={`What's on your mind, ${user.name.split(' ')[0]}?`} 
+                    className="w-full bg-transparent text-lg border-none outline-none min-h-[200px] resize-none"
                  />
-                 <div className="flex gap-4 mb-6">
-                    <div className="bg-zinc-800 p-4 rounded-2xl cursor-pointer hover:bg-zinc-700"><ImageIcon size={20} className="text-green-500" /></div>
-                    <div className="bg-zinc-800 p-4 rounded-2xl cursor-pointer hover:bg-zinc-700"><Play size={20} className="text-red-500" /></div>
-                    <div className="bg-zinc-800 p-4 rounded-2xl cursor-pointer hover:bg-zinc-700"><Music size={20} className="text-purple-500" /></div>
-                 </div>
-                 <button 
-                    onClick={handlePostSubmit}
-                    disabled={!postContent}
-                    className="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-[0.4em] shadow-xl disabled:opacity-30 active:scale-95 transition"
-                 > Launch Transmission </button>
+                 <button onClick={handlePostSubmit} className="w-full bg-blue-600 py-3 rounded-lg font-black uppercase text-xs tracking-widest mt-4">Post</button>
               </div>
            </div>
         </div>
@@ -228,59 +267,46 @@ export default function Home() {
   );
 }
 
-/* ================= CORE UI COMPONENTS ================= */
+/* ================= COMPONENTS ================= */
 
-function SocialCard({ post }: any) {
+function FBPostCard({ post }: any) {
   return (
-    <div className="mx-4 bg-zinc-900/40 rounded-[2.8rem] border border-white/5 overflow-hidden shadow-lg mb-4">
-      <div className="p-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center font-black italic text-[10px]">RX</div>
-          <div>
-            <h4 className="font-black italic uppercase text-xs tracking-tighter text-white">{post.authorName}</h4>
-            <p className="text-[7px] font-black text-zinc-500 uppercase tracking-widest">Broadcasted • {new Date(post.timestamp).toLocaleTimeString()}</p>
+    <div className="bg-[#1c1c1c] border-y border-white/5 pb-2">
+       <div className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black text-xs italic">RX</div>
+             <div>
+                <h4 className="font-bold text-[15px]">{post.authorName}</h4>
+                <p className="text-[10px] text-zinc-500 font-bold">{new Date(post.timestamp).toLocaleDateString()} • <Globe size={10} className="inline"/></p>
+             </div>
           </div>
-        </div>
-        <MoreHorizontal size={18} className="text-zinc-600" />
-      </div>
-      <div className="px-8 pb-6">
-        <p className="text-sm font-bold text-zinc-200 leading-relaxed">{post.content}</p>
-      </div>
-      <div className="px-6 py-5 flex justify-between border-t border-white/5 bg-zinc-900/30">
-         <div className="flex gap-8">
-            <div className="flex items-center gap-2 group cursor-pointer">
-              <Heart size={20} className="group-hover:text-red-500 transition-colors" />
-              <span className="text-[9px] font-black uppercase">{post.likes || 0}</span>
-            </div>
-            <div className="flex items-center gap-2 group cursor-pointer">
-              <MessageCircle size={20} className="group-hover:text-blue-500 transition-colors" />
-              <span className="text-[9px] font-black uppercase">{post.comments || 0}</span>
-            </div>
-            <Share2 size={20} className="text-zinc-500 cursor-pointer" />
-         </div>
-         <Crown size={18} className="text-yellow-500/40" />
-      </div>
+          <MoreHorizontal size={20} className="text-zinc-500" />
+       </div>
+       <div className="px-4 pb-4 text-[15px] leading-snug">{post.content}</div>
+       <div className="px-4 py-3 flex justify-between border-t border-zinc-800 mt-2 mx-2">
+          <button className="flex items-center gap-2 text-zinc-400 font-bold text-sm hover:bg-white/5 px-4 py-1.5 rounded-lg transition"><Heart size={20} /> Like</button>
+          <button className="flex items-center gap-2 text-zinc-400 font-bold text-sm hover:bg-white/5 px-4 py-1.5 rounded-lg transition"><MessageCircle size={20} /> Comment</button>
+          <button className="flex items-center gap-2 text-zinc-400 font-bold text-sm hover:bg-white/5 px-4 py-1.5 rounded-lg transition"><Share2 size={20} /> Share</button>
+       </div>
     </div>
   );
 }
 
-function StudioTool({ title, desc, icon }: any) {
+function StudioBtn({ title, icon, bg }: any) {
   return (
-    <div className="bg-zinc-900 p-6 rounded-[2.2rem] border border-white/5 hover:border-blue-500/30 transition cursor-pointer group">
-       <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">{icon}</div>
-       <h4 className="font-black text-xs uppercase italic tracking-tighter mb-1">{title}</h4>
-       <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">{desc}</p>
+    <div className={`${bg} p-6 rounded-3xl flex flex-col items-center gap-3 border border-white/5 cursor-pointer active:scale-95 transition`}>
+       <div className="p-4 bg-black/40 rounded-2xl">{icon}</div>
+       <span className="text-[10px] font-black uppercase tracking-widest">{title}</span>
     </div>
   );
 }
 
-function NavIcon({ icon, label, active, onClick }: any) {
+function NavIcon({ icon, active, onClick }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1.5 transition-all ${active ? 'text-blue-500 scale-110' : 'text-zinc-500 hover:text-zinc-300'}`}>
-      <div className={`transition-all duration-300 ${active ? 'bg-blue-600/10 p-2.5 rounded-xl border border-blue-600/20 shadow-[0_0_15px_rgba(37,99,235,0.1)]' : 'p-1'}`}>{icon}</div>
-      <span className="text-[7px] font-black uppercase tracking-[0.2em]">{label}</span>
+    <button onClick={onClick} className={`transition-all ${active ? 'text-blue-500 scale-110' : 'text-zinc-500'}`}>
+      {icon}
     </button>
   );
 }
 
-// ... Splash & AuthScreen (Keep existing logic) ...
+// Keep your existing Splash and AuthScreen components here
