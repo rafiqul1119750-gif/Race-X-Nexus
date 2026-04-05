@@ -11,8 +11,17 @@ import {
 } from "lucide-react";
 import { account, ID } from "@/lib/appwrite";
 
-// --- 1. REAL SPLASH COMPONENT ---
+// --- 1. REAL SPLASH COMPONENT (FIXED TIMER & ANIMATION) ---
 function Splash({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    // 2.5 Seconds ke baad home screen load hogi
+    const timer = setTimeout(() => {
+      onDone();
+    }, 2500);
+    
+    return () => clearTimeout(timer); 
+  }, [onDone]);
+
   return (
     <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999]">
       <div className="relative mb-8">
@@ -21,9 +30,21 @@ function Splash({ onDone }: { onDone: () => void }) {
       </div>
       <h1 className="text-5xl font-black italic tracking-tighter text-white mb-2 animate-pulse">RACE-X</h1>
       <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.6em]">Neural Link v4.0</p>
+      
+      {/* Visual Progress Bar */}
       <div className="absolute bottom-20 w-64 h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-        <div className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 animate-[progress_2.5s_ease-in-out]" style={{width: '100%'}} />
+        <div className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 animate-[progress_2.5s_linear]" style={{ width: '100%' }} />
       </div>
+
+      <style>{`
+        @keyframes progress {
+          0% { width: 0%; }
+          100% { width: 100%; }
+        }
+        .animate-progress {
+          animation: progress 2.5s linear;
+        }
+      `}</style>
     </div>
   );
 }
@@ -36,7 +57,7 @@ function AuthScreen({ setUser }: any) {
       <div className="w-24 h-24 bg-blue-600 rounded-[2.5rem] flex items-center justify-center mb-10 shadow-[0_0_50px_rgba(37,99,235,0.3)] rotate-12">
         <Lock className="text-white" size={44} />
       </div>
-      <h2 className="text-4xl font-black mb-3 italic tracking-tighter uppercase">Nexus Login</h2>
+      <h2 className="text-4xl font-black mb-3 italic tracking-tighter uppercase text-white">Nexus Login</h2>
       <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] mb-12 text-center">Biometric & Neural Encryption Active</p>
       <button onClick={handleLogin} className="w-full max-w-sm bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl">Start Synchronization</button>
       <div className="mt-12 flex gap-6 opacity-30">
@@ -250,10 +271,10 @@ export default function Home() {
                        <div className="aspect-square bg-zinc-900 rounded-2xl mb-4 overflow-hidden shadow-inner">
                           <img src={`https://picsum.photos/seed/prd${i}/400`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                        </div>
-                       <h4 className="text-[11px] font-bold text-zinc-300 line-clamp-2 leading-snug mb-2 uppercase">Race-X Nexus Smart Audio Node v{i}.0 Edition</h4>
+                       <h4 className="text-[11px] font-bold text-zinc-300 line-clamp-2 leading-snug mb-2 uppercase text-white">Race-X Nexus Smart Audio Node v{i}.0 Edition</h4>
                        <div className="flex items-center gap-1 mb-3"><div className="flex text-yellow-500"><Star size={12} fill="currentColor"/><Star size={12} fill="currentColor"/><Star size={12} fill="currentColor"/><Star size={12} fill="currentColor"/><Star size={12}/></div><span className="text-[10px] font-black text-blue-400 ml-1">12,402</span></div>
                        <div className="flex items-baseline gap-2 mb-4">
-                          <span className="text-2xl font-black">₹{1499 + (i*200)}</span>
+                          <span className="text-2xl font-black text-white">₹{1499 + (i*200)}</span>
                           <span className="text-[10px] text-zinc-500 font-bold line-through">₹5,999</span>
                        </div>
                        <button className="w-full bg-yellow-400 text-black py-3 rounded-xl font-black text-[10px] uppercase shadow-lg shadow-yellow-400/10 active:scale-95 transition-transform">Add to Cart</button>
@@ -274,24 +295,24 @@ export default function Home() {
         <NavIcon icon={<ShoppingBag size={28}/>} label="Shop" active={activeTab === 'shop'} onClick={() => setActiveTab('shop')} />
       </nav>
 
-      {/* --- CREATE POST MODAL (REAL FB STYLE) --- */}
+      {/* --- CREATE POST MODAL --- */}
       {isPostModalOpen && (
         <div className="fixed inset-0 bg-black/98 z-[6000] flex flex-col p-6 animate-in slide-in-from-bottom-20 duration-500 backdrop-blur-3xl">
            <div className="flex justify-between items-center mb-12">
               <X onClick={() => setIsPostModalOpen(false)} className="text-zinc-500 cursor-pointer p-2 bg-zinc-900 rounded-full" />
-              <h2 className="font-black uppercase tracking-[0.4em] text-xs">New Transmission</h2>
-              <button onClick={handlePostSubmit} className="bg-blue-600 px-8 py-2.5 rounded-full font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 active:scale-95 transition-transform">Publish</button>
+              <h2 className="font-black uppercase tracking-[0.4em] text-xs text-white">New Transmission</h2>
+              <button onClick={handlePostSubmit} className="bg-blue-600 px-8 py-2.5 rounded-full font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 active:scale-95 transition-transform text-white">Publish</button>
            </div>
            <div className="flex items-center gap-4 mb-8">
               <div className="w-14 h-14 rounded-full bg-blue-600 shadow-lg border-2 border-white/10" />
-              <div><h4 className="font-black uppercase tracking-tighter text-lg">{user.name}</h4><p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Public Nexus Node</p></div>
+              <div><h4 className="font-black uppercase tracking-tighter text-lg text-white">{user.name}</h4><p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Public Nexus Node</p></div>
            </div>
            <textarea 
               autoFocus
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
               placeholder="What's happening in your Nexus?" 
-              className="flex-1 bg-transparent border-none outline-none text-3xl font-black italic tracking-tighter placeholder:opacity-10 leading-tight resize-none"
+              className="flex-1 bg-transparent border-none outline-none text-3xl font-black italic tracking-tighter placeholder:opacity-10 leading-tight resize-none text-white"
            />
            <div className="flex justify-around p-6 bg-zinc-900/50 rounded-[2.5rem] border border-white/5 mb-6">
               <ImageIcon className="text-green-500" size={30} /><Video className="text-red-500" size={30} /><Mic className="text-blue-500" size={30} /><Smile className="text-yellow-500" size={30} />
@@ -302,16 +323,16 @@ export default function Home() {
   );
 }
 
-/* --- REUSABLE COMPONENTS (MASTER LIST) --- */
+/* --- REUSABLE COMPONENTS --- */
 
 function HubCard({ title, sub, icon, color, onClick }: any) {
   return (
     <div onClick={onClick} className={`${color} p-7 rounded-[2.5rem] flex flex-col items-center gap-3 active:scale-95 transition-all shadow-2xl border border-white/10 group overflow-hidden relative min-h-[170px] justify-center`}>
        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-       <div className="drop-shadow-2xl">{icon}</div>
+       <div className="drop-shadow-2xl text-white">{icon}</div>
        <div className="text-center mt-3">
-          <span className="text-[14px] font-black uppercase tracking-widest block leading-none">{title}</span>
-          <span className="text-[8px] font-black opacity-50 uppercase tracking-[0.2em]">{sub}</span>
+          <span className="text-[14px] font-black uppercase tracking-widest block leading-none text-white">{title}</span>
+          <span className="text-[8px] font-black opacity-50 uppercase tracking-[0.2em] text-white/70">{sub}</span>
        </div>
     </div>
   );
@@ -331,8 +352,8 @@ function SocialCard({ post }: any) {
     <div className="bg-[#121212] border-y border-white/5 pb-2 mb-2 animate-in fade-in duration-500">
        <div className="p-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-             <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center font-black italic text-sm shadow-lg shadow-blue-600/20">RX</div>
-             <div><h4 className="font-black text-sm uppercase tracking-tighter">{post.user_name}</h4><p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1">Global Node • Just Now • <Globe size={10}/></p></div>
+             <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center font-black italic text-sm shadow-lg shadow-blue-600/20 text-white">RX</div>
+             <div><h4 className="font-black text-sm uppercase tracking-tighter text-white">{post.user_name}</h4><p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1">Global Node • Just Now • <Globe size={10}/></p></div>
           </div>
           <MoreHorizontal size={22} className="text-zinc-600" />
        </div>
@@ -351,7 +372,7 @@ function StudioBtn({ title, sub, icon, bg }: any) {
     <div className={`${bg} p-7 rounded-[2.5rem] flex flex-col items-center gap-3 border border-white/5 active:scale-95 transition-all group cursor-pointer shadow-xl`}>
        <div className="p-5 bg-black/40 rounded-[1.5rem] group-hover:bg-black/60 transition-colors shadow-inner">{icon}</div>
        <div className="text-center">
-          <span className="text-[11px] font-black uppercase tracking-widest block mb-1 leading-none">{title}</span>
+          <span className="text-[11px] font-black uppercase tracking-widest block mb-1 leading-none text-white">{title}</span>
           <span className="text-[7px] font-black text-zinc-500 uppercase tracking-[0.2em]">{sub}</span>
        </div>
     </div>
