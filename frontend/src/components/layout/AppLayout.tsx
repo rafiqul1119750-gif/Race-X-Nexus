@@ -7,20 +7,21 @@ import {
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false); // Post modal ke liye
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [postContent, setPostContent] = useState("");
 
-  // POST BHEJNE KA FUNCTION
+  // POST BHEJNE KA FUNCTION (With Your Render Link)
   const handlePostSubmit = async () => {
     if(!postContent) return;
     
     try {
-      const response = await fetch("https://your-race-x-backend.onrender.com/api/social/post", {
+      // Aapka asli Render Link yahan add kar diya hai
+      const response = await fetch("https://race-x-nexus.onrender.com/api/social/post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: postContent,
-          user_id: "current_user_id", // Yahan login user ki ID aayegi
+          user_id: "user_" + Math.random().toString(36).substr(2, 9), // Temporary ID jab tak auth fully connect na ho
           user_name: "Race-X Creator",
           image_url: ""
         })
@@ -30,9 +31,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         alert("Race-X par post live ho gayi! 🔥");
         setIsPostModalOpen(false);
         setPostContent("");
+      } else {
+        alert("Post fail ho gaya, check karo backend live hai ya nahi.");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error:", err);
+      alert("Connection Error! Render link check karo.");
     }
   };
 
@@ -80,25 +84,25 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="w-8 h-8 rounded-full bg-zinc-800 border border-white/20" />
       </nav>
 
-      {/* --- CREATE POST MODAL (Overlay) --- */}
+      {/* --- CREATE POST MODAL --- */}
       {isPostModalOpen && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-4">
-          <div className="bg-zinc-900 w-full max-w-md border border-blue-500/30 rounded-2xl p-6 shadow-2xl shadow-blue-500/10">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-black italic text-blue-500">NEW POST</h3>
-              <X className="cursor-pointer" onClick={() => setIsPostModalOpen(false)} />
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-[100] p-4 backdrop-blur-sm">
+          <div className="bg-zinc-900 w-full max-w-md border border-blue-500/40 rounded-2xl p-6 shadow-[0_0_50px_-12px_rgba(59,130,246,0.5)]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-extrabold italic text-blue-500 tracking-tighter">NEW TRANSMISSION</h3>
+              <X className="cursor-pointer text-zinc-500 hover:text-white" onClick={() => setIsPostModalOpen(false)} />
             </div>
             <textarea 
-              className="w-full bg-black border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-blue-500 min-h-[150px]"
-              placeholder="What's happening in your Race-X world?"
+              className="w-full bg-black border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-blue-500 min-h-[160px] text-lg placeholder:text-zinc-700"
+              placeholder="What's the hype today?"
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
             />
             <button 
               onClick={handlePostSubmit}
-              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl transition-all"
+              className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-600/20"
             >
-              RACE IT! 🚀
+              LAUNCH POST 🚀
             </button>
           </div>
         </div>
