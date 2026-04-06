@@ -1,134 +1,129 @@
-import { useState, useRef, useEffect } from "react";
-import { Send, Bot, Sparkles } from "lucide-react";
-import { useGetChatMessages, useSendChatMessage } from "@workspace/api-client-react";
-import { useAppContext } from "@/context/AppContext";
-import { useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, User, ChevronLeft, MoreVertical, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { useAppContext } from '@/context/AppContext';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
-export default function Chat() {
-  const [input, setInput] = useState("");
-  const queryClient = useQueryClient();
-  const { data, isLoading } = useGetChatMessages();
-  const { mutate: sendMessage, isPending } = useSendChatMessage({
-    mutation: {
-      onSuccess: () => {
-        setInput("");
-        queryClient.invalidateQueries({ queryKey: [`/api/chat/messages`] });
-      }
-    }
-  });
-
+const Chat = () => {
+  const { user } = useAppContext();
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [message, setMessage] = useState('');
+  
+  // Fake Chat Data (Real app mein Appwrite Realtime se aayega)
+  const [messages, setMessages] = useState([
+    { id: 1, text: "Bhai, naya AI model dekha?", senderId: "other", time: "10:30 AM" },
+    { id: 2, text: "Haan yaar, Race-X Studio kamaal hai! 🔥", senderId: "me", time: "10:31 AM" },
+    { id: 3, text: "Ek mast image generate ki hai, dikhaun?", senderId: "other", time: "10:32 AM" },
+  ]);
 
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+
+    const newMessage = {
+      id: Date.now(),
+      text: message,
+      senderId: "me",
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages([...messages, newMessage]);
+    setMessage('');
+  };
+
+  // Auto-scroll to bottom jab naya message aaye
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [data?.messages]);
-
-  const handleSend = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!input.trim() || isPending) return;
-    sendMessage({ data: { content: input } });
-  };
-
-  const messages = data?.messages || [];
-  const suggestions = data?.aiSuggestions || ["Tell me a joke", "How do I edit videos?", "Write a tweet"];
+  }, [messages]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto px-4 py-6">
-      <div className="glass-panel rounded-t-2xl p-4 border-b border-white/10 flex items-center justify-between">
+    <div className="flex flex-col h-[85vh] -mt-4 -mx-4">
+      {/* --- Chat Header --- */}
+      <header className="p-4 bg-secondary/40 backdrop-blur-xl border-b border-white/5 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/50">
-            <Bot className="w-6 h-6 text-primary drop-shadow-[0_0_8px_rgba(0,212,255,0.8)]" />
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full">
+            <ChevronLeft size={20} />
+          </Button>
+          <div className="relative">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-purple-600 flex items-center justify-center border border-white/10">
+              <User size={20} className="text-black" />
+            </div>
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-background rounded-full"></div>
           </div>
           <div>
-            <h2 className="font-display font-bold text-glow text-lg">RX Magic Chat</h2>
-            <p className="text-xs text-muted-foreground">AI Assistant & Global Rooms</p>
+            <h2 className="text-sm font-bold tracking-tight">Nexus Creator</h2>
+            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Online</p>
           </div>
         </div>
-      </div>
+        <Button variant="ghost" size="icon" className="text-gray-400">
+          <MoreVertical size={20} />
+        </Button>
+      </header>
 
+      {/* --- Messages Area --- */}
       <div 
         ref={scrollRef}
-        className="flex-1 glass-panel border-y-0 rounded-none p-4 overflow-y-auto space-y-4 custom-scrollbar"
+        className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth"
+        style={{ scrollbarWidth: 'none' }}
       >
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : (
-          messages.map((msg) => {
-            const isUser = msg.senderName === "You";
-            const isAi = msg.type === "ai";
-            const isSystem = msg.type === "system";
-
-            if (isSystem) {
-              return (
-                <div key={msg.id} className="flex justify-center my-4">
-                  <span className="bg-white/5 border border-white/10 text-muted-foreground text-[10px] px-3 py-1 rounded-full uppercase tracking-wider">
-                    {msg.content}
-                  </span>
-                </div>
-              );
-            }
-
-            return (
-              <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                <div className={`flex gap-3 max-w-[80%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ${isAi ? 'bg-primary/20 p-1 border border-primary/50' : 'bg-muted'}`}>
-                    {isAi ? <Bot className="w-full h-full text-primary" /> : <img src={msg.senderAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&fit=crop"} alt="Avatar" className="w-full h-full object-cover" />}
-                  </div>
-                  <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-                    <span className="text-[10px] text-muted-foreground mb-1 ml-1">{msg.senderName} • {format(new Date(msg.timestamp), 'HH:mm')}</span>
-                    <div className={`p-3 rounded-2xl text-sm shadow-lg ${
-                      isUser 
-                        ? 'bg-primary text-primary-foreground rounded-tr-sm shadow-[0_0_15px_rgba(0,212,255,0.2)]' 
-                        : isAi 
-                          ? 'bg-secondary/20 border border-secondary/30 text-white rounded-tl-sm shadow-[0_0_15px_rgba(157,78,221,0.1)]'
-                          : 'bg-white/10 text-white rounded-tl-sm'
-                    }`}>
-                      {msg.content}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      <div className="glass-panel rounded-b-2xl p-4 border-t border-white/10 bg-background/80 backdrop-blur-xl">
-        <div className="flex gap-2 mb-3 overflow-x-auto custom-scrollbar pb-2">
-          {suggestions.map((sug, i) => (
-            <button 
-              key={i}
-              onClick={() => setInput(sug)}
-              className="flex items-center gap-1.5 whitespace-nowrap bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/50 px-3 py-1.5 rounded-full text-xs transition-colors text-white/80 hover:text-primary btn-ripple"
-            >
-              <Sparkles className="w-3 h-3" />
-              {sug}
-            </button>
-          ))}
-        </div>
-        <form onSubmit={handleSend} className="relative flex items-center">
-          <input 
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask RX Magic Chat..."
-            className="w-full bg-black/50 border border-white/10 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl pl-4 pr-12 py-3 text-sm outline-none text-white transition-all shadow-inner"
-            disabled={isPending}
-          />
-          <button 
-            type="submit"
-            disabled={!input.trim() || isPending}
-            className="absolute right-2 p-2 bg-primary text-primary-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 btn-ripple shadow-[0_0_10px_rgba(0,212,255,0.4)]"
+        {messages.map((msg) => (
+          <motion.div
+            key={msg.id}
+            initial={{ opacity: 0, x: msg.senderId === 'me' ? 20 : -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className={`flex ${msg.senderId === 'me' ? 'justify-end' : 'justify-start'}`}
           >
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
+            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-lg ${
+              msg.senderId === 'me' 
+              ? 'bg-primary text-black font-medium rounded-tr-none' 
+              : 'bg-secondary/50 text-white border border-white/5 rounded-tl-none'
+            }`}>
+              <p className="leading-relaxed">{msg.text}</p>
+              <p className={`text-[9px] mt-1 text-right ${msg.senderId === 'me' ? 'text-black/60' : 'text-gray-500'}`}>
+                {msg.time}
+              </p>
+            </div>
+          </motion.div>
+        ))}
       </div>
+
+      {/* --- Input Area --- */}
+      <footer className="p-4 bg-background border-t border-white/5">
+        <form onSubmit={handleSend} className="flex items-center gap-2">
+          <Button type="button" variant="ghost" size="icon" className="text-gray-400 rounded-full bg-secondary/20">
+            <Sparkles size={20} className="text-primary" />
+          </Button>
+          <div className="flex-1 relative">
+            <input 
+              type="text" 
+              placeholder="Message..."
+              className="w-full bg-secondary/30 border border-white/10 rounded-2xl py-3 pl-4 pr-10 outline-none focus:border-primary/50 transition-all text-sm"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon" 
+              className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400"
+            >
+              <ImageIcon size={18} />
+            </Button>
+          </div>
+          <Button 
+            type="submit" 
+            className="rounded-full w-12 h-12 bg-primary text-black p-0 shadow-lg shadow-primary/20 active:scale-90 transition-transform"
+          >
+            <Send size={20} fill="currentColor" />
+          </Button>
+        </form>
+      </footer>
     </div>
   );
-}
+};
+
+export default Chat;
