@@ -1,119 +1,112 @@
-import { User, Shield, Zap, AlertTriangle } from "lucide-react";
-import { useGetUserProfile } from "@workspace/api-client-react";
-import { format } from "date-fns";
+import { motion } from 'framer-motion';
+import { Settings, Edit2, Grid, Bookmark, Share2, Zap, Heart } from 'lucide-react';
+import { useAppContext } from '@/context/AppContext';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { useState } from 'react';
 
-export default function Profile() {
-  const { data: profile, isLoading } = useGetUserProfile();
+const Profile = () => {
+  const { user, diamonds } = useAppContext();
+  const [activeTab, setActiveTab] = useState<'posts' | 'saved'>('posts');
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center p-10">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (!profile) return null;
+  // Fake data for UI visualization (Baad mein Appwrite se aayega)
+  const stats = [
+    { label: 'Creations', count: '24' },
+    { label: 'Followers', count: '1.2k' },
+    { label: 'Following', count: '450' },
+  ];
 
   return (
-    <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
-      
-      {/* Safety Warning Banner */}
-      {profile.violationCount > 0 && (
-        <div className="bg-destructive/20 border border-destructive/50 text-destructive p-4 rounded-xl flex items-start gap-3 shadow-[0_0_15px_rgba(255,0,0,0.2)]">
-          <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-          <div>
-            <h4 className="font-bold">Account Warning ({profile.violationCount}/3 Violations)</h4>
-            <p className="text-sm mt-1">Please adhere to community guidelines. 3 violations result in a temporary account freeze.</p>
-          </div>
+    <div className="space-y-6 pb-28">
+      {/* --- Profile Header --- */}
+      <header className="relative pt-6 flex flex-col items-center text-center">
+        <div className="absolute top-0 right-0">
+          <Button variant="ghost" size="icon" className="text-gray-400">
+            <Settings size={22} />
+          </Button>
         </div>
-      )}
 
-      {/* Header Card */}
-      <div className="glass-panel rounded-3xl p-6 md:p-10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px] pointer-events-none" />
+        {/* Avatar with Neon Glow */}
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-purple-600 rounded-full blur opacity-40 group-hover:opacity-75 transition duration-1000"></div>
+          <div className="relative w-24 h-24 rounded-full border-4 border-background overflow-hidden bg-secondary">
+            <img 
+              src={user?.prefs?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=RaceX"} 
+              alt="Profile" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <button className="absolute bottom-0 right-0 bg-primary text-black p-1.5 rounded-full border-2 border-background shadow-lg active:scale-90 transition-transform">
+            <Edit2 size={12} fill="currentColor" />
+          </button>
+        </div>
+
+        <h2 className="mt-4 text-xl font-black tracking-tight">{user?.name || "Premium Creator"}</h2>
+        <p className="text-sm text-muted-foreground italic">@rx_{user?.$id?.slice(0, 5) || "nexus"}</p>
         
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10">
-          <div className="w-32 h-32 rounded-full border-4 border-primary p-1 shadow-[0_0_20px_rgba(0,212,255,0.4)]">
-            <div className="w-full h-full rounded-full overflow-hidden bg-black">
-              <img src={profile.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&fit=crop"} alt={profile.displayName} className="w-full h-full object-cover" />
-            </div>
-          </div>
-          
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-              <h1 className="text-3xl font-display font-black text-white">{profile.displayName}</h1>
-              {profile.isGodMode && (
-                <span className="bg-destructive text-white text-[10px] px-2 py-0.5 rounded font-bold tracking-widest">GOD</span>
-              )}
-            </div>
-            <p className="text-muted-foreground mb-4">@{profile.username}</p>
-            
-            <div className="flex flex-wrap justify-center md:justify-start gap-3 mb-6">
-              <div className="glass-panel-purple px-4 py-2 rounded-xl border-secondary/30 flex items-center gap-2">
-                <Shield className="w-4 h-4 text-secondary" />
-                <span className="text-sm font-bold">{profile.faction} Faction</span>
-              </div>
-              <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl flex items-center gap-2">
-                <Zap className="w-4 h-4 text-yellow-400" />
-                <span className="text-sm font-bold">Level {profile.level}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center md:justify-start gap-6">
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest">Diamonds</p>
-                <p className="text-2xl font-display font-bold text-glow">{profile.diamonds}</p>
-              </div>
-              <div className="w-px h-10 bg-white/10" />
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest">Gems</p>
-                <p className="text-2xl font-display font-bold text-secondary text-glow-purple">{profile.gems}</p>
-              </div>
-              <div className="w-px h-10 bg-white/10" />
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest">Reputation</p>
-                <p className="text-2xl font-display font-bold text-white">{profile.reputation}</p>
-              </div>
-            </div>
-          </div>
+        <div className="flex items-center gap-2 mt-3 bg-white/5 px-4 py-1.5 rounded-2xl border border-white/10">
+          <Zap className="w-4 h-4 text-primary fill-primary" />
+          <span className="font-bold text-sm">{diamonds} Diamonds</span>
         </div>
+      </header>
+
+      {/* --- Stats Row --- */}
+      <section className="flex justify-around py-4 border-y border-white/5">
+        {stats.map((stat, i) => (
+          <div key={i} className="text-center">
+            <p className="text-lg font-black">{stat.count}</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest">{stat.label}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* --- Action Buttons --- */}
+      <div className="flex gap-3 px-2">
+        <Button className="flex-1 rounded-xl font-bold h-12 bg-white text-black hover:bg-gray-200">
+          Edit Profile
+        </Button>
+        <Button variant="secondary" className="rounded-xl font-bold h-12 px-5 border border-white/10">
+          <Share2 size={18} />
+        </Button>
       </div>
 
-      {/* Badges & Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 glass-panel p-6 rounded-3xl">
-          <h3 className="font-bold text-lg mb-4 text-white">Earned Badges</h3>
-          <div className="flex flex-wrap gap-4">
-            {(profile.badges || ['Early Adopter', 'First Collab', '10k Club']).map((badge, i) => (
-              <div key={i} className="flex flex-col items-center justify-center w-24 h-24 bg-black/40 border border-white/10 rounded-2xl hover:border-primary/50 transition-colors cursor-pointer group">
-                <div className="text-2xl mb-2 group-hover:scale-125 transition-transform duration-300">
-                  {i === 0 ? '🚀' : i === 1 ? '🤝' : '🏆'}
-                </div>
-                <span className="text-[10px] font-bold text-center px-1 text-white/70">{badge}</span>
-              </div>
-            ))}
-          </div>
+      {/* --- Content Tabs --- */}
+      <div className="space-y-4">
+        <div className="flex border-b border-white/5">
+          <button 
+            onClick={() => setActiveTab('posts')}
+            className={`flex-1 pb-3 flex items-center justify-center gap-2 transition-all ${activeTab === 'posts' ? 'border-b-2 border-primary text-primary' : 'text-gray-500'}`}
+          >
+            <Grid size={18} /> <span className="text-xs font-bold uppercase">My Work</span>
+          </button>
+          <button 
+            onClick={() => setActiveTab('saved')}
+            className={`flex-1 pb-3 flex items-center justify-center gap-2 transition-all ${activeTab === 'saved' ? 'border-b-2 border-primary text-primary' : 'text-gray-500'}`}
+          >
+            <Bookmark size={18} /> <span className="text-xs font-bold uppercase">Saved</span>
+          </button>
         </div>
 
-        <div className="glass-panel p-6 rounded-3xl">
-          <h3 className="font-bold text-lg mb-4 text-white">Account Details</h3>
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs text-muted-foreground">Status</p>
-              <p className="text-sm font-bold text-green-400 capitalize mt-0.5">{profile.status}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Joined</p>
-              <p className="text-sm font-bold text-white mt-0.5">{profile.joinDate ? format(new Date(profile.joinDate), 'MMMM dd, yyyy') : 'Unknown'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Last Active</p>
-              <p className="text-sm font-bold text-white mt-0.5">{profile.lastActive ? format(new Date(profile.lastActive), 'MMM dd, HH:mm') : 'Now'}</p>
-            </div>
-          </div>
+        {/* --- Post Grid (Empty State / Mockup) --- */}
+        <div className="grid grid-cols-3 gap-1">
+          {[1, 2, 3, 4, 5, 6].map((item) => (
+            <motion.div 
+              key={item}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: item * 0.05 }}
+              className="aspect-square bg-secondary/30 rounded-sm relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Heart size={16} className="text-white fill-white" />
+              </div>
+              <div className="w-full h-full bg-gradient-to-br from-primary/10 to-purple-600/10" />
+            </motion.div>
+          ))}
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Profile;
