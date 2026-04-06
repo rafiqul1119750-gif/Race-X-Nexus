@@ -1,95 +1,119 @@
-import React, { useState } from 'react';
-import { Heart, MessageCircle, User, Play, Search, Settings, ChevronLeft, Mic, Image as ImageIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Sparkles, ShoppingBag, Globe, Wallet, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '@/context/AppContext';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import Badge from '@/components/ui/badge';
 
-// 1. 💬 CHAT SYSTEM (Messenger - Live Text/Voice/Media)
-export const ChatSystem = ({ onBack }: { onBack: () => void }) => {
-  const [view, setView] = useState<'list' | 'screen'>('list');
+const Home = () => {
+  const navigate = useNavigate();
+  const { user, diamonds } = useAppContext();
+
+  // Animations for a smooth mobile feel
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: { opacity: 1, scale: 1 }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black z-[60] flex flex-col">
-      <header className="p-4 border-b border-gray-800 flex items-center gap-4">
-        <button onClick={view === 'list' ? onBack : () => setView('list')}><ChevronLeft /></button>
-        <h2 className="font-bold text-xl">{view === 'list' ? 'Messenger' : 'User_Node'}</h2>
-      </header>
-      {view === 'list' ? (
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} onClick={() => setView('screen')} className="flex gap-3 items-center cursor-pointer">
-              <div className="w-12 h-12 rounded-full bg-blue-900 border border-blue-500"></div>
-              <div><p className="font-bold">User Node {i}</p><p className="text-xs text-gray-500">Sent a voice message</p></div>
-            </div>
-          ))}
+    <motion.div 
+      className="space-y-6 pb-10"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      {/* --- Top Banner (The Hub) --- */}
+      <section className="relative h-48 rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+        <img 
+          src="/assets/hub-top.png" 
+          alt="Race-X Hub" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5">
+          <h1 className="text-2xl font-bold text-white tracking-tight">Race-X Nexus</h1>
+          <p className="text-gray-300 text-sm">Next-Gen AI Creator Hub</p>
         </div>
-      ) : (
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-            <div className="bg-blue-600 self-end p-2 rounded-lg max-w-[70%] ml-auto text-sm">Bhai, ye logic live hai!</div>
-            <div className="bg-gray-800 self-start p-2 rounded-lg max-w-[70%] text-sm italic">Voice Message • 0:12</div>
+      </section>
+
+      {/* --- Quick Stats (Diamonds & Rank) --- */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="p-4 bg-secondary/50 border-primary/20 backdrop-blur-md flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground uppercase font-semibold">Diamonds</p>
+            <p className="text-xl font-black text-primary">{diamonds ?? 0}</p>
           </div>
-          <div className="p-4 border-t border-gray-800 flex gap-4 items-center bg-black">
-            <button className="text-blue-500"><ImageIcon size={24}/></button>
-            <input type="text" placeholder="Aa message..." className="flex-1 bg-gray-900 rounded-full px-4 py-2 outline-none text-sm" />
-            <button className="text-blue-500"><Mic size={24}/></button>
+          <div className="p-2 bg-primary/10 rounded-full">
+            <Zap className="w-5 h-5 text-primary fill-primary" />
           </div>
+        </Card>
+        <Card className="p-4 bg-secondary/50 border-white/5 backdrop-blur-md flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground uppercase font-semibold">Status</p>
+            <p className="text-lg font-bold">Creator</p>
+          </div>
+          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/50">Live</Badge>
+        </Card>
+      </div>
+
+      {/* --- Main Navigation Grid --- */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground pl-1">The Studio</h2>
+        <div className="grid grid-cols-3 gap-3">
+          <MenuButton 
+            icon={<Sparkles className="w-6 h-6 text-purple-400" />} 
+            label="Studio" 
+            onClick={() => navigate('/studio')} 
+          />
+          <MenuButton 
+            icon={<ShoppingBag className="w-6 h-6 text-orange-400" />} 
+            label="Market" 
+            onClick={() => navigate('/shop')} 
+          />
+          <MenuButton 
+            icon={<Globe className="w-6 h-6 text-blue-400" />} 
+            label="Social" 
+            onClick={() => navigate('/social')} 
+          />
         </div>
-      )}
-    </div>
+      </section>
+
+      {/* --- Featured Action Card --- */}
+      <Card className="p-6 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-white/10 relative overflow-hidden group">
+        <div className="relative z-10">
+          <h3 className="text-xl font-bold mb-2">Create Your Avatar</h3>
+          <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+            Generate 100% accurate AI models with just a prompt.
+          </p>
+          <Button 
+            onClick={() => navigate('/studio')}
+            className="w-full bg-white text-black hover:bg-gray-200 font-bold py-6 rounded-2xl shadow-xl transition-all active:scale-95"
+          >
+            Launch Rx-Studio
+          </Button>
+        </div>
+        <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+          <Sparkles className="w-32 h-32 text-white" />
+        </div>
+      </Card>
+    </motion.div>
   );
 };
 
-// 2. 🔍 EXPLORE PAGE (Trending & Grid Feed)
-export const ExplorePage = () => (
-  <div className="p-4 space-y-4 h-full overflow-y-auto">
-    <div className="flex items-center bg-gray-900 rounded-lg px-3 py-2 gap-2">
-      <Search size={18} className="text-gray-500" />
-      <input type="text" placeholder="Search Users, Videos, Hashtags..." className="bg-transparent outline-none text-sm w-full" />
-    </div>
-    <div className="grid grid-cols-3 gap-1">
-      {[...Array(12)].map((_, i) => (
-        <div key={i} className="aspect-[9/16] bg-gray-800 relative group cursor-pointer">
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/40"><Play size={20}/></div>
-          <img src={`https://picsum.photos/seed/${i+20}/200/300`} className="w-full h-full object-cover" />
-        </div>
-      ))}
-    </div>
-  </div>
+// Reusable Menu Component for clean code
+const MenuButton = ({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick: () => void }) => (
+  <button 
+    onClick={onClick}
+    className="flex flex-col items-center justify-center p-4 bg-secondary/30 rounded-3xl border border-white/5 active:bg-primary/20 transition-colors space-y-2 group"
+  >
+    <div className="group-active:scale-110 transition-transform">{icon}</div>
+    <span className="text-xs font-medium text-gray-300">{label}</span>
+  </button>
 );
 
-// 3. ❤️ ACTIVITY TAB (Likes/Follows/Mentions)
-export const ActivityPage = () => (
-  <div className="p-4 space-y-6 h-full overflow-y-auto">
-    <h2 className="font-black text-2xl">Notifications</h2>
-    {['Liked your reel', 'Started following you', 'Commented: "Masterpiece!"'].map((text, i) => (
-      <div key={i} className="flex items-center justify-between border-b border-gray-900 pb-4">
-        <div className="flex gap-3 items-center">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-500 to-pink-500"></div>
-          <p className="text-sm"><span className="font-bold">User_{i+1}</span> {text}</p>
-        </div>
-        <div className="w-10 h-12 bg-gray-800 rounded overflow-hidden"><img src={`https://picsum.photos/seed/${i+40}/50/50`} /></div>
-      </div>
-    ))}
-  </div>
-);
-
-// 4. 👤 PROFILE TAB (Header, Tabs, Settings)
-export const ProfileTab = () => (
-  <div className="flex-1 overflow-y-auto bg-black">
-    <div className="p-6 space-y-4">
-      <div className="flex justify-between items-start">
-        <div className="w-20 h-20 rounded-full border-2 border-blue-500 p-1"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" className="rounded-full" /></div>
-        <div className="flex gap-6 text-center mt-4">
-          <div><p className="font-bold">128</p><p className="text-[10px] text-gray-500">Reels</p></div>
-          <div><p className="font-bold">1.2M</p><p className="text-[10px] text-gray-500">Followers</p></div>
-        </div>
-        <button className="mt-4"><Settings size={24} /></button>
-      </div>
-      <div><p className="font-bold">Omniverse God</p><p className="text-xs text-gray-400">Race-X Official Admin Node</p></div>
-      <button className="w-full bg-gray-900 border border-gray-700 py-2 rounded font-bold text-sm">Edit Profile</button>
-    </div>
-    <div className="grid grid-cols-3 border-t border-gray-800 text-center py-2">
-      <div className="border-b-2 border-blue-500 pb-2">🧱</div><div>🎬</div><div>🔖</div>
-    </div>
-    <div className="grid grid-cols-3 gap-0.5 mt-0.5">
-      {[...Array(9)].map((_, i) => <div key={i} className="aspect-square bg-gray-900"></div>)}
-    </div>
-  </div>
-);
+export default Home;
