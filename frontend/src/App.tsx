@@ -3,7 +3,7 @@ import { AppProvider } from './context/AppContext';
 import Header from './components/layout/Header';
 import BottomNavbar from './components/layout/BottomNavbar';
 
-// Pages - EXACT match from your screenshot
+import RXMainHub from "@/pages/hub";
 import Home from './pages/home';
 import Auth from './pages/auth';
 import Social from './pages/social';
