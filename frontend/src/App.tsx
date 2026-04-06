@@ -1,22 +1,22 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 
-// Layout Components - Fixed paths for GitHub structure
-import Header from './components/layout/Header';
-import BottomNavbar from './components/layout/BottomNavbar';
+// Layout Components
+import Header from './components/layout/Header.tsx';
+import BottomNavbar from './components/layout/BottomNavbar.tsx';
 
-// Pages - Case Sensitive Names (Matching your screenshot)
-import Home from './pages/Home';
-import Auth from './pages/Auth';
-import Social from './pages/Social';
-import Studio from './pages/Studio';
-import Chat from './pages/Chat';
-import Music from './pages/Music';
-import Leaderboard from './pages/Leaderboard';
-import Event from './pages/Event';
-import Admin from './pages/Admin';
-import Profile from './pages/Profile';
-import NotFound from './pages/not-found';
+// Pages - Case Sensitive Imports with extensions
+import Home from './pages/Home.tsx';
+import Auth from './pages/Auth.tsx';
+import Social from './pages/Social.tsx';
+import Studio from './pages/Studio.tsx';
+import Chat from './pages/Chat.tsx';
+import Music from './pages/Music.tsx';
+import Leaderboard from './pages/Leaderboard.tsx';
+import Event from './pages/Event.tsx';
+import Admin from './pages/Admin.tsx';
+import Profile from './pages/Profile.tsx';
+import NotFound from './pages/not-found.tsx';
 
 function App() {
   return (
