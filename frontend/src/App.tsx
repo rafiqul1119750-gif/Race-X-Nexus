@@ -1,22 +1,23 @@
-Components { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 
 // Layout Components
-import Header from './components/layout/Header.tsx';
-import BottomNavbar from './components/layout/BottomNavbar.tsx';
+import Header from './components/layout/Header';
+import BottomNavbar from './components/layout/BottomNavbar';
 
-// Pages - Case Sensitive Imports with extensions
-import Home from './pages/home.tsx';
-import Auth from './pages/auth.tsx';
-import Social from './pages/social.tsx';
-import Studio from './pages/studio.tsx';
-import Chat from './pages/chat.tsx';
-import Music from './pages/music.tsx';
-import Leaderboard from './pages/leaderboard.tsx';
-import Event from './pages/event.tsx';
-import Admin from './pages/admin.tsx';
-import Profile from './pages/profile.tsx';
-import NotFound from './pages/not-found.tsx';
+// Pages - Case Sensitive Fix
+// Agar build fail ho, toh check karein ki GitHub par 'home' small hai ya 'Home' capital
+import Home from './pages/home'; 
+import Auth from './pages/auth';
+import Social from './pages/social';
+import Studio from './pages/studio';
+import Chat from './pages/chat';
+import Music from './pages/music';
+import Leaderboard from './pages/leaderboard';
+import Event from './pages/event';
+import Admin from './pages/admin';
+import Profile from './pages/profile';
+import NotFound from './pages/not-found';
 
 function App() {
   return (
