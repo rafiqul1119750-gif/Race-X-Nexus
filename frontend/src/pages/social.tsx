@@ -1,24 +1,60 @@
-const reels = [
-  { id: 1, user: "Deepak_AI", likes: "12k", title: "Testing RX Studio Glow" },
-  { id: 2, user: "Rohan_Nexus", likes: "5k", title: "New AI Voice is fire!" }
-];
+import React, { useState, useEffect, useRef } from 'react';
+import AdOverlay from '../components/AdOverlay'; // Hum Ad component yahan import karenge
 
-export default function Social() {
+const Social = () => {
+  const [reels, setReels] = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [showAd, setShowAd] = useState(false);
+  const [adCount, setAdCount] = useState(0);
+
+  // Har 5 Reels ke baad Ad dikhane ka logic
+  useEffect(() => {
+    if (currentIdx > 0 && currentIdx % 5 === 0) {
+      setShowAd(true);
+      setAdCount(prev => prev + 1);
+    }
+  }, [currentIdx]);
+
+  const handleSkipAd = () => {
+    setShowAd(false);
+    // Logic: Skip kiya toh Gems nahi milenge
+    console.log("Ad Skipped: No Gems Rewarded");
+  };
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold italic text-pink-500">RX SOCIAL FEED</h1>
-      {reels.map(reel => (
-        <div key={reel.id} className="relative aspect-[9/16] w-full glass-card overflow-hidden rounded-3xl mb-6">
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
-          <div className="absolute bottom-6 left-6 z-20">
-            <p className="font-bold text-white">@{reel.user}</p>
-            <p className="text-sm text-zinc-300">{reel.title}</p>
-            <div className="flex gap-4 mt-3 text-xs text-pink-500 font-bold">
-              <span>❤️ {reel.likes}</span> <span>💬 450</span>
+    <div className="social-container">
+      {/* 🎬 Vertical Reel Scroll */}
+      <div className="snap-container">
+        {reels.map((reel, index) => (
+          <div key={index} className="reel-card">
+            <video src={reel.url} loop autoPlay muted />
+            
+            {/* Neon Sidebar Icons */}
+            <div className="neon-sidebar">
+              <div className="icon-glow">❤️ {reel.likes}</div>
+              <div className="icon-glow">💬 {reel.comments}</div>
+              <div className="icon-glow">💎 Send Gem</div>
+            </div>
+
+            {/* Content Info */}
+            <div className="reel-info">
+              <h3>@{reel.username}</h3>
+              <p>{reel.description}</p>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+
+      {/* 📺 The Direct Ad Overlay (Skippable) */}
+      {showAd && (
+        <AdOverlay 
+          onSkip={handleSkipAd} 
+          isSkippable={true}
+          rewardText="Watch full to earn 1 Gem 💎"
+        />
+      )}
     </div>
   );
-}
+};
+
+export default Social;
