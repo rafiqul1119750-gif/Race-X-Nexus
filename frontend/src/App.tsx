@@ -1,23 +1,24 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 
-// Layout Components
+// Layout Components (Matching your layout folder)
 import Header from './components/layout/Header';
 import BottomNavbar from './components/layout/BottomNavbar';
 
-// Pages - Case Sensitive Fix
-// Agar build fail ho, toh check karein ki GitHub par 'home' small hai ya 'Home' capital
-import Home from './pages/home'; 
+// Pages - EXACT MATCH from your latest screenshot (All Small Letters)
+import Home from './pages/home';
 import Auth from './pages/auth';
 import Social from './pages/social';
 import Studio from './pages/studio';
 import Chat from './pages/chat';
 import Music from './pages/music';
 import Leaderboard from './pages/leaderboard';
-import Event from './pages/event';
+import Events from './pages/events'; // 'event' ko 'events' kiya aur small 'e'
 import Admin from './pages/admin';
 import Profile from './pages/profile';
 import NotFound from './pages/not-found';
+import Shop from './pages/shop';
+import Wallet from './pages/wallet';
 
 function App() {
   return (
@@ -33,10 +34,12 @@ function App() {
               <Route path="/chat" element={<Chat />} />
               <Route path="/music" element={<Music />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
-              <Route path="/events" element={<Event />} />
+              <Route path="/events" element={<Events />} />
               <Route path="/studio" element={<Studio />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/admin-control" element={<Admin />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/wallet" element={<Wallet />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
