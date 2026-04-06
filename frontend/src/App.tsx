@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+Components { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 
 // Layout Components
@@ -6,7 +6,7 @@ import Header from './components/layout/Header.tsx';
 import BottomNavbar from './components/layout/BottomNavbar.tsx';
 
 // Pages - Case Sensitive Imports with extensions
-import Home from './pages/Home.tsx';
+import Home from './pages/home.tsx';
 import Auth from './pages/Auth.tsx';
 import Social from './pages/Social.tsx';
 import Studio from './pages/Studio.tsx';
