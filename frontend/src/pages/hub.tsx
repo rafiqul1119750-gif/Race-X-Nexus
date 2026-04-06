@@ -15,13 +15,12 @@ import {
 } from 'lucide-react';
 import { Card } from '../components/ui/card';
 
-// screenshots ke colors
 const colors = {
   studio: '#00e1ff',
   magic: '#00e1ff',
   social: '#ab47bc',
-  media: 'linear-gradient(to right, #00e1ff, #ab47bc)',
-  shop: '#ffa726' // Yellow for Shop
+  media: 'linear-gradient(90deg, #00e1ff 0%, #ab47bc 100%)',
+  shop: '#f59e0b' // RX Shop ke liye Bright Orange/Yellow
 };
 
 const moduleCards = [
@@ -36,26 +35,29 @@ const moduleCards = [
     path: '/media',
     desc: '(MILLIONS OF INDIAN SONGS & VOICES)' 
   },
-  { id: 'shop', name: 'RX SHOP', icon: ShoppingBag, color: colors.shop, path: '/shop' } // ADDED
+  { id: 'shop', name: 'RX SHOP', icon: ShoppingBag, color: colors.shop, path: '/shop' }
 ];
 
 const RXMainHub = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#000000] text-white p-5 pb-28 relative">
-      {/* Background logo */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-20 w-[60%]">
-          <img src="/rx-logo.png" alt="RX Logo Background" className="w-full h-auto" /> {/* Path adjustment */}
+    <div className="min-h-screen bg-black text-white p-5 pb-32 relative overflow-x-hidden">
+      
+      {/* 🖼️ Background Logo (From Public Folder) */}
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.07] w-[120%] pointer-events-none">
+          <img src="/logo.png" alt="RX Background" className="w-full h-auto object-contain" />
       </div>
       
-      {/* Header (Screenshot se basic copy) */}
+      {/* Header Section */}
       <header className="flex items-center justify-between mb-8 relative z-10">
         <div className="flex items-center gap-3">
-          <img src="/creator-avatar.png" alt="Creator Avatar" className="w-10 h-10 rounded-full border border-blue-500 shadow-blue" />
+          <div className="w-12 h-12 rounded-full border-2 border-cyan-400 p-0.5 shadow-[0_0_15px_rgba(0,225,255,0.4)]">
+            <img src="/avatar.png" alt="Creator" className="w-full h-full rounded-full object-cover" />
+          </div>
           <div className="flex flex-col">
-            <h1 className="text-xl font-bold tracking-tight text-blue-400">Creator</h1>
-            <div className="flex items-center gap-2 text-xs text-zinc-400 mt-0.5">
+            <h1 className="text-xl font-black tracking-tighter text-cyan-400 italic">CREATOR</h1>
+            <div className="flex items-center gap-3 text-[10px] font-bold text-zinc-500 tracking-widest uppercase">
               <span>0 Diamonds</span>
               <span>0 Gems</span>
             </div>
@@ -63,69 +65,68 @@ const RXMainHub = () => {
         </div>
       </header>
 
-      {/* Main Hero Card (RACE-X: THE FUTURE...) */}
-      <Card className="bg-gradient-to-br from-[#1a1a1a] via-[#1a1a1a] to-[#2d1b40] border-zinc-800/80 p-8 rounded-2xl mb-6 relative z-10">
-        <div className="absolute top-1 right-1 opacity-20">
-          <img src="/rx-logo.png" alt="RX Logo Overlay" className="w-8 h-8" /> {/* Path adjustment */}
+      {/* Main Banner Card */}
+      <Card className="bg-[#111] border-zinc-800/50 p-8 rounded-3xl mb-8 relative z-10 overflow-hidden">
+        <div className="absolute -top-4 -right-4 w-24 h-24 opacity-10">
+           <img src="/logo.png" alt="RX Icon" className="w-full h-full" />
         </div>
-        <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white leading-tight mb-6 w-[80%]">
-          RACE-X: THE FUTURE<br />OF CREATION
+        <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white leading-[0.9] mb-8">
+          RACE-X:<br />THE FUTURE<br />OF CREATION
         </h2>
-        <button className="bg-white text-black font-bold text-xs uppercase px-5 py-2.5 rounded-full hover:bg-zinc-200 active:scale-95 transition-all">
+        <button className="bg-white text-black font-black text-[10px] uppercase px-8 py-3 rounded-full hover:scale-105 active:scale-95 transition-all tracking-widest">
           + New Project
         </button>
       </Card>
 
-      {/* Grid Modules */}
-      <div className="grid grid-cols-1 gap-4 relative z-10 mb-6">
+      {/* Grid: Studio, Magic, Social */}
+      <div className="flex flex-col gap-4 relative z-10 mb-4">
         {moduleCards.slice(0, 3).map((mod) => (
           <Card 
             key={mod.id}
             onClick={() => navigate(mod.path)}
-            style={{ backgroundColor: mod.color, boxShadow: `0 0 15px 0 ${mod.color}50` }} // Basic shadow
-            className="flex items-center justify-between px-6 py-5 rounded-xl cursor-pointer hover:brightness-110 active:scale-98 transition-all duration-300 h-20 border-none"
+            style={{ backgroundColor: mod.color }}
+            className="flex items-center justify-between px-6 py-4 rounded-2xl cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all h-[75px] border-none shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
           >
             <h3 className="font-black text-2xl tracking-tighter uppercase italic text-black">
               {mod.name}
-            </h3 >
-            <mod.icon className="w-7 h-7 text-black" />
+            </h3>
+            <mod.icon className="w-8 h-8 text-black stroke-[2.5]" />
           </Card>
         ))}
       </div>
 
-      {/* Media Library - Row card with description */}
+      {/* Media Library Card */}
       <Card 
-        key={moduleCards[3].id}
-        onClick={() => navigate(moduleCards[3].path)}
-        style={{ background: colors.media, boxShadow: '0 0 15px 0 #00e1ff40, 0 0 15px 0 #ab47bc40' }} // Mixed shadow
-        className="flex items-center justify-between px-6 py-4 rounded-xl cursor-pointer hover:brightness-110 active:scale-98 transition-all duration-300 h-24 mb-4 border-none relative z-10"
+        onClick={() => navigate('/media')}
+        style={{ background: colors.media }}
+        className="flex items-center justify-between px-6 py-4 rounded-2xl cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all h-24 mb-4 border-none relative z-10"
       >
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col">
             <h3 className="font-black text-2xl tracking-tighter uppercase italic text-black">
-                {moduleCards[3].name}
-            </h3 >
-            {moduleCards[3].desc && <p className="text-[10px] text-zinc-900 uppercase font-medium">{moduleCards[3].desc}</p>}
+                RX MEDIA LIBRARY
+            </h3>
+            <p className="text-[9px] text-black/80 font-bold uppercase tracking-tight">
+                (MILLIONS OF INDIAN SONGS & VOICES)
+            </p>
         </div>
-        <moduleCards[3].icon className="w-8 h-8 text-black" />
+        <BookOpenText className="w-9 h-9 text-black stroke-[2.5]" />
       </Card>
       
-      {/* ADDED: RX Shop Card */}
+      {/* RX Shop Card */}
       <Card 
-        key={moduleCards[4].id}
-        onClick={() => navigate(moduleCards[4].path)}
-        style={{ backgroundColor: colors.shop, boxShadow: `0 0 15px 0 ${colors.shop}50` }}
-        className="flex items-center justify-between px-6 py-5 rounded-xl cursor-pointer hover:brightness-110 active:scale-98 transition-all duration-300 h-20 border-none relative z-10"
+        onClick={() => navigate('/shop')}
+        style={{ backgroundColor: colors.shop }}
+        className="flex items-center justify-between px-6 py-4 rounded-2xl cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all h-[75px] border-none relative z-10 shadow-[0_4px_20px_rgba(245,158,11,0.3)]"
       >
         <h3 className="font-black text-2xl tracking-tighter uppercase italic text-black">
-          {moduleCards[4].name}
-        </h3 >
-        <moduleCards[4].icon className="w-7 h-7 text-black" />
+          RX SHOP
+        </h3>
+        <ShoppingBag className="w-8 h-8 text-black stroke-[2.5]" />
       </Card>
 
-
-      {/* Bottom Navigation (Screenshot layout) */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#000000]/80 backdrop-blur-md border-t border-zinc-900 p-4 z-20">
-        <div className="flex items-center justify-around gap-2 max-w-sm mx-auto">
+      {/* Bottom Dock Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-xl border-t border-zinc-900 p-4 z-50">
+        <div className="flex items-center justify-between max-w-md mx-auto">
           {[
             { name: 'Hub', icon: Home, path: '/', active: true },
             { name: 'Studio', icon: Video, path: '/studio' },
@@ -137,10 +138,10 @@ const RXMainHub = () => {
             <button 
                 key={item.name} 
                 onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center gap-1.5 flex-1 ${item.active ? 'text-blue-400' : 'text-zinc-500'}`}
+                className={`flex flex-col items-center gap-1 flex-1 transition-colors ${item.active ? 'text-cyan-400' : 'text-zinc-600 hover:text-zinc-400'}`}
             >
-              <item.icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium uppercase tracking-tighter">{item.name}</span>
+              <item.icon className={`w-5 h-5 ${item.active ? 'drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : ''}`} />
+              <span className="text-[8px] font-black uppercase tracking-tighter">{item.name}</span>
             </button>
           ))}
         </div>
