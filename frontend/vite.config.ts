@@ -1,24 +1,22 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      // Seedha src folder ko target karein
-      "@": "/opt/render/project/src/frontend/src",
+      "@": path.resolve(__dirname, "./src"),
+      // Ye line @workspace wale error ko fix karegi:
+      "@workspace/api-client-react": path.resolve(__dirname, "../src/lib/api-client-react"),
+      "@tanstack/react-query": path.resolve(__dirname, "node_modules/@tanstack/react-query"),
     },
   },
   build: {
     outDir: "dist",
     emptyOutDir: true,
     rollupOptions: {
-      // Agar koi module nahi mil raha, toh use external maanke skip na karein, use dhoondhein
       external: [],
     },
-  },
-  // Force pre-bundling of problematic dependencies
-  optimizeDeps: {
-    include: ["@tanstack/react-query", "react-query"],
   },
 });
