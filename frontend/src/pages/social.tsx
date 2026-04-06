@@ -9,7 +9,7 @@ import { databases, storage } from '@/lib/appwrite';
 import { ID, Query } from 'appwrite';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useToaster } from '@/components/ui/use-toast';
+import { useToaster } from "../hooks/use-toast";
 
 const Social = () => {
   const { user, setDiamonds, refreshUserData } = useAppContext();
