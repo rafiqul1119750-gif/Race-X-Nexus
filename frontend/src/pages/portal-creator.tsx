@@ -1,197 +1,105 @@
-import { useState } from "react";
-import { Link } from "wouter";
-import { motion } from "framer-motion";
-import {
-  MonitorPlay, Users, BarChart2, Share2, Link2,
-  Star, Zap, ArrowRight, Copy, Check
-} from "lucide-react";
-import { useGetUserProfile, useGetSocialFeed } from "@workspace/api-client-react";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Plus, LayoutGrid, BarChart2, DollarSign, 
+  Settings2, Wand2, ArrowUpRight, Share2 
+} from 'lucide-react';
+import { useAppContext } from '@/context/AppContext';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import Badge from '@/components/ui/badge';
 
-function generateSmartLink(path: string) {
-  const ua = navigator.userAgent;
-  const base = window.location.origin;
-  if (/android/i.test(ua)) return `intent://${window.location.host}${path}#Intent;scheme=https;end`;
-  if (/iphone|ipad/i.test(ua)) return `${base}${path}?src=ios`;
-  return `${base}${path}?src=web`;
-}
-
-const MOCK_ANALYTICS = [
-  { label: "Total Views", value: "284K", change: "+12%", up: true },
-  { label: "Followers", value: "18.4K", change: "+8%", up: true },
-  { label: "Engagement", value: "6.7%", change: "+2.1%", up: true },
-  { label: "Revenue 💎", value: "45.2K", change: "-3%", up: false },
-];
-
-export default function CreatorPortal() {
-  const { data: profile } = useGetUserProfile();
-  const { data: feedData } = useGetSocialFeed();
-  const { toast } = useToast();
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyLink = () => {
-    const link = generateSmartLink("/portal/creator");
-    navigator.clipboard.writeText(link).catch(() => {});
-    setCopied(true);
-    toast({ title: "🔗 Smart Link Copied!", description: "Detected: " + (/android/i.test(navigator.userAgent) ? "Android" : /iphone|ipad/i.test(navigator.userAgent) ? "iOS" : "Web") });
-    setTimeout(() => setCopied(false), 2000);
-  };
+const CreatorPortal = () => {
+  const { diamonds } = useAppContext();
+  const [activeTab, setActiveTab] = useState('uploads');
 
   return (
-    <div className="px-4 py-6 max-w-7xl mx-auto">
-
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-panel p-6 rounded-3xl mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-primary/30 shadow-[0_0_30px_rgba(0,247,255,0.08)]"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full border-2 border-primary p-0.5 shadow-[0_0_15px_rgba(0,247,255,0.3)]">
-            <div className="w-full h-full rounded-full bg-muted overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop" alt="Avatar" className="w-full h-full object-cover" />
-            </div>
+    <div className="space-y-8 pb-32">
+      {/* --- Creator Hero Section --- */}
+      <section className="bg-gradient-to-tr from-primary/30 via-secondary/20 to-black p-6 rounded-[3rem] border border-white/10 relative overflow-hidden">
+        <div className="relative z-10">
+          <div className="flex justify-between items-start">
+            <Badge className="bg-primary text-black font-black">CREATOR PRO</Badge>
+            <Settings2 className="text-gray-500" size={20} />
           </div>
+          <h2 className="text-3xl font-black mt-4 leading-tight tracking-tighter">
+            Design Your <br/> Legacy.
+          </h2>
+          <div className="flex gap-4 mt-6">
+            <Button className="bg-white text-black font-bold rounded-2xl px-6 h-12 shadow-xl hover:bg-primary transition-all">
+              <Plus className="mr-1 w-5 h-5" /> New Project
+            </Button>
+          </div>
+        </div>
+        <Wand2 className="absolute -right-6 -bottom-6 w-40 h-40 text-primary/10 -rotate-12" />
+      </section>
+
+      {/* --- Performance Overview --- */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="p-5 bg-secondary/10 border-white/5 flex flex-col justify-between h-32">
+          <div className="p-2 bg-blue-500/10 rounded-xl w-fit"><BarChart2 className="text-blue-400 w-5 h-5" /></div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-display font-bold text-glow">{profile?.displayName || "Creator"}</h1>
-              <span className="text-[10px] px-2 py-0.5 bg-primary/20 text-primary border border-primary/40 rounded font-bold">CREATOR</span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-0.5">@{profile?.username} · {profile?.faction || "No Faction"} · Lvl {profile?.level}</p>
+            <p className="text-2xl font-black">4.8k</p>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Total Reach</p>
           </div>
-        </div>
-
-        <div className="flex gap-3 flex-wrap">
-          <button
-            onClick={handleCopyLink}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground font-bold rounded-xl shadow-[0_0_15px_rgba(0,247,255,0.3)] hover:shadow-[0_0_25px_rgba(0,247,255,0.5)] transition-all btn-ripple text-sm"
-          >
-            {copied ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
-            {copied ? "Copied!" : "Share Profile"}
-          </button>
-          <Link href="/studio">
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 font-bold rounded-xl hover:bg-white/10 transition-all btn-ripple text-sm">
-              <MonitorPlay className="w-4 h-4 text-primary" /> Studio
-            </button>
-          </Link>
-        </div>
-      </motion.div>
-
-      {/* Analytics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {MOCK_ANALYTICS.map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
-            className="glass-panel p-4 rounded-2xl"
-          >
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">{stat.label}</p>
-            <p className="text-2xl font-display font-bold text-white mt-1">{stat.value}</p>
-            <p className={`text-xs mt-1 font-bold ${stat.up ? "text-green-400" : "text-destructive"}`}>
-              {stat.change} this week
-            </p>
-          </motion.div>
-        ))}
+        </Card>
+        <Card className="p-5 bg-secondary/10 border-white/5 flex flex-col justify-between h-32">
+          <div className="p-2 bg-emerald-500/10 rounded-xl w-fit"><DollarSign className="text-emerald-400 w-5 h-5" /></div>
+          <div>
+            <p className="text-2xl font-black">₹2,450</p>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Est. Revenue</p>
+          </div>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Studio Quick Access */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="glass-panel p-6 rounded-3xl">
-            <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
-              <MonitorPlay className="w-5 h-5 text-primary" /> Studio Quick Access
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-              {[
-                { label: "New Video", desc: "Start from scratch", href: "/studio/editor", icon: "🎬" },
-                { label: "Templates", desc: "5 ready to use", href: "/studio", icon: "📐" },
-                { label: "Collab", desc: "1 invite pending", href: "/studio", icon: "👥" },
-              ].map(item => (
-                <Link key={item.label} href={item.href}>
-                  <div className="p-4 rounded-xl border border-white/10 hover:border-primary/50 bg-black/30 cursor-pointer group transition-all">
-                    <div className="text-2xl mb-2">{item.icon}</div>
-                    <p className="font-bold text-sm text-white group-hover:text-primary transition-colors">{item.label}</p>
-                    <p className="text-xs text-muted-foreground">{item.desc}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            <Link href="/studio/editor">
-              <button className="w-full py-3 bg-primary/20 text-primary border border-primary/40 rounded-xl font-bold hover:bg-primary/30 transition-all btn-ripple flex items-center justify-center gap-2">
-                <Zap className="w-4 h-4" /> Open Full Studio <ArrowRight className="w-4 h-4 ml-auto" />
-              </button>
-            </Link>
-          </div>
-
-          {/* Social Engagement */}
-          <div className="glass-panel p-6 rounded-3xl">
-            <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
-              <Users className="w-5 h-5 text-secondary" /> Social Engagement
-            </h2>
-            <div className="space-y-3">
-              {(feedData?.posts || []).slice(0, 3).map(post => (
-                <div key={post.id} className="flex items-center gap-3 p-3 bg-black/30 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-white/80 truncate">{post.content.slice(0, 60)}...</p>
-                    <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
-                      <span>❤️ {post.likes}</span>
-                      <span>💬 {post.comments}</span>
-                    </div>
-                  </div>
-                  <Link href="/social">
-                    <ArrowRight className="w-4 h-4 text-muted-foreground hover:text-primary transition-colors cursor-pointer" />
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <Link href="/social">
-              <button className="w-full mt-4 py-2 text-secondary text-sm font-bold hover:underline flex items-center justify-center gap-1">
-                View Full Feed <ArrowRight className="w-4 h-4" />
-              </button>
-            </Link>
-          </div>
+      {/* --- Project Manager Tabs --- */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <LayoutGrid size={14} /> My Projects
+          </h3>
+          <button className="text-xs text-primary font-bold">Filter</button>
         </div>
 
-        {/* Right Panel */}
-        <div className="space-y-6">
-          {/* Achievements */}
-          <div className="glass-panel-purple p-5 rounded-3xl">
-            <h3 className="font-display font-bold text-secondary mb-4 flex items-center gap-2">
-              <Star className="w-5 h-5" /> Badges & Rank
-            </h3>
-            <div className="text-center mb-4">
-              <div className="text-5xl mb-2">🏆</div>
-              <p className="font-display font-bold text-white">Diamond Tier</p>
-              <p className="text-xs text-muted-foreground">Top 3% of creators</p>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {(profile?.badges || ["Founder", "Top Creator", "PvP Champ"]).slice(0, 6).map((b, i) => (
-                <div key={i} className="bg-secondary/10 border border-secondary/20 rounded-lg p-2 text-center">
-                  <p className="text-[9px] text-secondary font-bold leading-tight">{b}</p>
+        <div className="grid grid-cols-1 gap-3">
+          {[1, 2].map((i) => (
+            <motion.div 
+              key={i}
+              whileTap={{ scale: 0.98 }}
+              className="group"
+            >
+              <Card className="p-4 bg-secondary/20 border-white/5 flex items-center gap-4 hover:border-primary/40 transition-all">
+                <div className="w-16 h-16 bg-black rounded-2xl border border-white/10 overflow-hidden relative">
+                   <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent" />
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Share Panel */}
-          <div className="glass-panel p-5 rounded-3xl border-primary/30">
-            <h3 className="font-display font-bold text-primary mb-3 flex items-center gap-2">
-              <Share2 className="w-5 h-5" /> Smart Share
-            </h3>
-            <p className="text-xs text-muted-foreground mb-3">Generates device-aware links. Auto-detects Android / iOS / Web.</p>
-            <div className="bg-black/40 rounded-lg px-3 py-2 text-[10px] font-mono text-muted-foreground mb-3 break-all">
-              {generateSmartLink("/portal/creator")}
-            </div>
-            <button onClick={handleCopyLink} className="w-full py-2 bg-primary text-primary-foreground font-bold text-sm rounded-xl btn-ripple flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,247,255,0.3)]">
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              {copied ? "Copied!" : "Copy Link"}
-            </button>
-          </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold">AI Cyberpunk Model_{i}</h4>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-[9px] text-gray-500 flex items-center gap-1"><ArrowUpRight size={10} /> 1.2k Views</span>
+                    <span className="text-[9px] text-primary flex items-center gap-1 font-bold"><Zap size={10} fill="currentColor" /> 120 Gained</span>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" className="text-gray-500 group-hover:text-primary transition-colors">
+                  <Share2 size={18} />
+                </Button>
+              </Card>
+            </motion.div>
+          ))}
         </div>
       </div>
+
+      {/* --- Promotion Card --- */}
+      <Card className="p-6 bg-gradient-to-r from-purple-900/40 to-indigo-900/40 border-white/10 rounded-[2.5rem] border-dashed border-2">
+        <div className="text-center space-y-2">
+          <h4 className="font-black text-lg text-purple-300 tracking-tight">Boost Your Reach</h4>
+          <p className="text-[10px] text-gray-400 leading-relaxed font-medium">Get featured on the Race-X Home Screen for 50 Diamonds.</p>
+          <Button className="mt-4 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold px-8 h-10 shadow-lg shadow-purple-900/50">
+            Promote Now
+          </Button>
+        </div>
+      </Card>
     </div>
   );
-}
+};
+
+export default CreatorPortal;
