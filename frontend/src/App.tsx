@@ -1,21 +1,21 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 
-// Layout Components (Exact names from your GitHub)
+// Layout Components - Fixed paths for GitHub structure
 import Header from './components/layout/Header';
-import BottomNavbar from './components/layout/BottomNavbar'; // Fixed Name
+import BottomNavbar from './components/layout/BottomNavbar';
 
-// Pages
-import Home from './pages/home';
-import Auth from './pages/auth';
-import Social from './pages/social';
-import Studio from './pages/studio';
-import Chat from './pages/chat';
-import Music from './pages/music';
-import Leaderboard from './pages/leaderboard';
-import Event from './pages/event';
-import Admin from './pages/admin';
-import Profile from './pages/profile';
+// Pages - Case Sensitive Names (Matching your screenshot)
+import Home from './pages/Home';
+import Auth from './pages/Auth';
+import Social from './pages/Social';
+import Studio from './pages/Studio';
+import Chat from './pages/Chat';
+import Music from './pages/Music';
+import Leaderboard from './pages/Leaderboard';
+import Event from './pages/Event';
+import Admin from './pages/Admin';
+import Profile from './pages/Profile';
 import NotFound from './pages/not-found';
 
 function App() {
@@ -23,9 +23,7 @@ function App() {
     <AppProvider>
       <Router>
         <div className="min-h-screen bg-black text-white font-sans">
-          {/* Header at the top */}
           <Header />
-          
           <main className="container max-w-md mx-auto pt-20 pb-28 px-4">
             <Routes>
               <Route path="/" element={<Home />} />
@@ -41,8 +39,6 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
-
-          {/* Bottom Navbar at the bottom */}
           <BottomNavbar />
         </div>
       </Router>
