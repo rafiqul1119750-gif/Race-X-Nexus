@@ -1,23 +1,30 @@
-const products = [
-  { id: 1, name: "Gold Creator Pack", price: "₹499", icon: "👑" },
-  { id: 2, name: "1000 RX Diamonds", price: "₹199", icon: "💎" },
-  { id: 3, name: "Premium Voice Pack", price: "₹99", icon: "🎙️" }
-];
+import React from 'react';
 
-export default function Shop() {
+const Shop = () => {
+  const handleRedeem = (diamondCost: number, company: string) => {
+    const confirm = window.confirm(`Kya aap ${diamondCost} Diamonds kharch karke ${company} Gift Code lena chahte hain?`);
+    
+    if (confirm) {
+      // Biometric Check Trigger (Using Web Auth API or Mock)
+      console.log("Biometric Verified...");
+      // Backend call to: 
+      // 1. Deduct diamonds (1 Diamond = 1 Paisa)
+      // 2. Trigger automatic email to user's registered ID
+      alert(`Success! ${company} code aapke email par bhej diya gaya hai.`);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold italic text-yellow-500">RX PREMIUM SHOP</h1>
-      <div className="grid grid-cols-2 gap-4">
-        {products.map(p => (
-          <div key={p.id} className="bg-[#111] p-4 rounded-2xl border border-yellow-500/20 flex flex-col items-center text-center">
-            <span className="text-4xl mb-2">{p.icon}</span>
-            <h3 className="font-bold text-sm mb-1">{p.name}</h3>
-            <p className="text-yellow-500 font-black mb-3">{p.price}</p>
-            <button className="w-full bg-yellow-500 text-black py-2 rounded-xl text-[10px] font-bold uppercase">Buy Now</button>
-          </div>
-        ))}
+    <div className="shop-page">
+      <h2 className="neon-text">Race-X Shop</h2>
+      {/* Product List */}
+      <div className="product-card">
+        <img src="amazon-voucher.png" alt="Amazon" />
+        <p>Rate: ₹500 (50,000 Diamonds)</p>
+        <button onClick={() => handleRedeem(50000, 'Amazon')}>Redeem Now</button>
       </div>
     </div>
   );
-}
+};
+
+export default Shop;
