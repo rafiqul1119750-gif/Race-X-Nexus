@@ -7,15 +7,15 @@ import BottomNavbar from './components/layout/BottomNavbar.tsx';
 
 // Pages - Case Sensitive Imports with extensions
 import Home from './pages/home.tsx';
-import Auth from './pages/Auth.tsx';
-import Social from './pages/Social.tsx';
-import Studio from './pages/Studio.tsx';
-import Chat from './pages/Chat.tsx';
-import Music from './pages/Music.tsx';
-import Leaderboard from './pages/Leaderboard.tsx';
-import Event from './pages/Event.tsx';
-import Admin from './pages/Admin.tsx';
-import Profile from './pages/Profile.tsx';
+import Auth from './pages/auth.tsx';
+import Social from './pages/social.tsx';
+import Studio from './pages/studio.tsx';
+import Chat from './pages/chat.tsx';
+import Music from './pages/music.tsx';
+import Leaderboard from './pages/leaderboard.tsx';
+import Event from './pages/event.tsx';
+import Admin from './pages/admin.tsx';
+import Profile from './pages/profile.tsx';
 import NotFound from './pages/not-found.tsx';
 
 function App() {
