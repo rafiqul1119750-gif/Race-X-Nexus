@@ -1,103 +1,125 @@
-import { Trophy, Calendar, Users, Zap } from "lucide-react";
-import { useGetEvents } from "@workspace/api-client-react";
-import { format } from "date-fns";
+import { motion } from 'framer-motion';
+import { Trophy, Timer, Gift, Star, ChevronRight, Users, Sparkles } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import ProgressBar from '@/components/ui/ProgressBar';
 
-export default function Events() {
-  const { data, isLoading } = useGetEvents();
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center p-10">
-        <div className="w-10 h-10 border-4 border-destructive border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  const events = data?.events || [];
-  const liveEvents = events.filter(e => e.status === 'live');
-  const upcomingEvents = events.filter(e => e.status === 'upcoming');
+const Event = () => {
+  const activeEvents = [
+    {
+      id: 1,
+      title: "Cyberpunk Art Challenge",
+      prize: "5,000 Diamonds",
+      timeLeft: "2 Din Baki",
+      participants: "1.2k",
+      status: "Live",
+      gradient: "from-blue-600 to-purple-600"
+    },
+    {
+      id: 2,
+      title: "Daily Login Streak",
+      prize: "50 Diamonds",
+      timeLeft: "Aaj Tak",
+      participants: "Aap + 5k Others",
+      status: "Ongoing",
+      gradient: "from-emerald-500 to-teal-700"
+    }
+  ];
 
   return (
-    <div className="px-4 py-6 max-w-5xl mx-auto space-y-8">
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <Trophy className="w-16 h-16 text-primary mx-auto mb-4 drop-shadow-[0_0_15px_rgba(0,212,255,0.8)]" />
-        <h1 className="text-4xl font-display font-black text-glow mb-2">Tournaments & Events</h1>
-        <p className="text-muted-foreground">Compete globally, earn massive diamond rewards, and climb the leaderboard.</p>
-      </div>
-
-      {liveEvents.length > 0 && (
-        <div>
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-destructive animate-pulse shadow-[0_0_10px_rgba(255,0,0,0.8)]" />
-            Live Now
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {liveEvents.map(event => (
-              <div key={event.id} className="relative glass-panel rounded-3xl overflow-hidden border-destructive/30 hover:border-destructive/60 transition-colors group">
-                <div className="absolute inset-0 bg-gradient-to-r from-destructive/10 to-transparent pointer-events-none" />
-                <div className="p-6 relative z-10">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="text-[10px] font-bold bg-destructive text-white px-2 py-1 rounded tracking-wider">LIVE TOURNAMENT</span>
-                    <div className="flex flex-col items-end">
-                      <span className="text-xs text-muted-foreground">Prize Pool</span>
-                      <span className="font-display font-bold text-primary text-glow">{event.reward}</span>
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">{event.name}</h3>
-                  <p className="text-sm text-white/70 mb-6">{event.description}</p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="w-4 h-4" />
-                      <span>{event.participants} / {event.maxParticipants} playing</span>
-                    </div>
-                    <button className="px-6 py-2 bg-destructive hover:bg-red-600 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(255,0,0,0.4)] btn-ripple">
-                      Join Match
-                    </button>
-                  </div>
-                </div>
-                {/* Animated loading bar at bottom */}
-                <div className="absolute bottom-0 left-0 h-1 bg-destructive animate-[pulse_2s_ease-in-out_infinite]" style={{ width: `${(event.participants || 0) / (event.maxParticipants || 1) * 100}%` }} />
-              </div>
-            ))}
+    <div className="space-y-8 pb-32">
+      {/* --- Featured Event Banner (Big) --- */}
+      <section className="relative h-64 rounded-[3rem] overflow-hidden group">
+        <img 
+          src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800" 
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          alt="Event Banner"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-end p-8">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="bg-rose-600 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse">LIVE NOW</span>
           </div>
+          <h2 className="text-3xl font-black tracking-tighter leading-none">GRAND AI <br/> TOURNAMENT</h2>
+          <p className="text-sm text-gray-300 mt-2 font-medium">Win a share of 50,000 Diamonds</p>
         </div>
-      )}
+      </section>
 
-      <div>
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-white">
-          <Calendar className="w-5 h-5 text-secondary" />
-          Upcoming Events
-        </h2>
-        <div className="space-y-4">
-          {upcomingEvents.map(event => (
-            <div key={event.id} className="glass-panel-purple p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-center sm:items-start gap-4 hover:border-secondary/50 transition-colors">
-              <div className="flex gap-5 w-full sm:w-auto">
-                <div className="w-16 h-16 rounded-xl bg-secondary/20 border border-secondary/30 flex flex-col items-center justify-center flex-shrink-0 text-secondary">
-                  <span className="text-xs font-bold uppercase">{format(new Date(event.startDate), 'MMM')}</span>
-                  <span className="text-xl font-display font-bold">{format(new Date(event.startDate), 'dd')}</span>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] text-secondary border border-secondary/30 px-1.5 py-0.5 rounded uppercase">{event.type}</span>
-                  </div>
-                  <h3 className="font-bold text-white text-lg">{event.name}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-1">{event.description}</p>
-                </div>
-              </div>
-              
-              <div className="w-full sm:w-auto flex sm:flex-col items-center justify-between sm:items-end gap-3 border-t sm:border-t-0 border-white/10 pt-3 sm:pt-0">
-                <div className="flex items-center gap-1 text-sm font-bold text-primary">
-                  <Zap className="w-4 h-4 fill-current" /> {event.reward}
-                </div>
-                <button className="px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg text-sm transition-colors btn-ripple">
-                  Remind Me
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* --- Event Stats / Leaderboard Shortcut --- */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="p-4 bg-secondary/10 border-white/5 flex items-center gap-3">
+          <Trophy className="text-yellow-500" size={24} />
+          <div>
+            <p className="text-lg font-black leading-none">#42</p>
+            <p className="text-[9px] text-gray-500 uppercase font-bold">Your Rank</p>
+          </div>
+        </Card>
+        <Card className="p-4 bg-secondary/10 border-white/5 flex items-center gap-3">
+          <Star className="text-primary" size={24} />
+          <div>
+            <p className="text-lg font-black leading-none">120</p>
+            <p className="text-[9px] text-gray-500 uppercase font-bold">Points</p>
+          </div>
+        </Card>
       </div>
+
+      {/* --- Active Challenges List --- */}
+      <section className="space-y-4">
+        <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground px-1 flex items-center gap-2">
+          <Timer size={14} /> Active Challenges
+        </h3>
+        
+        {activeEvents.map((event) => (
+          <motion.div key={event.id} whileTap={{ scale: 0.98 }}>
+            <Card className={`p-5 bg-gradient-to-r ${event.gradient} border-none relative overflow-hidden group`}>
+              <div className="relative z-10 space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="text-xl font-black text-white">{event.title}</h4>
+                    <p className="text-xs text-white/70 font-bold italic">Prize: {event.prize}</p>
+                  </div>
+                  <div className="bg-black/20 backdrop-blur-md p-2 rounded-xl text-white text-[10px] font-bold">
+                    {event.timeLeft}
+                  </div>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Users size={14} className="text-white/60" />
+                    <span className="text-[10px] text-white font-bold">{event.participants} Participating</span>
+                  </div>
+                  <Button className="bg-white text-black hover:bg-gray-200 rounded-xl font-black text-xs px-6">
+                    JOIN
+                  </Button>
+                </div>
+              </div>
+              {/* Decorative shapes */}
+              <Sparkles className="absolute -right-4 -top-4 w-24 h-24 text-white/10 rotate-12" />
+            </Card>
+          </motion.div>
+        ))}
+      </section>
+
+      {/* --- Daily Tasks (Mini Events) --- */}
+      <section className="space-y-4">
+        <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground px-1">Daily Quests</h3>
+        <Card className="p-4 bg-secondary/20 border-white/5 space-y-4">
+          <div className="flex justify-between items-center">
+             <div className="flex items-center gap-3">
+                <Gift className="text-primary" />
+                <div>
+                  <p className="text-sm font-bold">Create 3 AI Images</p>
+                  <p className="text-[10px] text-gray-500">Progress: 1/3</p>
+                </div>
+             </div>
+             <span className="text-xs font-black text-primary">+10 💎</span>
+          </div>
+          <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+             <div className="w-1/3 h-full bg-primary shadow-[0_0_10px_#fff]"></div>
+          </div>
+        </Card>
+      </section>
     </div>
   );
-}
+};
+
+export default Event;
