@@ -1,11 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
-
-// Layout Components (Matching your layout folder)
 import Header from './components/layout/Header';
 import BottomNavbar from './components/layout/BottomNavbar';
 
-// Pages - EXACT MATCH from your latest screenshot (All Small Letters)
+// Pages - EXACT match from your screenshot
 import Home from './pages/home';
 import Auth from './pages/auth';
 import Social from './pages/social';
@@ -13,18 +11,18 @@ import Studio from './pages/studio';
 import Chat from './pages/chat';
 import Music from './pages/music';
 import Leaderboard from './pages/leaderboard';
-import Events from './pages/events'; // 'event' ko 'events' kiya aur small 'e'
+import Events from './pages/events';
 import Admin from './pages/admin';
 import Profile from './pages/profile';
-import NotFound from './pages/not-found';
 import Shop from './pages/shop';
 import Wallet from './pages/wallet';
+import NotFound from './pages/not-found';
 
 function App() {
   return (
     <AppProvider>
       <Router>
-        <div className="min-h-screen bg-black text-white font-sans">
+        <div className="min-h-screen bg-black text-white">
           <Header />
           <main className="container max-w-md mx-auto pt-20 pb-28 px-4">
             <Routes>
@@ -49,5 +47,4 @@ function App() {
     </AppProvider>
   );
 }
-
 export default App;
