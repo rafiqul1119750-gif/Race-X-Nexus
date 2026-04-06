@@ -1,22 +1,22 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import path from "path";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      // Ye line @workspace errors ko fix karegi
-      "@workspace": path.resolve(__dirname, "../lib"), 
+      // Ye lines missing dependencies ko force-fix karengi:
+      "@tanstack/react-query": path.resolve(__dirname, "node_modules/@tanstack/react-query"),
+      "react-query": path.resolve(__dirname, "node_modules/@tanstack/react-query"),
     },
   },
   build: {
-    outDir: 'dist',
+    outDir: "dist",
     emptyOutDir: true,
     rollupOptions: {
-      // Agar @workspace/api-client-react phir bhi error de, toh hum ise external bol denge
+      // Isse Rollup ko pata chalega ki ye libraries installed hain
       external: [], 
     },
   },
