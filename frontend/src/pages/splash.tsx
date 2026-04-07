@@ -1,42 +1,82 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const SplashScreen = () => {
   const [, setLocation] = useLocation();
+  const [loadingText, setLoadingText] = useState("Initializing Core");
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLocation('/auth/signin'); // Diagram: Auto Redirect
+    // Logic: 1.5s baad text badlega, 4s baad redirect
+    const textTimer = setTimeout(() => setLoadingText("Syncing Nexus Hub"), 1800);
+    
+    const redirectTimer = setTimeout(() => {
+      // Diagram Logic: Auto Redirect → SIGN IN
+      // Future mein yahan Auth Check lagayenge (if user then /hub else /auth/signin)
+      setLocation('/auth/signin'); 
     }, 4000);
-    return () => clearTimeout(timer);
+
+    return () => {
+      clearTimeout(textTimer);
+      clearTimeout(redirectTimer);
+    };
   }, [setLocation]);
 
   return (
-    <div className="h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
-      {/* RX 3D Logo Animation Effect */}
+    <div className="h-screen bg-black flex flex-col items-center justify-center overflow-hidden relative">
+      
+      {/* Background Cinematic Glow */}
+      <div className="absolute w-[300px] h-[300px] bg-cyan-500/10 blur-[120px] rounded-full animate-pulse" />
+
+      {/* 🟢 RX 3D Logo Animation Node */}
       <motion.div 
-        initial={{ scale: 0.5, rotateY: 0, opacity: 0 }}
-        animate={{ scale: 1, rotateY: 360, opacity: 1 }}
-        transition={{ duration: 2, ease: "easeOut" }}
-        className="relative mb-10"
+        initial={{ scale: 0.8, opacity: 0, rotateY: -90 }}
+        animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        className="relative z-10 mb-12"
       >
-        <div className="absolute inset-0 bg-cyan-500/30 blur-[80px] rounded-full animate-pulse" />
-        <img src="/images/rx-logo.png" alt="RX Logo" className="w-40 h-40 relative z-10 drop-shadow-[0_0_20px_rgba(0,225,255,0.8)]" />
+        {/* Glow Effect behind logo */}
+        <div className="absolute inset-0 bg-cyan-400/20 blur-2xl rounded-full scale-150" />
+        
+        <img 
+          src="/images/rx-logo.png" 
+          alt="Race-X Logo" 
+          className="w-44 h-44 object-contain drop-shadow-[0_0_30px_rgba(6,182,212,0.5)]"
+          // Error handling agar logo missing ho toh
+          onError={(e) => {
+            e.currentTarget.src = "https://placehold.co/400x400/000000/00e1ff?text=RX";
+          }}
+        />
       </motion.div>
 
-      {/* Loading Indicator */}
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-48 h-1 bg-zinc-900 rounded-full overflow-hidden relative">
+      {/* 🟢 Loading Indicator Node */}
+      <div className="flex flex-col items-center gap-6 z-10">
+        <div className="w-64 h-[2px] bg-zinc-900 rounded-full overflow-hidden relative">
           <motion.div 
-            initial={{ x: "-100%" }}
-            animate={{ x: "100%" }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
+            initial={{ width: "0%" }}
+            animate={{ width: "100%" }}
+            transition={{ duration: 3.5, ease: "easeInOut" }}
+            className="h-full bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_#22d3ee]"
           />
         </div>
-        <p className="text-[10px] font-black text-cyan-400 tracking-[0.5em] uppercase animate-pulse">
-          Initializing Race-X Engine
+
+        <AnimatePresence mode="wait">
+          <motion.p 
+            key={loadingText}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            className="text-[10px] font-black text-cyan-400 tracking-[0.5em] uppercase italic"
+          >
+            {loadingText}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+
+      {/* Bottom Branding */}
+      <div className="absolute bottom-10 opacity-20">
+        <p className="text-[8px] font-bold tracking-[1em] text-white uppercase">
+          Powered by Race-X Engine
         </p>
       </div>
     </div>
