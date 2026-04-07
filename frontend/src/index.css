@@ -2,12 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 🌌 Race-X Global Black Theme */
-body {
-  @apply bg-black text-white antialiased overflow-x-hidden;
-  font-family: 'Inter', sans-serif; /* Ya jo bhi premium font aap use karein */
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    /* Race-X Cyan Neon Variable */
+    --neon-blue: 180 100% 50%; 
+  }
+
+  body {
+    @apply bg-black text-white antialiased;
+    font-family: 'Inter', sans-serif;
+    /* Smooth scrolling for Reels */
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
 }
 
-/* Hide Scrollbars for Cinematic Feel */
-.hide-scrollbar::-webkit-scrollbar { display: none; }
-.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+@layer components {
+  /* ✨ Glassmorphism Effect */
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+
+  /* 🔵 Neon Glow Text */
+  .text-neon {
+    text-shadow: 0 0 10px rgba(0, 225, 255, 0.7),
+                 0 0 20px rgba(0, 225, 255, 0.4);
+  }
+
+  /* 💎 Diamond Shimmer Animation */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+}
+
+/* 🌀 Custom Race-X Animations */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-neon {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); shadow: 0 0 20px rgba(0, 225, 255, 0.6); }
+}
+
+.animate-neon {
+  animation: pulse-neon 3s infinite ease-in-out;
+}
+
+/* 📱 Mobile UI Fixes */
+input, button {
+  @apply outline-none focus:ring-0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Custom Scrollbar for Hub (Hidden but functional) */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* ✨ Orbitron Font for Headlines */
+.font-cyber {
+  font-family: 'Orbitron', sans-serif;
+}
