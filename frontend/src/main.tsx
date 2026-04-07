@@ -1,24 +1,16 @@
-import { createRoot } from "react-dom/client";
-import App from "./App";
-import "./index.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css'; // Tailwind & Global Styles Node
 
-// Query Client yahi bana lete hain taaki import error na aaye
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  },
-});
-
-const rootElement = document.getElementById("root");
-
-if (rootElement) {
-  createRoot(rootElement).render(
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  );
-}
+/**
+ * 🚀 RACE-X ENTRY NODE
+ * Yahan se aapka "Quantum Nexus" render hona shuru hota hai.
+ * Hum StrictMode use kar rahe hain taaki development mein 
+ * bugs pehle hi pakde jayein.
+ */
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
