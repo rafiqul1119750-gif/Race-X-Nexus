@@ -1,74 +1,67 @@
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
-import { Toaster } from "@/components/ui/toaster";
 
-// --- 🟢 ENTRY & AUTH NODES (As per Diagram) ---
-import SplashScreen from "@/pages/splash";
-import SignIn from "@/pages/auth/signin";
-import SignUp from "@/pages/auth/signup";
-import TermsConditions from "@/pages/auth/terms";
+// 🟢 Following Your Diagram Nodes (Pages)
+import SplashScreen from "./pages/splash";
+import SignIn from "./pages/auth/signin";
+import SignUp from "./pages/auth/signup";
+import Terms from "./pages/auth/terms";
+import MainHub from "./pages/hub";
 
-// --- 🏠 CORE HUB NODE ---
-import RXMainHub from "@/pages/hub";
+// 🌐 Social Module
+import Feed from "./pages/social/feed";
+import Profile from "./pages/social/profile";
 
-// --- 🌐 SOCIAL APP NODES ---
-import SocialFeed from "@/pages/social/feed";
-// Note: Future mein explore, create, profile yahan add honge
+// 🎬 Studio Module
+import RaceXEditor from "./pages/studio/editor";
+import StudioAnalytics from "./pages/studio/analytics";
 
-// --- 🤖 MODULE PLACEHOLDERS (To prevent crashes) ---
-const Placeholder = ({ name }: { name: string }) => (
-  <div className="h-screen bg-black flex items-center justify-center text-zinc-500 uppercase tracking-widest font-black italic">
-    {name} Coming Soon
-  </div>
-);
-
-function Router() {
-  return (
-    <Switch>
-      {/* 1. Entry Point */}
-      <Route path="/" component={SplashScreen} />
-
-      {/* 2. Auth System Group */}
-      <Route path="/auth/signin" component={SignIn} />
-      <Route path="/auth/signup" component={SignUp} />
-      <Route path="/auth/terms" component={TermsConditions} />
-
-      {/* 3. Main Hub (The Control Center) */}
-      <Route path="/hub" component={RXMainHub} />
-
-      {/* 4. Social App Group */}
-      <Route path="/social" component={SocialFeed} />
-      <Route path="/social/explore" component={() => <Placeholder name="RX Explore" />} />
-      <Route path="/social/create" component={() => <Placeholder name="RX Studio Create" />} />
-      
-      {/* 5. Other Modules from Diagram */}
-      <Route path="/magic" component={() => <Placeholder name="RX Magic AI" />} />
-      <Route path="/chat" component={() => <Placeholder name="RX Chat" />} />
-      <Route path="/music" component={() => <Placeholder name="RX Music" />} />
-      <Route path="/shop" component={() => <Placeholder name="RX Shop" />} />
-
-      {/* 6. Admin Panel (Hidden Node) */}
-      <Route path="/admin-rx-portal" component={() => <Placeholder name="Admin Control" />} />
-
-      {/* 404 Fallback */}
-      <Route>
-        <div className="h-screen bg-black flex items-center justify-center text-red-500 font-bold uppercase tracking-tighter">
-          404 | Nexus Connection Lost
-        </div>
-      </Route>
-    </Switch>
-  );
-}
+// 🛒 Shop & Music
+import ExternalShop from "./pages/shop/products";
+import MusicLibrary from "./pages/music/library";
 
 function App() {
   return (
+    // 🚀 Injecting the Realtime Engine from src/lib
     <QueryClientProvider client={queryClient}>
-      {/* Global Wrapper for Cinematic Aesthetic */}
-      <div className="min-h-screen bg-black text-white selection:bg-cyan-500/30 selection:text-cyan-200">
-        <Router />
-        {/* Real-time Notifications for Likes/Ads/Gifts */}
-        <Toaster />
+      <div className="min-h-screen bg-black text-white selection:bg-cyan-500/30 font-sans">
+        
+        <Switch>
+          {/* 1. 🟢 SPLASH SCREEN (Entry Point) */}
+          <Route path="/" component={SplashScreen} />
+
+          {/* 2. 🔐 AUTH SYSTEM */}
+          <Route path="/auth/signin" component={SignIn} />
+          <Route path="/auth/signup" component={SignUp} />
+          <Route path="/auth/terms" component={Terms} />
+
+          {/* 3. 🏠 RX MAIN HUB (Core Hub) */}
+          <Route path="/hub" component={MainHub} />
+
+          {/* 4. 🌐 SOCIAL APP */}
+          <Route path="/social/feed" component={Feed} />
+          <Route path="/social/profile" component={Profile} />
+
+          {/* 5. 🎬 STUDIO */}
+          <Route path="/studio/editor" component={RaceXEditor} />
+          <Route path="/studio/analytics" component={StudioAnalytics} />
+
+          {/* 6. 🛒 SHOP (External Redirect) */}
+          <Route path="/shop/products" component={ExternalShop} />
+
+          {/* 7. 🎵 MUSIC */}
+          <Route path="/music/library" component={MusicLibrary} />
+
+          {/* 🚫 404 Node: Lost in Nexus */}
+          <Route>
+            <div className="h-screen flex flex-col items-center justify-center bg-black">
+              <h1 className="text-4xl font-black italic text-zinc-900 tracking-[0.5em] uppercase">404</h1>
+              <p className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest mt-4">Node Not Found in Race-X</p>
+            </div>
+          </Route>
+        </Switch>
+
       </div>
     </QueryClientProvider>
   );
