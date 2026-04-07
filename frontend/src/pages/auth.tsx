@@ -1,71 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useLocation } from 'wouter';
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
+import { User, AtSign, Mail, Lock, Camera, ArrowRight } from 'lucide-react';
 
-const SignIn = () => {
+const SignUp = () => {
   const [, setLocation] = useLocation();
-  const [showPass, setShowPass] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white p-8 flex flex-col justify-center">
-      <div className="mb-10 text-center">
-        <h1 className="text-4xl font-black italic tracking-tighter text-white">SIGN IN</h1>
-        <p className="text-zinc-500 text-xs mt-2 uppercase tracking-widest">Access the Nexus Hub</p>
+    <div className="min-h-screen bg-black text-white p-8 flex flex-col pt-16">
+      <div className="mb-8 text-center">
+        <h1 className="text-4xl font-black italic tracking-tighter">CREATE ACCOUNT</h1>
+        <p className="text-zinc-500 text-[10px] mt-2 uppercase tracking-[0.3em]">Join the Race-X Elite</p>
       </div>
 
       <div className="space-y-4">
-        {/* Email / Phone Input */}
+        {/* Profile Image Upload Node */}
+        <div className="flex flex-col items-center mb-6">
+          <div 
+            onClick={() => fileInputRef.current?.click()}
+            className="w-24 h-24 rounded-full bg-zinc-900 border-2 border-dashed border-zinc-700 flex items-center justify-center overflow-hidden cursor-pointer hover:border-cyan-500 transition-all"
+          >
+            {preview ? (
+              <img src={preview} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <Camera className="w-8 h-8 text-zinc-600" />
+            )}
+          </div>
+          <input type="file" ref={fileInputRef} hidden onChange={handleImage} accept="image/*" />
+          <span className="text-[10px] text-zinc-500 mt-2 font-bold uppercase tracking-widest">Upload Profile Image</span>
+        </div>
+
+        {/* Inputs */}
+        <div className="relative">
+          <User className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
+          <input type="text" placeholder="FULL NAME" className="signup-input pl-12" />
+        </div>
+
+        <div className="relative">
+          <AtSign className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
+          <input type="text" placeholder="USERNAME" className="signup-input pl-12" />
+        </div>
+
         <div className="relative">
           <Mail className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
-          <input 
-            type="text" 
-            placeholder="EMAIL OR PHONE" 
-            className="w-full bg-zinc-900/50 border border-zinc-800 p-4 pl-12 rounded-2xl focus:border-cyan-500 outline-none transition-all text-sm font-bold"
-          />
+          <input type="text" placeholder="EMAIL OR PHONE" className="signup-input pl-12" />
         </div>
 
-        {/* Password Input with Show/Hide */}
         <div className="relative">
           <Lock className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
-          <input 
-            type={showPass ? "text" : "password"} 
-            placeholder="PASSWORD" 
-            className="w-full bg-zinc-900/50 border border-zinc-800 p-4 pl-12 pr-12 rounded-2xl focus:border-cyan-500 outline-none transition-all text-sm font-bold"
-          />
-          <button 
-            onClick={() => setShowPass(!showPass)} 
-            className="absolute right-4 top-4 text-zinc-500"
-          >
-            {showPass ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-          </button>
+          <input type="password" placeholder="PASSWORD" className="signup-input pl-12" />
         </div>
 
-        <button className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest ml-1">
-          Forgot Password?
-        </button>
+        <div className="relative">
+          <Lock className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
+          <input type="password" placeholder="CONFIRM PASSWORD" className="signup-input pl-12" />
+        </div>
 
-        {/* Login Button -> Redirect to Main Hub */}
+        {/* Continue Button -> Terms Page */}
         <button 
-          onClick={() => setLocation('/hub')}
-          className="w-full bg-white text-black p-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-cyan-400 transition-all active:scale-95"
+          onClick={() => setLocation('/auth/terms')}
+          className="w-full bg-cyan-500 text-black p-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-white transition-all active:scale-95 mt-4"
         >
-          LOGIN <ArrowRight className="w-5 h-5" />
+          CONTINUE <ArrowRight className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="mt-8 text-center">
-        <p className="text-zinc-500 text-xs">NEW USER?</p>
-        <button onClick={() => setLocation('/auth/signup')} className="text-white font-black text-sm uppercase underline mt-1">
-          Create Account
-        </button>
-      </div>
-      
-      {/* Guest Mode Option */}
-      <button onClick={() => setLocation('/hub')} className="mt-6 text-zinc-600 text-[10px] uppercase tracking-widest hover:text-white">
-        Continue as Guest (Limited Access)
-      </button>
+      <style>{`
+        .signup-input {
+          @apply w-full bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl focus:border-cyan-500 outline-none transition-all text-sm font-bold uppercase tracking-tighter;
+        }
+      `}</style>
     </div>
   );
 };
 
-export default SignIn;
+export default SignUp;
