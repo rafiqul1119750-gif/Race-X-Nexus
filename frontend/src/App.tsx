@@ -18,17 +18,6 @@ import MusicPlayer from "./pages/music/main";
 import ShopMain from "./pages/shop/main";
 
 export default function App() {
-  // Temporary bypass for instant testing
-  const loading = false;
-
-  if (loading) {
-    return (
-      <div className="h-screen bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-black text-white font-sans selection:bg-cyan-500/30">
@@ -69,5 +58,3 @@ export default function App() {
     </QueryClientProvider>
   );
 }
-
-export default App;
