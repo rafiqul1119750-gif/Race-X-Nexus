@@ -3,49 +3,62 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "./components/ui/toaster";
 
-// 📄 Strict Case Sensitive Imports
+// --- CORE PAGES ---
 import SplashScreen from "./pages/splash";
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
 import MainHub from "./pages/hub";
 import Feed from "./pages/social/feed";
+
+// --- MODULES (Ensure these files exist) ---
 import StudioDashboard from "./pages/studio/dashboard";
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-black text-white font-sans selection:bg-cyan-500/30">
         <Switch>
-          {/* 🟢 Splash & Auth */}
+          {/* 🟢 Splash Screen */}
           <Route path="/" component={SplashScreen} />
+
+          {/* 🔐 Auth System */}
           <Route path="/auth/signin" component={SignIn} />
           <Route path="/auth/signup" component={SignUp} />
 
           {/* 🏠 Main Nexus Hub */}
           <Route path="/hub" component={MainHub} />
           
-          {/* 🌐 Social Module */}
+          {/* 🌐 Social App Module */}
           <Route path="/social/feed" component={Feed} />
-          <Route path="/social/explore" component={() => <Placeholder title="Explore" />} />
-          <Route path="/social/create" component={() => <Placeholder title="Create" />} />
 
           {/* 🎬 Studio Module */}
           <Route path="/studio" component={StudioDashboard} />
 
-          {/* 🤖 Magic AI Module */}
-          <Route path="/magic" component={() => <Placeholder title="AI Magic" />} />
+          {/* ⚡ DYNAMIC ROUTE HANDLER (No More Build Failures) */}
+          <Route path="/:module/:page?">
+            {(params) => (
+              <div className="h-screen flex flex-col items-center justify-center bg-black p-8 text-center">
+                <div className="w-16 h-16 border-t-2 border-cyan-500 rounded-full animate-spin mb-6" />
+                <h1 className="text-xl font-black italic text-white tracking-[0.3em] uppercase">
+                  {params.module} {params.page || ""}
+                </h1>
+                <p className="text-[10px] text-zinc-500 mt-4 tracking-[0.2em] leading-relaxed">
+                  PROTOCOL: INITIALIZING_INTERFACE... <br />
+                  NODE: RX_NEXUS_V1
+                </p>
+                <button 
+                  onClick={() => window.location.href = '/hub'}
+                  className="mt-12 text-cyan-400 text-[10px] font-black border border-cyan-500/20 px-6 py-3 rounded-full uppercase tracking-widest hover:bg-cyan-500 hover:text-black transition-all"
+                >
+                  Return to Hub
+                </button>
+              </div>
+            )}
+          </Route>
 
-          {/* 💬 Chat Module */}
-          <Route path="/chat" component={() => <Placeholder title="RX Chat" />} />
-
-          {/* 🎵 Music & 🛒 Shop */}
-          <Route path="/music" component={() => <Placeholder title="RX Music" />} />
-          <Route path="/shop" component={() => <Placeholder title="RX Shop" />} />
-
+          {/* Default 404 */}
           <Route>
-            <div className="h-screen flex items-center justify-center bg-black font-black italic text-zinc-800">
-              404 // NEXUS_ERROR
-            </div>
+            <Redirect to="/hub" />
           </Route>
         </Switch>
         <Toaster />
@@ -53,16 +66,3 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-// Choti si help ke liye jab tak saare pages nahi bante
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div className="h-screen flex flex-col items-center justify-center bg-black p-6 text-center">
-      <h1 className="text-xl font-black italic text-cyan-400 tracking-widest uppercase">{title}</h1>
-      <p className="text-[10px] text-zinc-500 mt-2">MODULE INITIALIZING...</p>
-      <button onClick={() => window.history.back()} className="mt-8 text-white text-[10px] underline">GO BACK</button>
-    </div>
-  );
-}
-
-export default App;
