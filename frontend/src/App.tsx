@@ -1,63 +1,58 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
+import { useAuth } from "./hooks/use-auth"; // 👈 Your new Hook
 
-// 🟢 Following Your Diagram Nodes (Pages)
+// Pages
 import SplashScreen from "./pages/splash";
 import SignIn from "./pages/auth/signin";
 import SignUp from "./pages/auth/signup";
-import Terms from "./pages/auth/terms";
 import MainHub from "./pages/hub";
-
-// 🌐 Social Module
-import Feed from "./pages/social/feed";
-import Profile from "./pages/social/profile";
-
-// 🎬 Studio Module
-import RaceXEditor from "./pages/studio/editor";
-import StudioAnalytics from "./pages/studio/analytics";
-
-// 🛒 Shop & Music
 import ExternalShop from "./pages/shop/products";
 import MusicLibrary from "./pages/music/library";
+import Feed from "./pages/social/feed";
 
 function App() {
+  const { user, loading } = useAuth();
+
+  // 🌀 Loading state jab tak Appwrite check kar raha hai
+  if (loading) {
+    return (
+      <div className="h-screen bg-black flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    // 🚀 Injecting the Realtime Engine from src/lib
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-black text-white selection:bg-cyan-500/30 font-sans">
         
         <Switch>
-          {/* 1. 🟢 SPLASH SCREEN (Entry Point) */}
+          {/* 1. Public Routes */}
           <Route path="/" component={SplashScreen} />
-
-          {/* 2. 🔐 AUTH SYSTEM */}
-          <Route path="/auth/signin" component={SignIn} />
+          <Route path="/auth/signin">
+             {user ? <Redirect to="/hub" /> : <SignIn />}
+          </Route>
           <Route path="/auth/signup" component={SignUp} />
-          <Route path="/auth/terms" component={Terms} />
 
-          {/* 3. 🏠 RX MAIN HUB (Core Hub) */}
-          <Route path="/hub" component={MainHub} />
+          {/* 2. Protected Routes (Only for Logged-in Users) */}
+          <Route path="/hub">
+            {!user ? <Redirect to="/auth/signin" /> : <MainHub />}
+          </Route>
+          
+          <Route path="/social/feed">
+            {!user ? <Redirect to="/auth/signin" /> : <Feed />}
+          </Route>
 
-          {/* 4. 🌐 SOCIAL APP */}
-          <Route path="/social/feed" component={Feed} />
-          <Route path="/social/profile" component={Profile} />
-
-          {/* 5. 🎬 STUDIO */}
-          <Route path="/studio/editor" component={RaceXEditor} />
-          <Route path="/studio/analytics" component={StudioAnalytics} />
-
-          {/* 6. 🛒 SHOP (External Redirect) */}
           <Route path="/shop/products" component={ExternalShop} />
-
-          {/* 7. 🎵 MUSIC */}
           <Route path="/music/library" component={MusicLibrary} />
 
-          {/* 🚫 404 Node: Lost in Nexus */}
+          {/* 🚫 404 Node */}
           <Route>
             <div className="h-screen flex flex-col items-center justify-center bg-black">
               <h1 className="text-4xl font-black italic text-zinc-900 tracking-[0.5em] uppercase">404</h1>
-              <p className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest mt-4">Node Not Found in Race-X</p>
+              <p className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest mt-4">Node Not Found</p>
             </div>
           </Route>
         </Switch>
