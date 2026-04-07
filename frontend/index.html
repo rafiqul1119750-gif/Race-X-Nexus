@@ -2,14 +2,33 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Race-X Creator Ecosystem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <title>Race-X | The Creative Nexus</title>
+    
+    <link rel="icon" type="image/png" href="/images/rx-logo.png" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Race-X: AI-Powered Social & Studio Platform" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Orbitron:wght@900&display=swap" rel="stylesheet">
+
+    <style>
+      body {
+        margin: 0;
+        background-color: #000000;
+        -webkit-tap-highlight-color: transparent; /* Remove mobile tap gray box */
+      }
+      /* Prevent elastic scrolling on mobile for a native app feel */
+      html, body {
+        overscroll-behavior-y: contain;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
