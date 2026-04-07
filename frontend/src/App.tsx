@@ -4,10 +4,10 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "./components/ui/toaster";
 import { useAuth } from "./hooks/use-auth";
 
-// 📄 Race-X New Folder Structure Imports
+// 📄 Strict Case Sensitive Imports
 import SplashScreen from "./pages/splash";
-import SignIn from "./pages/auth/signin";
-import SignUp from "./pages/auth/signup";
+import SignIn from "./pages/Auth/signin"; // 'Auth' with Capital A
+import SignUp from "./pages/Auth/signup";
 import MainHub from "./pages/hub";
 import Feed from "./pages/social/feed";
 import StudioEditor from "./pages/studio/editor";
@@ -27,10 +27,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-black text-white">
         <Switch>
-          {/* Public Route */}
           <Route path="/" component={SplashScreen} />
           
-          {/* Auth Routes inside 📁auth/ folder */}
           <Route path="/auth/signin">
             {user ? <Redirect to="/hub" /> : <SignIn />}
           </Route>
@@ -38,25 +36,21 @@ function App() {
             {user ? <Redirect to="/hub" /> : <SignUp />}
           </Route>
 
-          {/* Protected Routes */}
           <Route path="/hub">
             {!user ? <Redirect to="/auth/signin" /> : <MainHub />}
           </Route>
           
-          {/* Social Feed inside 📁social/ folder */}
           <Route path="/social/feed">
             {!user ? <Redirect to="/auth/signin" /> : <Feed />}
           </Route>
 
-          {/* Studio inside 📁studio/ folder */}
           <Route path="/studio/editor">
             {!user ? <Redirect to="/auth/signin" /> : <StudioEditor />}
           </Route>
 
-          {/* Fallback 404 */}
           <Route>
-            <div className="h-screen flex items-center justify-center bg-black">
-              <p className="text-zinc-700 font-black italic tracking-tighter uppercase">Nexus 404</p>
+            <div className="h-screen flex items-center justify-center bg-black font-black italic text-zinc-800">
+              404 // NEXUS_ERROR
             </div>
           </Route>
         </Switch>
