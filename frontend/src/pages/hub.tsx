@@ -1,89 +1,85 @@
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { Zap, Play, LayoutGrid, Wallet, Sparkles } from "lucide-react";
+import { Sparkles, Play, Zap, Shield, Crown, ChevronRight } from "lucide-react";
 import BottomNav from "../components/BottomNav";
 
 export default function MainHub() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24">
-      {/* --- HEADER / WALLET SECTION --- */}
-      <header className="p-6 flex justify-between items-center sticky top-0 bg-black/50 backdrop-blur-md z-10">
-        <div className="font-cyber text-xl tracking-tighter text-neon">RX</div>
-        <div 
-          onClick={() => setLocation("/wallet")}
-          className="glass-card px-4 py-2 rounded-full flex items-center gap-2 border-cyan-500/30"
-        >
-          <div className="w-4 h-4 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_10px_cyan]" />
-          <span className="text-xs font-black tracking-widest">500💎</span>
-        </div>
-      </header>
-
-      {/* --- HERO BANNER --- */}
-      <div className="px-6 mt-4">
-        <div className="relative h-48 rounded-3xl overflow-hidden border border-white/10">
-          <img 
-            src="/images/hero-bg.png" 
-            className="w-full h-full object-cover opacity-60"
-            alt="Race-X Hero"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-          <div className="absolute bottom-6 left-6">
-            <h2 className="text-2xl font-black italic uppercase leading-none">Create with AI</h2>
-            <p className="text-[10px] text-cyan-400 font-bold tracking-widest mt-1">GENERATE • EDIT • EARN</p>
-          </div>
+    <div className="min-h-screen bg-black text-white pb-24 px-4 pt-6">
+      {/* --- TOP BAR --- */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-black italic tracking-tighter">RX</h1>
+        <div className="bg-zinc-900/50 border border-white/10 px-4 py-2 rounded-full flex items-center gap-2">
+          <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse" />
+          <span className="text-xs font-bold tracking-widest">500 <span className="text-cyan-400">💎</span></span>
         </div>
       </div>
 
-      {/* --- CORE NODES (Quick Actions) --- */}
-      <div className="grid grid-cols-2 gap-4 px-6 mt-8">
-        {/* Studio Card */}
+      {/* --- MAIN CARDS (AI STUDIO & REELS) --- */}
+      <div className="grid grid-cols-2 gap-4 mb-8">
         <motion.div 
           whileTap={{ scale: 0.95 }}
           onClick={() => setLocation("/studio/editor")}
-          className="glass-card p-6 rounded-3xl flex flex-col items-center gap-4 border-white/5"
+          className="aspect-square bg-zinc-900/40 border border-white/5 rounded-[32px] flex flex-col items-center justify-center gap-4 relative overflow-hidden group"
         >
+          <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="p-4 bg-cyan-500/10 rounded-2xl">
-            <Sparkles className="text-cyan-400 w-8 h-8" />
+            <Sparkles className="w-8 h-8 text-cyan-400" />
           </div>
-          <span className="text-[10px] font-black tracking-widest uppercase">AI Studio</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em]">AI Studio</span>
         </motion.div>
 
-        {/* Social Card */}
         <motion.div 
           whileTap={{ scale: 0.95 }}
           onClick={() => setLocation("/social/feed")}
-          className="glass-card p-6 rounded-3xl flex flex-col items-center gap-4 border-white/5"
+          className="aspect-square bg-zinc-900/40 border border-white/5 rounded-[32px] flex flex-col items-center justify-center gap-4 relative overflow-hidden group"
         >
+          <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="p-4 bg-purple-500/10 rounded-2xl">
-            <Play className="text-purple-400 w-8 h-8" />
+            <Play className="w-8 h-8 text-purple-400" />
           </div>
-          <span className="text-[10px] font-black tracking-widest uppercase">Reels</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Reels</span>
         </motion.div>
       </div>
 
-      {/* --- RECENT ACTIVITY SECTION --- */}
-      <div className="px-6 mt-10">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-[10px] font-black tracking-[0.3em] text-zinc-500 uppercase">Featured Assets</h3>
-          <Zap className="w-4 h-4 text-yellow-400" />
+      {/* --- FEATURED ASSETS (SLEEK LIST) --- */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center px-2">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Featured Assets</h2>
+          <Zap className="w-3 h-3 text-yellow-500" />
         </div>
-        
-        {/* Dummy Asset Rows */}
-        {[1, 2, 3].map((item) => (
-          <div key={item} className="glass-card p-4 rounded-2xl mb-3 flex items-center gap-4">
-            <div className="w-12 h-12 bg-zinc-900 rounded-xl overflow-hidden border border-white/5" />
-            <div className="flex-1">
-              <div className="h-2 w-24 bg-zinc-800 rounded-full mb-2" />
-              <div className="h-2 w-12 bg-zinc-900 rounded-full" />
+
+        {[
+          { label: "Neural Voice Pack", icon: Crown, color: "text-amber-400" },
+          { label: "Cinematic Filters", icon: Shield, color: "text-blue-400" },
+          { label: "8K Export Node", icon: Zap, color: "text-cyan-400" }
+        ].map((item, i) => (
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="bg-zinc-900/30 border border-white/5 p-5 rounded-[24px] flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-zinc-800/50 rounded-xl flex items-center justify-center">
+                <item.icon className={`w-5 h-5 ${item.color}`} />
+              </div>
+              <div>
+                <div className="h-2 w-24 bg-zinc-800 rounded-full mb-2" />
+                <div className="h-2 w-16 bg-zinc-800/50 rounded-full" />
+              </div>
             </div>
-            <div className="text-[10px] font-bold text-cyan-400 tracking-widest">+10💎</div>
-          </div>
+            <div className="flex items-center gap-3">
+               <span className="text-[10px] font-bold text-cyan-400">+10 💎</span>
+               <ChevronRight className="w-4 h-4 text-zinc-700 group-hover:text-white transition-colors" />
+            </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* --- BOTTOM NAVIGATION --- */}
       <BottomNav />
     </div>
   );
