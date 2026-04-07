@@ -1,53 +1,13 @@
-/* In 3 lines ko top par rehne dena (Tailwind ke liye) */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* --- Aapka Naya Neon Code Shuru --- */
-:root {
-  --bg-dark: #0a0a0c;
-  --neon-cyan: #00f2ff;
-  --neon-glow: 10px; 
-}
-
+/* 🌌 Race-X Global Black Theme */
 body {
-  background-color: var(--bg-dark);
-  color: white;
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  /* Dark mode battery saving for Redmi/Mobile */
-  -webkit-font-smoothing: antialiased;
+  @apply bg-black text-white antialiased overflow-x-hidden;
+  font-family: 'Inter', sans-serif; /* Ya jo bhi premium font aap use karein */
 }
 
-/* 3D Floating Glass Animation */
-.splash-logo {
-  filter: drop-shadow(0 0 var(--neon-glow) var(--neon-cyan));
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0% { transform: translateY(0px) rotateX(0deg); }
-  50% { transform: translateY(-20px) rotateX(10deg); }
-  100% { transform: translateY(0px) rotateX(0deg); }
-}
-
-.neon-btn {
-  border: 1px solid var(--neon-cyan);
-  box-shadow: 0 0 var(--neon-glow) var(--neon-cyan);
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px); 
-  transition: all 0.3s ease;
-}
-
-/* Click karne par dabne wala effect */
-.neon-btn:active {
-  transform: scale(0.95);
-  box-shadow: 0 0 15px var(--neon-cyan);
-}
-
-/* Scrollbar hide karne ke liye taaki app clean dikhe */
-::-webkit-scrollbar {
-  display: none;
-}
+/* Hide Scrollbars for Cinematic Feel */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
