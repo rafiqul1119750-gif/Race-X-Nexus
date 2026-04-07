@@ -6,14 +6,30 @@ export default {
   ],
   theme: {
     extend: {
-      keyframes: {
-        'nexus-loader': {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100%)' }
+      colors: {
+        // 🔵 Race-X Official Neon Palette
+        neon: {
+          blue: "#00e1ff",
+          purple: "#a855f7",
+          pink: "#ff007a",
+        },
+        zinc: {
+          950: "#09090b", // Deep Black for Backgrounds
         }
       },
+      backgroundImage: {
+        // ✨ Glassmorphism & Mesh Gradients Node
+        'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
+        'neon-mesh': 'radial-gradient(circle at top right, rgba(0, 225, 255, 0.15), transparent)',
+      },
+      boxShadow: {
+        // 💎 Neon Glow Effects
+        'neon-blue': '0 0 20px rgba(0, 225, 255, 0.5)',
+        'neon-purple': '0 0 20px rgba(168, 85, 247, 0.5)',
+      },
       animation: {
-        'nexus-loader': 'nexus-loader 2s infinite linear'
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'spin-slow': 'spin 8s linear infinite',
       }
     },
   },
