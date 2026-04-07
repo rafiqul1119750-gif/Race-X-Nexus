@@ -1,83 +1,63 @@
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { Sparkles, Play, Zap, Shield, Crown, ChevronRight } from "lucide-react";
+import { Sparkles, Globe, Wand2, MessageSquare, Music, ShoppingBag, Zap, Crown } from "lucide-react";
 import BottomNav from "../components/BottomNav";
 
 export default function MainHub() {
   const [, setLocation] = useLocation();
 
+  const modules = [
+    { id: 'studio', label: 'RX Studio', icon: <Sparkles />, path: '/studio', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+    { id: 'social', label: 'RX Social', icon: <Globe />, path: '/social/feed', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+    { id: 'magic', label: 'RX Magic', icon: <Wand2 />, path: '/magic', color: 'text-amber-400', bg: 'bg-amber-500/10' },
+    { id: 'chat', label: 'RX Chat', icon: <MessageSquare />, path: '/chat', color: 'text-green-400', bg: 'bg-green-500/10' },
+    { id: 'music', label: 'RX Music', icon: <Music />, path: '/music', color: 'text-red-400', bg: 'bg-red-500/10' },
+    { id: 'shop', label: 'RX Shop', icon: <ShoppingBag />, path: '/shop', color: 'text-pink-400', bg: 'bg-pink-500/10' },
+  ];
+
   return (
     <div className="min-h-screen bg-black text-white pb-24 px-4 pt-6">
-      {/* --- TOP BAR --- */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-black italic tracking-tighter">RX</h1>
-        <div className="bg-zinc-900/50 border border-white/10 px-4 py-2 rounded-full flex items-center gap-2">
-          <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse" />
-          <span className="text-xs font-bold tracking-widest">500 <span className="text-cyan-400">💎</span></span>
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-8 px-2">
+        <h1 className="text-2xl font-black italic tracking-tighter">RACE-X</h1>
+        <div className="flex items-center gap-3">
+          <div className="bg-zinc-900 border border-white/5 px-4 py-2 rounded-2xl flex items-center gap-2">
+            <span className="text-xs font-bold tracking-widest">500💎</span>
+          </div>
+          <div className="w-10 h-10 rounded-full border border-white/10 overflow-hidden bg-zinc-800" />
         </div>
       </div>
 
-      {/* --- MAIN CARDS (AI STUDIO & REELS) --- */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <motion.div 
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setLocation("/studio/editor")}
-          className="aspect-square bg-zinc-900/40 border border-white/5 rounded-[32px] flex flex-col items-center justify-center gap-4 relative overflow-hidden group"
-        >
-          <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="p-4 bg-cyan-500/10 rounded-2xl">
-            <Sparkles className="w-8 h-8 text-cyan-400" />
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em]">AI Studio</span>
-        </motion.div>
-
-        <motion.div 
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setLocation("/social/feed")}
-          className="aspect-square bg-zinc-900/40 border border-white/5 rounded-[32px] flex flex-col items-center justify-center gap-4 relative overflow-hidden group"
-        >
-          <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="p-4 bg-purple-500/10 rounded-2xl">
-            <Play className="w-8 h-8 text-purple-400" />
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Reels</span>
-        </motion.div>
-      </div>
-
-      {/* --- FEATURED ASSETS (SLEEK LIST) --- */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center px-2">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Featured Assets</h2>
-          <Zap className="w-3 h-3 text-yellow-500" />
-        </div>
-
-        {[
-          { label: "Neural Voice Pack", icon: Crown, color: "text-amber-400" },
-          { label: "Cinematic Filters", icon: Shield, color: "text-blue-400" },
-          { label: "8K Export Node", icon: Zap, color: "text-cyan-400" }
-        ].map((item, i) => (
-          <motion.div 
-            key={i}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="bg-zinc-900/30 border border-white/5 p-5 rounded-[24px] flex items-center justify-between group"
+      {/* 📦 MODULE GRID (Fully Clickable) */}
+      <div className="grid grid-cols-2 gap-4">
+        {modules.map((mod) => (
+          <motion.div
+            key={mod.id}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setLocation(mod.path)}
+            className="aspect-square bg-zinc-900/40 border border-white/5 rounded-[32px] flex flex-col items-center justify-center gap-4 relative overflow-hidden active:bg-zinc-800 transition-colors"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-zinc-800/50 rounded-xl flex items-center justify-center">
-                <item.icon className={`w-5 h-5 ${item.color}`} />
-              </div>
-              <div>
-                <div className="h-2 w-24 bg-zinc-800 rounded-full mb-2" />
-                <div className="h-2 w-16 bg-zinc-800/50 rounded-full" />
-              </div>
+            <div className={`p-4 ${mod.bg} rounded-2xl`}>
+              {/* Clone element to apply color to lucide icons */}
+              {Object.cloneElement(mod.icon as React.ReactElement, { className: `w-8 h-8 ${mod.color}` })}
             </div>
-            <div className="flex items-center gap-3">
-               <span className="text-[10px] font-bold text-cyan-400">+10 💎</span>
-               <ChevronRight className="w-4 h-4 text-zinc-700 group-hover:text-white transition-colors" />
-            </div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">{mod.label}</span>
           </motion.div>
         ))}
+      </div>
+
+      {/* QUICK STATS CARD */}
+      <div className="mt-8 bg-zinc-900/30 border border-white/5 p-6 rounded-[32px] flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-cyan-500/20 rounded-2xl flex items-center justify-center">
+            <Zap className="text-cyan-400 w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">System Status</p>
+            <p className="text-xs font-bold text-white">NEXUS_ONLINE_V1</p>
+          </div>
+        </div>
+        <Crown className="w-5 h-5 text-amber-500" />
       </div>
 
       <BottomNav />
