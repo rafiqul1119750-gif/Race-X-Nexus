@@ -1,100 +1,73 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Heart, MessageCircle, Share2, 
-  Plus, Music, Bookmark, Zap 
-} from 'lucide-react';
+import { motion } from "framer-motion";
+import { useLocation } from "wouter";
+import { ArrowLeft, Heart, MessageCircle, Share2, Music2 } from "lucide-react";
+import VideoPlayer from "../../components/VideoPlayer"; // Path check kar lena
 
-// 🎥 Dummy Data for Reels (Replace with API later)
-const REELS_DATA = [
-  { id: 1, user: "@ace_pilot", desc: "Testing the new Race-X Engine! 🚀 #future #ai", likes: "12.5K", music: "Original Sound - RaceX" },
-  { id: 2, user: "@cyber_queen", desc: "Neon vibes only. 💎 #cyberpunk #magic", likes: "45K", music: "After Dark - Remix" },
-];
+export default function Feed() {
+  const [, setLocation] = useLocation();
 
-const SocialFeed = () => {
   return (
-    <div className="h-screen bg-black overflow-y-scroll snap-y snap-mandatory hide-scrollbar">
-      {REELS_DATA.map((reel) => (
-        <div key={reel.id} className="h-screen w-full snap-start relative flex flex-col justify-end pb-20">
-          
-          {/* 🎥 Video Background Placeholder */}
-          <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/20 via-black to-black z-0">
-             <div className="absolute inset-0 flex items-center justify-center opacity-20">
-               <Zap className="w-20 h-20 text-cyan-500 animate-pulse" />
-             </div>
-          </div>
-
-          {/* 👤 Right Sidebar Actions Node */}
-          <div className="absolute right-4 bottom-32 flex flex-col items-center gap-6 z-20">
-            <div className="flex flex-col items-center gap-1 group">
-              <div className="p-3 bg-white/5 backdrop-blur-xl rounded-full border border-white/10 group-active:scale-90 transition-all">
-                <Heart className="w-7 h-7 text-white group-hover:text-red-500 transition-colors" />
-              </div>
-              <span className="text-[10px] font-black text-white">{reel.likes}</span>
-            </div>
-
-            <div className="flex flex-col items-center gap-1">
-              <div className="p-3 bg-white/5 backdrop-blur-xl rounded-full border border-white/10">
-                <MessageCircle className="w-7 h-7 text-white" />
-              </div>
-              <span className="text-[10px] font-black text-white italic">REPLY</span>
-            </div>
-
-            {/* 💎 Diamond Gifting Node (Monetization) */}
-            <div className="flex flex-col items-center gap-1">
-              <motion.div 
-                whileTap={{ scale: 1.5, rotate: 20 }}
-                className="p-3 bg-cyan-500/20 backdrop-blur-xl rounded-full border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
-              >
-                <Zap className="w-7 h-7 text-cyan-400 fill-cyan-400" />
-              </motion.div>
-              <span className="text-[10px] font-black text-cyan-400 tracking-tighter">GIFT</span>
-            </div>
-
-            <div className="p-3 bg-white/5 backdrop-blur-xl rounded-full border border-white/10">
-              <Share2 className="w-7 h-7 text-white" />
-            </div>
-          </div>
-
-          {/* 📝 Video Info Node (Bottom Left) */}
-          <div className="px-6 space-y-3 z-20 relative">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-cyan-500 rounded-full border-2 border-white overflow-hidden shadow-lg shadow-cyan-500/20" />
-              <h3 className="font-black italic text-lg tracking-tight uppercase">{reel.user}</h3>
-              <button className="px-4 py-1 bg-white text-black text-[9px] font-black rounded-full uppercase tracking-widest hover:bg-cyan-400 transition-colors">Follow</button>
-            </div>
-            
-            <p className="text-sm text-zinc-300 font-medium line-clamp-2 pr-12 leading-snug">
-              {reel.desc}
-            </p>
-
-            {/* 🎵 Music Disc Node */}
-            <div className="flex items-center gap-2">
-              <Music className="w-3 h-3 text-cyan-400" />
-              <marquee className="text-[10px] font-black text-zinc-400 w-40 uppercase tracking-widest italic">
-                {reel.music}
-              </marquee>
-            </div>
-          </div>
-
-          {/* 🔘 Rotating Disc Animation */}
-          <motion.div 
-            animate={{ rotate: 360 }}
-            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-            className="absolute bottom-10 right-6 w-10 h-10 rounded-full border-4 border-zinc-800 bg-gradient-to-tr from-zinc-900 to-black flex items-center justify-center overflow-hidden z-20"
-          >
-            <div className="w-4 h-4 bg-zinc-700 rounded-full border-2 border-zinc-900" />
-          </motion.div>
-
+    <div className="h-screen bg-black text-white overflow-hidden flex flex-col">
+      {/* --- TOP NAVIGATION --- */}
+      <div className="absolute top-0 w-full z-50 p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+        <button onClick={() => setLocation("/hub")} className="p-2 bg-white/10 rounded-full backdrop-blur-md">
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
+        <div className="flex gap-4 font-black italic text-[10px] tracking-widest">
+          <span className="text-cyan-400 border-b-2 border-cyan-400 pb-1">FOLLOWING</span>
+          <span className="text-zinc-500">FOR YOU</span>
         </div>
-      ))}
+        <div className="w-9 h-9 rounded-full border border-cyan-500/50 p-0.5">
+          <img src="/images/avatar.png" className="w-full h-full rounded-full object-cover" alt="Profile" />
+        </div>
+      </div>
 
-      <style>{`
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
+      {/* --- REELS ENGINE (FULL SCREEN) --- */}
+      <div className="flex-1 relative bg-zinc-900">
+        <VideoPlayer src="/videos/sample-reel.mp4" />
+
+        {/* SIDE BAR ACTIONS */}
+        <div className="absolute right-4 bottom-32 flex flex-col gap-6 items-center">
+          <div className="flex flex-col items-center gap-1">
+            <div className="p-3 bg-white/10 backdrop-blur-md rounded-full">
+              <Heart className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-[10px] font-bold">12.5K</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <div className="p-3 bg-white/10 backdrop-blur-md rounded-full">
+              <MessageCircle className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-[10px] font-bold">842</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <div className="p-3 bg-white/10 backdrop-blur-md rounded-full">
+              <Share2 className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-[10px] font-bold">Share</span>
+          </div>
+        </div>
+
+        {/* BOTTOM INFO SECTION */}
+        <div className="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black via-black/40 to-transparent">
+          <h3 className="font-bold text-sm">@race_x_creator</h3>
+          <p className="text-xs text-zinc-300 mt-2 line-clamp-2">
+            Amazing AI generation using Race-X Studio! #AI #Creative #Nexus
+          </p>
+
+          {/* ⚡ NEW SCROLLING TEXT (Marquee Fix) */}
+          <div className="mt-4 flex items-center gap-2 overflow-hidden bg-white/5 py-2 px-3 rounded-xl border border-white/5">
+            <Music2 className="w-3 h-3 text-cyan-400 flex-shrink-0" />
+            <motion.div 
+              animate={{ x: [0, -200] }}
+              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+              className="whitespace-nowrap text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400"
+            >
+              Original Sound - Race-X Media Studio • Original Sound - Race-X Media Studio • 
+            </motion.div>
+          </div>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default SocialFeed;
+}
