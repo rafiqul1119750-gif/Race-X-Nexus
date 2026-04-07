@@ -1,143 +1,107 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
+import { motion } from 'framer-motion';
 import { 
-  Zap, 
-  Sparkles, 
-  Globe, 
-  BookOpenText, 
-  ShoppingBag,
-  Home,
-  Video,
-  Users,
-  MessageSquare,
-  Music,
-  ShoppingBasket
+  Globe, Sparkles, Video, MessageCircle, 
+  Music, ShoppingBag, User, Settings, Bell, Zap
 } from 'lucide-react';
-import { Card } from '../components/ui/card';
-
-const colors = {
-  studio: '#00e1ff',
-  magic: '#00e1ff',
-  social: '#ab47bc',
-  media: 'linear-gradient(90deg, #00e1ff 0%, #ab47bc 100%)',
-  shop: '#f59e0b'
-};
-
-const moduleCards = [
-  { id: 'studio', name: 'RX STUDIO', icon: Zap, color: colors.studio, path: '/studio' },
-  { id: 'magic', name: 'RX MAGIC', icon: Sparkles, color: colors.magic, path: '/magic' },
-  { id: 'social', name: 'RX SOCIAL', icon: Globe, color: colors.social, path: '/social' },
-  { 
-    id: 'media', 
-    name: 'RX MEDIA LIBRARY', 
-    icon: BookOpenText, 
-    color: colors.media, 
-    path: '/media',
-    desc: '(MILLIONS OF INDIAN SONGS & VOICES)' 
-  },
-  { id: 'shop', name: 'RX SHOP', icon: ShoppingBag, color: colors.shop, path: '/shop' }
-];
 
 const RXMainHub = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
+
+  // 🟢 Diagram Modules Node
+  const modules = [
+    { id: 'social', name: 'Social App', icon: Globe, color: 'from-cyan-500/20', path: '/social' },
+    { id: 'magic', name: 'Magic AI', icon: Sparkles, color: 'from-purple-500/20', path: '/magic' },
+    { id: 'studio', name: 'Studio', icon: Video, color: 'from-blue-500/20', path: '/studio' },
+    { id: 'chat', name: 'Nexus Chat', icon: MessageCircle, color: 'from-emerald-500/20', path: '/chat' },
+    { id: 'music', name: 'Sound Sync', icon: Music, color: 'from-pink-500/20', path: '/music' },
+    { id: 'shop', name: 'Marketplace', icon: ShoppingBag, color: 'from-orange-500/20', path: '/shop' },
+  ];
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 pb-32 relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#050505] text-white p-6 pb-24 relative overflow-hidden">
       
-      {/* 🖼️ Background Logo (Subtle center logo) */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.05] w-[100%] pointer-events-none z-0">
-          <img src="/images/rx-logo.png" alt="RX Background" className="w-full h-auto object-contain" />
-      </div>
-      
-      {/* 🌌 Hero Banner Section (hero-bg.png) */}
-      <div className="relative w-full h-56 rounded-3xl overflow-hidden mb-8 z-10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-        <img 
-          src="/images/hero-bg.png" 
-          alt="Hero Background" 
-          className="w-full h-full object-cover brightness-[0.7]" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-        <div className="absolute bottom-6 left-6">
-          <h1 className="text-2xl font-black italic tracking-tighter uppercase leading-none">
-            Welcome to<br />
-            <span className="text-4xl text-cyan-400">Race-X World</span>
-          </h1>
-          <button className="mt-4 bg-white text-black font-black text-[10px] uppercase px-6 py-2 rounded-full tracking-widest active:scale-95 transition-transform">
-            + New Project
-          </button>
-        </div>
+      {/* Background Animated Energy Field */}
+      <div className="absolute inset-0 overflow-hidden opacity-30 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-900/20 blur-[150px] rounded-full" />
       </div>
 
-      {/* Grid: Studio, Magic, Social */}
-      <div className="flex flex-col gap-4 relative z-10 mb-4">
-        {moduleCards.slice(0, 3).map((mod) => (
-          <Card 
-            key={mod.id}
-            onClick={() => navigate(mod.path)}
-            style={{ backgroundColor: mod.color }}
-            className="flex items-center justify-between px-6 py-4 rounded-2xl cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all h-[78px] border-none shadow-lg"
+      {/* 🏠 Top Bar Node (Profile & Notifs) */}
+      <header className="flex justify-between items-center mb-10 pt-4 relative z-10">
+        <div className="flex flex-col">
+          <h2 className="text-[10px] font-black text-cyan-500 tracking-[0.4em] uppercase italic">System Online</h2>
+          <h1 className="text-2xl font-black tracking-tighter italic">RACE-X <span className="text-zinc-600">NEXUS</span></h1>
+        </div>
+        <div className="flex gap-4">
+          <button className="p-3 bg-zinc-900/50 rounded-2xl border border-zinc-800 hover:border-cyan-500/50 transition-all">
+            <Bell className="w-5 h-5 text-zinc-400" />
+          </button>
+          <button className="p-3 bg-zinc-900/50 rounded-2xl border border-zinc-800 hover:border-cyan-500/50 transition-all">
+            <User className="w-5 h-5 text-zinc-400" />
+          </button>
+        </div>
+      </header>
+
+      {/* 🏠 Quick Action / Featured Node */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full h-40 bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-[32px] mb-8 p-6 relative overflow-hidden flex items-center justify-between group cursor-pointer"
+      >
+        <div className="z-10">
+          <div className="flex items-center gap-2 mb-2">
+            <Zap className="w-4 h-4 text-cyan-400 fill-cyan-400" />
+            <span className="text-[9px] font-black tracking-widest text-cyan-400">DAILY QUEST</span>
+          </div>
+          <h3 className="text-xl font-black uppercase italic">Earn 500 Diamonds</h3>
+          <p className="text-[10px] text-zinc-500 font-bold mt-1">POST 3 REELS TO UNLOCK REWARDS</p>
+        </div>
+        <div className="relative z-10 p-4 bg-cyan-500 rounded-2xl text-black">
+          <ChevronRight className="w-6 h-6 stroke-[3]" />
+        </div>
+        {/* Glow behind */}
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-cyan-500/10 blur-3xl group-hover:bg-cyan-500/20 transition-all" />
+      </motion.div>
+
+      {/* 🏠 Grid Navigation Node (The 6 Modules) */}
+      <div className="grid grid-cols-2 gap-4 relative z-10">
+        {modules.map((item, index) => (
+          <motion.div
+            key={item.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1 }}
+            onClick={() => setLocation(item.path)}
+            className={`aspect-square bg-gradient-to-b ${item.color} to-zinc-950 border border-zinc-800/50 rounded-[32px] p-6 flex flex-col justify-between hover:border-cyan-500/50 transition-all active:scale-95 cursor-pointer group`}
           >
-            <h3 className="font-black text-2xl tracking-tighter uppercase italic text-black">
-              {mod.name}
-            </h3>
-            <mod.icon className="w-8 h-8 text-black stroke-[2.5]" />
-          </Card>
+            <div className="w-12 h-12 bg-black/40 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <item.icon className="w-6 h-6 text-white group-hover:text-cyan-400 transition-colors" />
+            </div>
+            <div>
+              <h4 className="font-black text-xs uppercase tracking-wider">{item.name}</h4>
+              <p className="text-[8px] text-zinc-600 font-bold mt-1 uppercase">Enter Module</p>
+            </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* Media Library Card */}
-      <Card 
-        onClick={() => navigate('/media')}
-        style={{ background: colors.media }}
-        className="flex items-center justify-between px-6 py-4 rounded-2xl cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all h-24 mb-4 border-none relative z-10"
-      >
-        <div className="flex flex-col">
-            <h3 className="font-black text-2xl tracking-tighter uppercase italic text-black">
-                RX MEDIA LIBRARY
-            </h3>
-            <p className="text-[9px] text-black/80 font-bold uppercase tracking-tight">
-                {moduleCards[3].desc}
-            </p>
-        </div>
-        <BookOpenText className="w-9 h-9 text-black stroke-[2.5]" />
-      </Card>
-      
-      {/* RX Shop Card */}
-      <Card 
-        onClick={() => navigate('/shop')}
-        style={{ backgroundColor: colors.shop }}
-        className="flex items-center justify-between px-6 py-4 rounded-2xl cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all h-[78px] border-none relative z-10 shadow-md"
-      >
-        <h3 className="font-black text-2xl tracking-tighter uppercase italic text-black">
-          RX SHOP
-        </h3>
-        <ShoppingBag className="w-8 h-8 text-black stroke-[2.5]" />
-      </Card>
+      {/* 🏠 Bottom Quick Tools Node */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 p-2 rounded-3xl flex justify-around items-center z-50">
+        <button className="p-4 text-cyan-400"><Globe className="w-6 h-6" /></button>
+        <div className="w-[1px] h-6 bg-zinc-800" />
+        <button className="p-4 text-zinc-600 hover:text-white transition-colors"><Settings className="w-6 h-6" /></button>
+      </div>
 
-      {/* Bottom Dock Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-xl border-t border-zinc-900 p-4 z-50">
-        <div className="flex items-center justify-between max-w-md mx-auto">
-          {[
-            { name: 'Hub', icon: Home, path: '/', active: true },
-            { name: 'Studio', icon: Video, path: '/studio' },
-            { name: 'Social', icon: Users, path: '/social' },
-            { name: 'Chat', icon: MessageSquare, path: '/chat' },
-            { name: 'Music', icon: Music, path: '/music' },
-            { name: 'Shop', icon: ShoppingBasket, path: '/shop' },
-          ].map((item) => (
-            <button 
-                key={item.name} 
-                onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center gap-1 flex-1 transition-colors ${item.active ? 'text-cyan-400' : 'text-zinc-600'}`}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="text-[8px] font-black uppercase tracking-tighter">{item.name}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
     </div>
   );
 };
+
+// Helper Component
+const ChevronRight = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+  </svg>
+);
 
 export default RXMainHub;
