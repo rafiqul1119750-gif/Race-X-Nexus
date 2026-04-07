@@ -6,20 +6,20 @@ import { Eye, EyeOff, Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
 const SignIn = () => {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [credentials, setCredentials] = useState({ identity: '', password: '' });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic: Authenticate user then redirect to Main Hub
+    // Logic: Validation check here in future
+    // Diagram Flow: Sign In Success -> Redirect to HUB
     setLocation('/hub'); 
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col p-8 pt-20 relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white flex flex-col p-8 pt-24 relative overflow-hidden">
       
-      {/* Cinematic Background Elements */}
-      <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-cyan-500/5 blur-[100px] rounded-full" />
+      {/* Background Cinematic Glows */}
+      <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-cyan-500/10 blur-[100px] rounded-full animate-pulse" />
       <div className="absolute bottom-[-5%] left-[-5%] w-80 h-80 bg-purple-500/5 blur-[120px] rounded-full" />
 
       {/* 🔐 Header Node */}
@@ -28,87 +28,85 @@ const SignIn = () => {
         animate={{ opacity: 1, x: 0 }}
         className="mb-12"
       >
-        <h1 className="text-5xl font-black italic tracking-tighter text-white leading-none">
-          SIGN <span className="text-cyan-400 text-shadow-[0_0_15px_rgba(34,211,238,0.5)]">IN</span>
+        <h1 className="text-6xl font-black italic tracking-tighter text-white leading-[0.8]">
+          SIGN <span className="text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]">IN</span>
         </h1>
-        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.4em] mt-3">
-          Access the Race-X Nexus
+        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.5em] mt-4 ml-1">
+          Authorized Personnel Only
         </p>
       </motion.div>
 
-      {/* 🔐 Sign In Form Nodes */}
-      <form onSubmit={handleLogin} className="space-y-5 z-10">
+      {/* 🔐 Form Module */}
+      <form onSubmit={handleLogin} className="space-y-4 z-10">
         
-        {/* Email / Phone Input Node */}
-        <div className="group relative">
-          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600 group-focus-within:text-cyan-400 transition-colors" />
+        {/* Email/Phone Input */}
+        <div className="relative group">
+          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-700 group-focus-within:text-cyan-400 transition-colors" />
           <input 
             type="text" 
             placeholder="EMAIL OR PHONE" 
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-zinc-900/40 border border-zinc-800 p-5 pl-12 rounded-2xl focus:border-cyan-500/50 outline-none transition-all text-sm font-bold placeholder:text-zinc-700 tracking-tight"
+            className="w-full bg-zinc-900/40 border border-zinc-800 p-5 pl-12 rounded-2xl focus:border-cyan-500/50 outline-none transition-all text-sm font-bold tracking-tight placeholder:text-zinc-700"
+            onChange={(e) => setCredentials({...credentials, identity: e.target.value})}
           />
         </div>
 
-        {/* Password Input Node (With 👁 Show/Hide) */}
-        <div className="group relative">
-          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600 group-focus-within:text-cyan-400 transition-colors" />
+        {/* Password Input (With 👁 Toggle) */}
+        <div className="relative group">
+          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-700 group-focus-within:text-cyan-400 transition-colors" />
           <input 
             type={showPassword ? "text" : "password"} 
             placeholder="PASSWORD" 
             required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-zinc-900/40 border border-zinc-800 p-5 pl-12 pr-12 rounded-2xl focus:border-cyan-500/50 outline-none transition-all text-sm font-bold placeholder:text-zinc-700 tracking-tight"
+            className="w-full bg-zinc-900/40 border border-zinc-800 p-5 pl-12 pr-12 rounded-2xl focus:border-cyan-500/50 outline-none transition-all text-sm font-bold tracking-tight placeholder:text-zinc-700"
+            onChange={(e) => setCredentials({...credentials, password: e.target.value})}
           />
           <button 
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-white transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-700 hover:text-white transition-colors"
           >
             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
           </button>
         </div>
 
-        {/* 🔐 Forgot Password Node */}
-        <div className="flex justify-start">
-          <button type="button" className="text-[10px] font-black text-zinc-500 hover:text-cyan-400 uppercase tracking-widest transition-all">
-            Forgot Password?
+        {/* Forgot Password Link */}
+        <div className="flex justify-end pr-2">
+          <button type="button" className="text-[9px] font-black text-zinc-600 hover:text-cyan-400 uppercase tracking-widest transition-colors">
+            Recovery Access?
           </button>
         </div>
 
-        {/* 🔐 Login Button Node (Redirect → MAIN HUB) */}
+        {/* 🚀 Login Action */}
         <motion.button 
-          whileTap={{ scale: 0.97 }}
+          whileTap={{ scale: 0.98 }}
           type="submit"
-          className="w-full bg-white text-black p-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-cyan-400 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] active:shadow-none mt-4"
+          className="w-full bg-white text-black p-5 rounded-2xl font-black flex items-center justify-center gap-3 mt-6 hover:bg-cyan-400 transition-all shadow-[0_0_30px_rgba(255,255,255,0.05)]"
         >
-          LOGIN TO HUB <ArrowRight className="w-5 h-5" />
+          ENTER NEXUS <ArrowRight className="w-5 h-5" />
         </motion.button>
       </form>
 
-      {/* 🔐 Sign Up Redirect Node */}
-      <div className="mt-10 text-center">
-        <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest mb-2">New Pilot?</p>
+      {/* 🆕 Redirect to Signup */}
+      <div className="mt-12 text-center">
+        <p className="text-zinc-700 text-[10px] font-bold uppercase tracking-[0.2em] mb-3">No Identity Found?</p>
         <button 
           onClick={() => setLocation('/auth/signup')}
-          className="text-white font-black text-sm uppercase underline decoration-cyan-500/50 underline-offset-8 hover:text-cyan-400 transition-colors"
+          className="text-white font-black text-sm uppercase border-b-2 border-cyan-500/30 pb-1 hover:text-cyan-400 transition-colors"
         >
-          Create New Account
+          Initialize New Account
         </button>
       </div>
 
-      {/* 🔐 GUEST MODE Node (Limited Access) */}
-      <div className="mt-auto pb-6 text-center">
+      {/* 🛡️ Guest Mode Node */}
+      <div className="mt-auto pb-8 text-center opacity-40 hover:opacity-100 transition-opacity">
         <button 
           onClick={() => setLocation('/hub')}
-          className="group flex items-center justify-center gap-2 mx-auto"
+          className="flex items-center justify-center gap-2 mx-auto"
         >
-          <ShieldCheck className="w-4 h-4 text-zinc-700 group-hover:text-cyan-500 transition-colors" />
-          <span className="text-zinc-700 text-[9px] font-black uppercase tracking-[0.2em] group-hover:text-zinc-400 transition-colors">
-            Continue as Guest (Limited Access)
+          <ShieldCheck className="w-3 h-3 text-cyan-500" />
+          <span className="text-zinc-500 text-[9px] font-black uppercase tracking-[0.3em]">
+            Continue as Guest (Limited)
           </span>
         </button>
       </div>
