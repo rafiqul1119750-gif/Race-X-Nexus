@@ -2,106 +2,112 @@ import React from 'react';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { 
-  Globe, Sparkles, Video, MessageCircle, 
-  Music, ShoppingBag, User, Settings, Bell, Zap
+  Zap, Play, Music, ShoppingBag, 
+  Wallet, Trophy, Bell, Settings 
 } from 'lucide-react';
+import BottomNav from '../components/BottomNav';
+import AdBanner from '../components/AdBanner';
 
-const RXMainHub = () => {
+const MainHub = () => {
   const [, setLocation] = useLocation();
 
-  // 🟢 Diagram Modules Node
-  const modules = [
-    { id: 'social', name: 'Social App', icon: Globe, color: 'from-cyan-500/20', path: '/social' },
-    { id: 'magic', name: 'Magic AI', icon: Sparkles, color: 'from-purple-500/20', path: '/magic' },
-    { id: 'studio', name: 'Studio', icon: Video, color: 'from-blue-500/20', path: '/studio' },
-    { id: 'chat', name: 'Nexus Chat', icon: MessageCircle, color: 'from-emerald-500/20', path: '/chat' },
-    { id: 'music', name: 'Sound Sync', icon: Music, color: 'from-pink-500/20', path: '/music' },
-    { id: 'shop', name: 'Marketplace', icon: ShoppingBag, color: 'from-orange-500/20', path: '/shop' },
-  ];
-
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-6 pb-24 relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white pb-32 overflow-x-hidden">
       
-      {/* Background Animated Energy Field */}
-      <div className="absolute inset-0 overflow-hidden opacity-30 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-900/20 blur-[150px] rounded-full" />
-      </div>
-
-      {/* 🏠 Top Bar Node (Profile & Notifs) */}
-      <header className="flex justify-between items-center mb-10 pt-4 relative z-10">
-        <div className="flex flex-col">
-          <h2 className="text-[10px] font-black text-cyan-500 tracking-[0.4em] uppercase italic">System Online</h2>
-          <h1 className="text-2xl font-black tracking-tighter italic">RACE-X <span className="text-zinc-600">NEXUS</span></h1>
+      {/* 🟢 Header Node (Logo & Wallet) */}
+      <header className="flex justify-between items-center p-6 bg-black/50 backdrop-blur-md sticky top-0 z-50">
+        <div className="flex items-center gap-3">
+          {/* 🖼️ Logo Import from Public */}
+          <img src="/images/rx-logo.png" alt="RX Logo" className="w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(0,225,255,0.5)]" />
+          <div>
+            <h1 className="text-lg font-black italic tracking-tighter leading-none">RACE-X</h1>
+            <span className="text-[8px] text-cyan-400 font-bold uppercase tracking-[0.3em]">Nexus v1.0</span>
+          </div>
         </div>
-        <div className="flex gap-4">
-          <button className="p-3 bg-zinc-900/50 rounded-2xl border border-zinc-800 hover:border-cyan-500/50 transition-all">
-            <Bell className="w-5 h-5 text-zinc-400" />
-          </button>
-          <button className="p-3 bg-zinc-900/50 rounded-2xl border border-zinc-800 hover:border-cyan-500/50 transition-all">
-            <User className="w-5 h-5 text-zinc-400" />
-          </button>
+        <div className="flex items-center gap-4">
+          <div className="bg-zinc-900 px-3 py-1.5 rounded-2xl border border-white/5 flex items-center gap-2">
+            <Wallet className="w-3 h-3 text-yellow-500" />
+            <span className="text-xs font-black italic">1.2K</span>
+          </div>
+          <Bell className="w-5 h-5 text-zinc-500" />
         </div>
       </header>
 
-      {/* 🏠 Quick Action / Featured Node */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full h-40 bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-[32px] mb-8 p-6 relative overflow-hidden flex items-center justify-between group cursor-pointer"
-      >
-        <div className="z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-4 h-4 text-cyan-400 fill-cyan-400" />
-            <span className="text-[9px] font-black tracking-widest text-cyan-400">DAILY QUEST</span>
+      {/* 🟢 Hero Banner Node (Public Image Import) */}
+      <section className="px-6 py-4">
+        <div 
+          className="relative h-48 rounded-[40px] overflow-hidden border border-white/10 flex items-center px-8"
+          style={{
+            backgroundImage: "linear-gradient(to right, rgba(0,0,0,0.8), transparent), url('/images/hero-bg.png')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          <div className="relative z-10 max-w-[200px]">
+            <h2 className="text-2xl font-black italic leading-none tracking-tighter uppercase mb-2">
+              Welcome to <span className="text-cyan-400">Race-X</span> Creative World
+            </h2>
+            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Unleash the Power of AI</p>
           </div>
-          <h3 className="text-xl font-black uppercase italic">Earn 500 Diamonds</h3>
-          <p className="text-[10px] text-zinc-500 font-bold mt-1">POST 3 REELS TO UNLOCK REWARDS</p>
+          {/* Neon Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
         </div>
-        <div className="relative z-10 p-4 bg-cyan-500 rounded-2xl text-black">
-          <ChevronRight className="w-6 h-6 stroke-[3]" />
-        </div>
-        {/* Glow behind */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-cyan-500/10 blur-3xl group-hover:bg-cyan-500/20 transition-all" />
-      </motion.div>
+      </section>
 
-      {/* 🏠 Grid Navigation Node (The 6 Modules) */}
-      <div className="grid grid-cols-2 gap-4 relative z-10">
-        {modules.map((item, index) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.1 }}
-            onClick={() => setLocation(item.path)}
-            className={`aspect-square bg-gradient-to-b ${item.color} to-zinc-950 border border-zinc-800/50 rounded-[32px] p-6 flex flex-col justify-between hover:border-cyan-500/50 transition-all active:scale-95 cursor-pointer group`}
-          >
-            <div className="w-12 h-12 bg-black/40 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <item.icon className="w-6 h-6 text-white group-hover:text-cyan-400 transition-colors" />
-            </div>
-            <div>
-              <h4 className="font-black text-xs uppercase tracking-wider">{item.name}</h4>
-              <p className="text-[8px] text-zinc-600 font-bold mt-1 uppercase">Enter Module</p>
-            </div>
-          </motion.div>
-        ))}
+      {/* 🟢 Module Grid (The Nexus) */}
+      <div className="grid grid-cols-2 gap-4 px-6 mt-6">
+        {/* Studio Card */}
+        <motion.div 
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setLocation('/studio/editor')}
+          className="bg-zinc-900/50 p-6 rounded-[32px] border border-white/5 flex flex-col items-center gap-3"
+        >
+          <div className="w-12 h-12 bg-white text-black rounded-2xl flex items-center justify-center shadow-neon-blue">
+            <Zap className="w-6 h-6 fill-black" />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-widest">AI Studio</span>
+        </motion.div>
+
+        {/* Social Card */}
+        <motion.div 
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setLocation('/social/feed')}
+          className="bg-zinc-900/50 p-6 rounded-[32px] border border-white/5 flex flex-col items-center gap-3"
+        >
+          <div className="w-12 h-12 bg-cyan-500 text-black rounded-2xl flex items-center justify-center">
+            <Play className="w-6 h-6 fill-black" />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-widest">Explore</span>
+        </motion.div>
       </div>
 
-      {/* 🏠 Bottom Quick Tools Node */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 p-2 rounded-3xl flex justify-around items-center z-50">
-        <button className="p-4 text-cyan-400"><Globe className="w-6 h-6" /></button>
-        <div className="w-[1px] h-6 bg-zinc-800" />
-        <button className="p-4 text-zinc-600 hover:text-white transition-colors"><Settings className="w-6 h-6" /></button>
+      {/* 🟢 Ad Engine Injection */}
+      <div className="px-6 mt-8">
+        <AdBanner />
       </div>
 
+      {/* 🟢 Secondary Actions */}
+      <div className="px-6 mt-8 space-y-4">
+         <div className="flex items-center justify-between p-4 bg-zinc-900/30 rounded-3xl border border-white/5">
+            <div className="flex items-center gap-3">
+               <Music className="w-5 h-5 text-purple-500" />
+               <span className="text-[10px] font-black uppercase tracking-widest">Audio Library</span>
+            </div>
+            <button onClick={() => setLocation('/music/library')} className="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Open</button>
+         </div>
+         <div className="flex items-center justify-between p-4 bg-zinc-900/30 rounded-3xl border border-white/5">
+            <div className="flex items-center gap-3">
+               <ShoppingBag className="w-5 h-5 text-pink-500" />
+               <span className="text-[10px] font-black uppercase tracking-widest">RX Shop</span>
+            </div>
+            <button onClick={() => setLocation('/shop/products')} className="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Visit</button>
+         </div>
+      </div>
+
+      {/* 🟢 Navigation Node */}
+      <BottomNav />
     </div>
   );
 };
 
-// Helper Component
-const ChevronRight = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-  </svg>
-);
-
-export default RXMainHub;
+export default MainHub;
