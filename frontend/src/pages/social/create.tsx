@@ -1,33 +1,66 @@
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Camera, Video, Music, Wand2 } from "lucide-react";
+import { X, Image as ImageIcon, Video, Camera, Check, Music } from "lucide-react";
 
 export default function CreatePost() {
   const [, setLocation] = useLocation();
+  const [file, setFile] = useState<string | null>(null);
+  const [caption, setCaption] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setFile(URL.createObjectURL(selectedFile));
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 font-sans flex flex-col">
-      <div className="flex items-center gap-4 mb-10">
-        <ArrowLeft onClick={() => setLocation('/social/feed')} className="text-zinc-500" />
-        <h1 className="text-sm font-black italic tracking-[0.2em] uppercase text-cyan-400">Forge New Content</h1>
+    <div className="min-h-screen bg-black text-white flex flex-col p-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <X onClick={() => setLocation("/social/feed")} className="cursor-pointer" />
+        <h1 className="font-black uppercase italic tracking-widest text-sm">New Creation</h1>
+        <button 
+          disabled={!file}
+          onClick={() => setLocation("/social/feed")}
+          className={`font-black text-xs uppercase p-2 px-4 rounded-xl ${file ? 'bg-cyan-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}
+        >
+          Share
+        </button>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center gap-6">
-        <div className="aspect-square w-full bg-zinc-900/50 border-2 border-dashed border-zinc-700 rounded-[40px] flex flex-col items-center justify-center gap-4 group active:border-cyan-500 transition-colors">
-          <Camera size={40} className="text-zinc-600 group-active:text-cyan-400" />
-          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center px-10">
-            Tap to upload from Nexus Gallery or capture live
-          </p>
+      {/* Media Preview Box */}
+      <div 
+        onClick={() => fileInputRef.current?.click()}
+        className="aspect-square w-full rounded-[40px] border-2 border-dashed border-zinc-800 flex flex-col items-center justify-center bg-zinc-900/30 overflow-hidden relative cursor-pointer"
+      >
+        {file ? (
+          <img src={file} className="w-full h-full object-cover animate-in fade-in zoom-in duration-300" />
+        ) : (
+          <>
+            <div className="p-5 bg-zinc-800 rounded-full mb-4 text-cyan-400"><Camera size={32}/></div>
+            <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Tap to capture or upload</p>
+          </>
+        )}
+        <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" accept="image/*,video/*" />
+      </div>
+
+      {/* Post Details */}
+      <div className="mt-8 space-y-6">
+        <div className="flex gap-4 items-start bg-zinc-900/50 p-4 rounded-3xl border border-white/5">
+          <div className="w-10 h-10 rounded-2xl bg-zinc-800" />
+          <textarea 
+            placeholder="Write a caption... #RaceX #AI"
+            className="flex-1 bg-transparent text-sm outline-none h-20 resize-none"
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <button className="p-6 bg-zinc-900 rounded-[30px] border border-white/5 flex flex-col items-center gap-3">
-            <Video className="text-purple-400" />
-            <span className="text-[9px] font-black uppercase">Post Reel</span>
-          </button>
-          <button className="p-6 bg-zinc-900 rounded-[30px] border border-white/5 flex flex-col items-center gap-3">
-            <Wand2 className="text-amber-400" />
-            <span className="text-[9px] font-black uppercase">AI Studio</span>
-          </button>
+          <button className="flex items-center justify-center gap-2 p-4 bg-zinc-900 rounded-2xl border border-white/5 text-[10px] font-black uppercase"><Music size={14} className="text-purple-500"/> Add Music</button>
+          <button className="flex items-center justify-center gap-2 p-4 bg-zinc-900 rounded-2xl border border-white/5 text-[10px] font-black uppercase"><Check size={14} className="text-cyan-500"/> Tag AI Hub</button>
         </div>
       </div>
     </div>
