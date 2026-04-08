@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from "react"; // <--- Maine yahan 'i' small kar diya hai
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 
@@ -7,7 +7,7 @@ export default function SplashScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setLocation("/hub"); // Hub missing na ho isliye rasta change kar diya
+      setLocation("/hub"); 
     }, 3000);
     return () => clearTimeout(timer);
   }, [setLocation]);
