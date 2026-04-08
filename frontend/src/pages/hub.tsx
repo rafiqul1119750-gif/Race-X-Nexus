@@ -1,35 +1,56 @@
 import { useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, Globe, Plus, Search, User, Compass, Bell, Camera, Send } from "lucide-react";
+import { Sparkles, Globe, Wand2, MessageSquare, Music, ShoppingBag, User, Settings, Bell, Gem } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
 
-export default function SocialFeed() {
+export default function MainHub() {
   const [, setLocation] = useLocation();
+  const { diamonds } = useAppContext();
+
+  const cards = [
+    { label: 'RX STUDIO', icon: Sparkles, path: '/studio', color: 'text-cyan-400' },
+    { label: 'RX SOCIAL', icon: Globe, path: '/social/feed', color: 'text-purple-400' },
+    { label: 'RX MAGIC', icon: Wand2, path: '/magic', color: 'text-amber-400' },
+    { label: 'RX CHAT', icon: MessageSquare, path: '/chat', color: 'text-green-400' },
+    { label: 'RX MUSIC', icon: Music, path: '/music', color: 'text-red-400' },
+    { label: 'RX SHOP', icon: ShoppingBag, path: '/shop', color: 'text-pink-400' },
+  ];
 
   return (
-    <div className="fixed inset-0 bg-black text-white">
-      {/* TOP BAR (Diagram: Camera, Search, DM, Notif) */}
-      <div className="absolute top-0 w-full z-50 p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
-        <Camera size={24} onClick={() => setLocation('/social/create')} />
-        <h1 className="text-xl font-black italic tracking-widest">RACE-X</h1>
-        <div className="flex gap-5">
-          <Search size={24} onClick={() => setLocation('/social/search')} />
-          <Send size={24} className="-rotate-45" onClick={() => setLocation('/chat')} />
+    <div className="min-h-screen bg-black text-white p-6 pt-10">
+      {/* Top Header */}
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex gap-4 text-zinc-600">
+          <Settings size={22} />
+          <Bell size={22} />
+        </div>
+        <div onClick={() => setLocation('/profile')} className="w-10 h-10 rounded-2xl bg-zinc-900 border border-cyan-500/30 flex items-center justify-center cursor-pointer">
+          <User size={20} className="text-cyan-400" />
         </div>
       </div>
 
-      {/* VIDEO PLAYER (Reels Default) */}
-      <div className="h-full bg-zinc-900 flex items-center justify-center">
-        <video src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-city-light-14144-large.mp4" className="w-full h-full object-cover opacity-70" autoPlay loop muted playsInline />
+      {/* Logo & Diamonds */}
+      <div className="mb-10">
+        <h1 className="text-4xl font-black italic tracking-tighter text-white">RACE-X</h1>
+        <div className="flex items-center gap-2 mt-2">
+          <Gem size={14} className="text-cyan-400" />
+          <span className="text-xs font-black tracking-widest">{diamonds || 0} 💎</span>
+        </div>
       </div>
 
-      {/* BOTTOM NAV (Diagram: Home, Explore, Create, Activity, Profile) */}
-      <div className="absolute bottom-0 w-full bg-black/90 backdrop-blur-md border-t border-white/10 p-5 pb-8 flex justify-around items-center">
-        <Globe size={24} onClick={() => setLocation('/social/feed')} className="text-white" />
-        <Compass size={24} onClick={() => setLocation('/social/explore')} className="text-zinc-500" />
-        <div onClick={() => setLocation('/social/create')} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center -mt-10 border-4 border-black shadow-xl">
-          <Plus className="text-black font-bold" />
-        </div>
-        <Bell size={24} onClick={() => setLocation('/social/activity')} className="text-zinc-500" />
-        <User size={24} onClick={() => setLocation('/profile')} className="text-zinc-500" />
+      {/* Grid - Original 45px rounding */}
+      <div className="grid grid-cols-2 gap-4">
+        {cards.map((card, i) => (
+          <div 
+            key={i} 
+            onClick={() => setLocation(card.path)} 
+            className="aspect-square bg-zinc-900/40 border border-white/5 rounded-[45px] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all cursor-pointer shadow-2xl"
+          >
+            <div className="p-4 rounded-3xl bg-black border border-white/5">
+              <card.icon className={`w-8 h-8 ${card.color}`} />
+            </div>
+            <span className="text-[9px] font-black tracking-[0.2em] uppercase text-zinc-400">{card.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
