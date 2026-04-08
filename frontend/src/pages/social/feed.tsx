@@ -10,12 +10,17 @@ export default function SocialFeed() {
       <div className="absolute top-0 w-full z-50 pt-6 px-6 flex justify-between items-center bg-gradient-to-b from-black/90 to-transparent pb-10">
         <div onClick={() => setLocation('/hub')} className="p-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 active:scale-90 transition-transform">
            <LayoutGrid size={20} className="text-cyan-400" /> 
-        </div>
-        <h1 className="text-xl font-black italic tracking-widest">RACE-X</h1>
-        <div className="flex gap-5">
-          <Search size={24} onClick={() => setLocation('/social/search')} />
-          <Send size={24} className="-rotate-45" onClick={() => setLocation('/chat')} />
-        </div>
+        <div className="flex gap-4 items-center">
+  <Camera size={24} onClick={() => {
+    // Phone Camera Access Logic
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'video/*,image/*';
+    input.capture = 'environment';
+    input.click();
+  }} className="cursor-pointer active:scale-90" />
+  <Bell size={24} onClick={() => setLocation('/social/activity')} className="cursor-pointer active:scale-90" />
+</div>
       </div>
 
       {/* REELS / VIDEO AREA */}
