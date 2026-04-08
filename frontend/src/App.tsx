@@ -3,9 +3,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "./components/ui/toaster";
 
-// CONTEXTS
-import { AppProvider } from "./connect/Appcontext"; // Aapka Diamonds wala context
-import { ThemeProvider } from "./context/ThemeContext"; // Naya Dark/Light mode context
+// SIRF YE WALA CONTEXT USE HOGA (Diamonds + Theme dono isi mein hain)
+import { AppProvider } from "./connect/Appcontext";
 
 // CORE PAGES
 import SplashScreen from "./pages/splash";
@@ -14,19 +13,18 @@ import SignUp from "./pages/Auth/signup";
 import MainHub from "./pages/hub";
 import Feed from "./pages/social/feed";
 
-// DIAGRAM MODULES (Internal components)
-const Studio = () => <div className="p-10 text-cyan-400 font-black tracking-widest">STUDIO_NODE_ACTIVE</div>;
-const Magic = () => <div className="p-10 text-amber-500 font-black tracking-widest">MAGIC_AI_ACTIVE</div>;
-const Chat = () => <div className="p-10 text-green-500 font-black tracking-widest">CHAT_SYSTEM_ACTIVE</div>;
-const Music = () => <div className="p-10 text-red-500 font-black tracking-widest">MUSIC_ENGINE_ACTIVE</div>;
-const Shop = () => <div className="p-10 text-pink-500 font-black tracking-widest">COMMERCE_SHOP_ACTIVE</div>;
+// DIAGRAM MODULES (Internal components taaki build fail na ho)
+const Studio = () => <div className="h-screen flex items-center justify-center bg-black text-cyan-400 font-black tracking-widest uppercase">Studio Node Active</div>;
+const Magic = () => <div className="h-screen flex items-center justify-center bg-black text-amber-500 font-black tracking-widest uppercase">Magic AI Active</div>;
+const Chat = () => <div className="h-screen flex items-center justify-center bg-black text-green-500 font-black tracking-widest uppercase">Chat System Active</div>;
+const Music = () => <div className="h-screen flex items-center justify-center bg-black text-red-500 font-black tracking-widest uppercase">Music Engine Active</div>;
+const Shop = () => <div className="h-screen flex items-center justify-center bg-black text-pink-500 font-black tracking-widest uppercase">Shop Node Active</div>;
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider> 
-        <ThemeProvider defaultTheme="dark" storageKey="rx-theme">
-          <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white transition-colors duration-300">
+          <div className="min-h-screen transition-colors duration-300 font-sans">
             <Switch>
               <Route path="/" component={SplashScreen} />
               <Route path="/auth/signin" component={SignIn} />
@@ -34,7 +32,7 @@ export default function App() {
               <Route path="/hub" component={MainHub} />
               <Route path="/social/feed" component={Feed} />
               
-              {/* Har icon click hone par ye khulenge */}
+              {/* Modules as per your strict diagram */}
               <Route path="/studio" component={Studio} />
               <Route path="/magic" component={Magic} />
               <Route path="/chat" component={Chat} />
@@ -45,7 +43,6 @@ export default function App() {
             </Switch>
             <Toaster />
           </div>
-        </ThemeProvider>
       </AppProvider>
     </QueryClientProvider>
   );
