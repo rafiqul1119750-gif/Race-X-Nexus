@@ -1,73 +1,49 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-// import { account, databases } from '@/lib/appwrite'; // Backend setup ke waqt uncomment karein
+import { Switch, Route, Redirect } from "wouter";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/queryClient";
+import { Toaster } from "./components/ui/toaster";
 
-const AppContext = createContext<any>(null);
+// SIRF YE WALA CONTEXT USE HOGA (Diamonds + Theme dono isi mein hain)
+import { AppProvider } from "./connect/Appcontext";
 
-export const AppProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
-  const [diamonds, setDiamonds] = useState(500); // Default balance
-  const [loading, setLoading] = useState(false);
-  
-  // 🌓 THEME STATE
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem("rx-theme") || "dark";
-    }
-    return "dark";
-  });
+// CORE PAGES
+import SplashScreen from "./pages/splash";
+import SignIn from "./pages/Auth/signin";
+import SignUp from "./pages/Auth/signup";
+import MainHub from "./pages/hub";
+import Feed from "./pages/social/feed";
 
-  // 🔄 THEME SIDE EFFECT
-  useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
-    root.classList.add(theme);
-    localStorage.setItem("rx-theme", theme);
-  }, [theme]);
+// DIAGRAM MODULES (Internal components taaki build fail na ho)
+const Studio = () => <div className="h-screen flex items-center justify-center bg-black text-cyan-400 font-black tracking-widest uppercase">Studio Node Active</div>;
+const Magic = () => <div className="h-screen flex items-center justify-center bg-black text-amber-500 font-black tracking-widest uppercase">Magic AI Active</div>;
+const Chat = () => <div className="h-screen flex items-center justify-center bg-black text-green-500 font-black tracking-widest uppercase">Chat System Active</div>;
+const Music = () => <div className="h-screen flex items-center justify-center bg-black text-red-500 font-black tracking-widest uppercase">Music Engine Active</div>;
+const Shop = () => <div className="h-screen flex items-center justify-center bg-black text-pink-500 font-black tracking-widest uppercase">Shop Node Active</div>;
 
-  // 🛠️ THEME TOGGLE FUNCTION
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  };
-
-  /* // APPWRITE INITIALIZATION LOGIC (Saved for later)
-  useEffect(() => {
-    const init = async () => {
-      try {
-        setLoading(true);
-        // const session = await account.get();
-        // setUser(session);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
-  */
-
+export default function App() {
   return (
-    <AppContext.Provider 
-      value={{ 
-        user, 
-        setUser, 
-        diamonds, 
-        setDiamonds, 
-        loading, 
-        theme, 
-        setTheme, 
-        toggleTheme 
-      }}
-    >
-      {children}
-    </AppContext.Provider>
-  );
-};
+    <QueryClientProvider client={queryClient}>
+      <AppProvider> 
+          <div className="min-h-screen transition-colors duration-300 font-sans">
+            <Switch>
+              <Route path="/" component={SplashScreen} />
+              <Route path="/auth/signin" component={SignIn} />
+              <Route path="/auth/signup" component={SignUp} />
+              <Route path="/hub" component={MainHub} />
+              <Route path="/social/feed" component={Feed} />
+              
+              {/* Modules as per your strict diagram */}
+              <Route path="/studio" component={Studio} />
+              <Route path="/magic" component={Magic} />
+              <Route path="/chat" component={Chat} />
+              <Route path="/music" component={Music} />
+              <Route path="/shop" component={Shop} />
 
-export const useAppContext = () => {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error("useAppContext must be used within AppProvider");
-  }
-  return context;
-};
+              <Route><Redirect to="/hub" /></Route>
+            </Switch>
+            <Toaster />
+          </div>
+      </AppProvider>
+    </QueryClientProvider>
+  );
+}
