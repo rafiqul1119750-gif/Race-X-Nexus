@@ -18,37 +18,34 @@ import SearchPage from "./pages/social/search";
 import CommentsPage from "./pages/social/comments";
 import RXStudio from "./pages/studio/index";
 
-// NEW DEDICATED PAGES (No Dead Links)
-const Page = ({ name }: { name: string }) => (
-  <div className="h-screen bg-black text-white p-6 flex flex-col items-center justify-center">
-    <h1 className="text-2xl font-black italic text-cyan-400 mb-4">{name}</h1>
-    <p className="text-[10px] tracking-widest text-zinc-500 uppercase">Nexus Node Active</p>
-  </div>
-);
-
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider> 
         <Switch>
+          {/* 1. Splash Screen Pehle */}
           <Route path="/" component={SplashScreen} />
+          
+          {/* 2. CORE ENTRY: Main Hub (Splash ke baad yahan aayega user) */}
           <Route path="/hub" component={MainHub} />
+          
+          {/* 3. Auth System */}
           <Route path="/auth/signin" component={SignIn} />
           <Route path="/auth/signup" component={SignUp} />
+          
+          {/* 4. Social Ecosystem */}
           <Route path="/social/feed" component={SocialFeed} />
           <Route path="/social/explore" component={ExplorePage} />
           <Route path="/social/create" component={CreatePost} />
           <Route path="/social/activity" component={ActivityPage} />
           <Route path="/social/comments/:id" component={CommentsPage} />
           <Route path="/social/search" component={SearchPage} />
+          
+          {/* 5. Profile & Studio */}
           <Route path="/profile" component={UserProfile} />
           <Route path="/studio" component={RXStudio} />
           
-          {/* Dedicated Routes for Story & Stats */}
-          <Route path="/social/story/:id"><Page name="STORY VIEWER" /></Route>
-          <Route path="/social/followers"><Page name="FOLLOWERS LIST" /></Route>
-          <Route path="/social/following"><Page name="FOLLOWING LIST" /></Route>
-          
+          {/* Default Path: Hamesha Hub par bhejega */}
           <Route><Redirect to="/hub" /></Route>
         </Switch>
         <Toaster />
