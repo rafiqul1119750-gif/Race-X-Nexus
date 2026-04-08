@@ -2,16 +2,19 @@ import { Switch, Route, Redirect } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "./components/ui/toaster";
+import { AppProvider } from "./context/AppContext";
 
-// DHAYAN SE: Folder 'context' hai aur file 'AppContext' hai
-import { AppProvider } from "./context/AppContext"; 
-
+// PAGES
 import SplashScreen from "./pages/splash";
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
 import MainHub from "./pages/hub";
 import Feed from "./pages/social/feed";
 
+// 🎨 ASALI STUDIO IMPORT (Jo aapne abhi banaya)
+import RXStudio from "./pages/studio/index"; 
+
+// Baki placeholders (Jab tak inki asali files nahi banti)
 const Placeholder = ({ name }: { name: string }) => (
   <div className="h-screen flex items-center justify-center bg-black text-white font-black italic uppercase tracking-[0.3em]">
     {name} _ NODE _ ACTIVE
@@ -30,7 +33,9 @@ export default function App() {
               <Route path="/hub" component={MainHub} />
               <Route path="/social/feed" component={Feed} />
               
-              <Route path="/studio"><Placeholder name="Studio" /></Route>
+              {/* 🚀 AB YE ASALI STUDIO KHULEGA */}
+              <Route path="/studio" component={RXStudio} />
+
               <Route path="/magic"><Placeholder name="Magic AI" /></Route>
               <Route path="/chat"><Placeholder name="RX Chat" /></Route>
               <Route path="/music"><Placeholder name="RX Music" /></Route>
