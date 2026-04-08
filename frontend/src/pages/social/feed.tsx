@@ -6,21 +6,30 @@ export default function SocialFeed() {
 
   return (
     <div className="fixed inset-0 bg-black text-white overflow-hidden">
-      {/* TOP BAR: Hub link added */}
+      {/* TOP BAR: Fixed Brackets & Added Missing Icons */}
       <div className="absolute top-0 w-full z-50 pt-6 px-6 flex justify-between items-center bg-gradient-to-b from-black/90 to-transparent pb-10">
         <div onClick={() => setLocation('/hub')} className="p-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 active:scale-90 transition-transform">
            <LayoutGrid size={20} className="text-cyan-400" /> 
+        </div>
+
         <div className="flex gap-4 items-center">
-  <Camera size={24} onClick={() => {
-    // Phone Camera Access Logic
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'video/*,image/*';
-    input.capture = 'environment';
-    input.click();
-  }} className="cursor-pointer active:scale-90" />
-  <Bell size={24} onClick={() => setLocation('/social/activity')} className="cursor-pointer active:scale-90" />
-</div>
+          <Camera size={24} onClick={() => {
+            // Phone Camera Access Logic
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'video/*,image/*';
+            input.capture = 'environment';
+            input.click();
+          }} className="cursor-pointer active:scale-90" />
+          <Bell size={24} onClick={() => setLocation('/social/activity')} className="cursor-pointer active:scale-90" />
+        </div>
+
+        <h1 className="text-xl font-black italic tracking-widest">RACE-X</h1>
+
+        <div className="flex gap-5">
+          <Search size={24} onClick={() => setLocation('/social/search')} className="cursor-pointer active:scale-90" />
+          <Send size={24} className="-rotate-45 cursor-pointer active:scale-90" onClick={() => setLocation('/chat')} />
+        </div>
       </div>
 
       {/* REELS / VIDEO AREA */}
@@ -32,7 +41,7 @@ export default function SocialFeed() {
         />
       </div>
 
-      {/* SIDEBAR ACTIONS (No Dead Links) */}
+      {/* SIDEBAR ACTIONS */}
       <div className="absolute right-4 bottom-32 flex flex-col gap-6 z-50 items-center">
         <div className="flex flex-col items-center gap-1">
           <Heart size={32} className="fill-cyan-400 text-cyan-400" />
