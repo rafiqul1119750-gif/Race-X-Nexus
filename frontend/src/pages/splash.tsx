@@ -7,7 +7,7 @@ export default function SplashScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setLocation("/auth/signin"); // 3 second baad login par bhej dega
+      setLocation("/hub"); // Hub missing na ho isliye rasta change kar diya
     }, 3000);
     return () => clearTimeout(timer);
   }, [setLocation]);
