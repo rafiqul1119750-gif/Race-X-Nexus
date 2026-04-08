@@ -1,41 +1,35 @@
 import { useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, Globe, Plus, Search, User, Compass, Bell, Send } from "lucide-react";
-import { useAppContext } from "../../context/AppContext";
+import { Heart, MessageCircle, Share2, Globe, Plus, Search, User, Compass, Bell, Camera, Send } from "lucide-react";
 
 export default function SocialFeed() {
   const [, setLocation] = useLocation();
-  const { diamonds } = useAppContext();
 
   return (
-    <div className="fixed inset-0 bg-black text-white overflow-hidden">
-      {/* HEADER: Hub aur Search Connection */}
-      <div className="absolute top-0 w-full z-50 pt-6 px-6">
-        <div className="flex justify-between items-center">
-          <button onClick={() => setLocation('/hub')} className="p-2 bg-zinc-900/50 rounded-full border border-white/10 active:scale-90 transition-transform">
-            <Send size={18} className="-rotate-45 text-cyan-400" />
-          </button>
-          <h1 className="text-xl font-black italic tracking-widest">RACE-X</h1>
-          <Search size={22} onClick={() => setLocation('/social/search')} className="cursor-pointer" />
+    <div className="fixed inset-0 bg-black text-white">
+      {/* TOP BAR (Diagram: Camera, Search, DM, Notif) */}
+      <div className="absolute top-0 w-full z-50 p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+        <Camera size={24} onClick={() => setLocation('/social/create')} />
+        <h1 className="text-xl font-black italic tracking-widest">RACE-X</h1>
+        <div className="flex gap-5">
+          <Search size={24} onClick={() => setLocation('/social/search')} />
+          <Send size={24} className="-rotate-45" onClick={() => setLocation('/chat')} />
         </div>
       </div>
 
-      {/* VIDEO AREA */}
-      <div className="h-full bg-zinc-950">
-         <video src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-city-light-14144-large.mp4" className="w-full h-full object-cover opacity-60" autoPlay loop muted playsInline />
+      {/* VIDEO PLAYER (Reels Default) */}
+      <div className="h-full bg-zinc-900 flex items-center justify-center">
+        <video src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-city-light-14144-large.mp4" className="w-full h-full object-cover opacity-70" autoPlay loop muted playsInline />
       </div>
 
-      {/* BOTTOM NAV: Sab Live hai ab */}
-      <div className="absolute bottom-0 w-full bg-black/90 backdrop-blur-xl border-t border-white/10 p-5 pb-8 flex justify-around items-center">
-        <Compass onClick={() => setLocation('/social/explore')} className="text-zinc-500 cursor-pointer" />
-        <Globe onClick={() => setLocation('/social/feed')} className="text-white cursor-pointer" />
-        
-        {/* CREATE LIVE */}
-        <div onClick={() => setLocation('/social/create')} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center -mt-10 border-4 border-black cursor-pointer shadow-lg active:scale-90 transition-transform">
+      {/* BOTTOM NAV (Diagram: Home, Explore, Create, Activity, Profile) */}
+      <div className="absolute bottom-0 w-full bg-black/90 backdrop-blur-md border-t border-white/10 p-5 pb-8 flex justify-around items-center">
+        <Globe size={24} onClick={() => setLocation('/social/feed')} className="text-white" />
+        <Compass size={24} onClick={() => setLocation('/social/explore')} className="text-zinc-500" />
+        <div onClick={() => setLocation('/social/create')} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center -mt-10 border-4 border-black shadow-xl">
           <Plus className="text-black font-bold" />
         </div>
-
-        <Bell onClick={() => setLocation('/social/activity')} className="text-zinc-500 cursor-pointer" />
-        <User onClick={() => setLocation('/profile')} className="text-zinc-500 cursor-pointer" />
+        <Bell size={24} onClick={() => setLocation('/social/activity')} className="text-zinc-500" />
+        <User size={24} onClick={() => setLocation('/profile')} className="text-zinc-500" />
       </div>
     </div>
   );
