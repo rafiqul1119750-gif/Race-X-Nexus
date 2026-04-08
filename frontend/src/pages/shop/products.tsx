@@ -1,94 +1,51 @@
-import React, { useState } from 'react';
-import { useLocation } from 'wouter';
-import { motion } from 'framer-motion';
-import { 
-  ChevronLeft, ShoppingCart, Search, 
-  Filter, Zap, Star, Tag, Package
-} from 'lucide-react';
-
-const ProductGrid = () => {
-  const [, setLocation] = useLocation();
-  const [activeCategory, setActiveCategory] = useState("All");
-
-  // 📦 Product Data Node (Physical + Digital Assets)
-  const products = [
-    { id: 1, name: 'RX-Neon Hoodie', price: '450', type: 'Physical', img: 'https://placehold.co/400x500/111/00e1ff?text=RX+Hoodie' },
-    { id: 2, name: 'AI Prompt Pack', price: '120', type: 'Digital', img: 'https://placehold.co/400x500/111/a855f7?text=AI+Prompts' },
-    { id: 3, name: 'Cyber Sneakers', price: '890', type: 'Physical', img: 'https://placehold.co/400x500/111/00e1ff?text=RX+Kicks' },
-    { id: 4, name: 'Premium Voice Kit', price: '200', type: 'Digital', img: 'https://placehold.co/400x500/111/a855f7?text=Voice+Pack' },
-  ];
-
+export default function ProductDetails() {
   return (
-    <div className="min-h-screen bg-black text-white p-6 pb-24 font-sans overflow-x-hidden">
-      
-      {/* 🟢 Header Node (Direct Hub Connection) */}
-      <header className="flex justify-between items-center mb-8 pt-4">
-        <button onClick={() => setLocation('/hub')} className="p-3 bg-zinc-900 rounded-2xl border border-zinc-800">
-          <ChevronLeft className="w-5 h-5 text-zinc-400" />
-        </button>
-        <div className="text-center">
-           <h1 className="text-sm font-black italic tracking-widest uppercase italic">RX <span className="text-cyan-400">SHOP</span></h1>
-           <p className="text-[7px] font-black text-zinc-600 uppercase tracking-[0.4em]">Official Merch & Assets</p>
+    <div className="min-h-screen bg-black text-white pb-10">
+      {/* Dynamic Trust Features (Amazon style) */}
+      <div className="grid grid-cols-3 gap-1 p-6 border-b border-white/5 bg-zinc-950/50">
+        <TrustItem icon={<Truck size={16}/>} label="Fast Delivery" />
+        <TrustItem icon={<ShieldCheck size={16}/>} label="Nexus Warranty" />
+        <TrustItem icon={<RotateCcw size={16}/>} label="7 Day Return" />
+      </div>
+
+      <div className="p-6 space-y-8">
+        {/* Gallery Placeholder */}
+        <div className="aspect-square w-full rounded-[40px] bg-zinc-900 border border-white/5 relative overflow-hidden">
+          <img src="https://picsum.photos/800/800?random=510" className="w-full h-full object-cover" alt="Product" />
         </div>
-        <button onClick={() => setLocation('/shop/cart')} className="p-3 bg-zinc-900 rounded-2xl border border-zinc-800 relative">
-          <ShoppingCart className="w-5 h-5 text-white" />
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-500 text-[8px] font-black rounded-full flex items-center justify-center border-2 border-black">2</span>
-        </button>
-      </header>
 
-      {/* 🔍 Search & Filter Node */}
-      <div className="flex gap-3 mb-8">
-         <div className="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-2xl flex items-center px-4 gap-3 focus-within:border-cyan-500/50 transition-all">
-            <Search className="w-4 h-4 text-zinc-600" />
-            <input type="text" placeholder="SEARCH GEAR..." className="bg-transparent outline-none py-4 text-[10px] font-black uppercase tracking-widest w-full" />
-         </div>
-         <button className="p-4 bg-zinc-900 rounded-2xl border border-zinc-800"><Filter className="w-5 h-5 text-zinc-500" /></button>
+        {/* Info Area */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-start">
+            <h1 className="text-3xl font-black italic uppercase tracking-tighter">Nexus Buds Pro Max</h1>
+            <Share2 className="text-zinc-500" />
+          </div>
+          <p className="text-xs text-zinc-500 font-bold leading-relaxed uppercase tracking-widest opacity-70">
+            Active Noise Cancellation with Neural Processing Unit. Experience 60H battery life.
+          </p>
+        </div>
+
+        {/* Selection Logic */}
+        <div className="space-y-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">Select Variant</p>
+          <div className="flex gap-3">
+            {['Space Black', 'Neon Blue', 'Titanium'].map(color => (
+              <button key={color} className="px-5 py-3 rounded-2xl border border-white/10 bg-zinc-900 text-[9px] font-black uppercase tracking-widest active:scale-90 transition-all">
+                {color}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
-
-      {/* 🟢 Category Tabs Node */}
-      <div className="flex gap-4 overflow-x-auto hide-scrollbar mb-8">
-        {["All", "Apparel", "AI Assets", "Equipment", "Collectibles"].map(cat => (
-          <button 
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${
-              activeCategory === cat ? 'bg-white text-black border-white' : 'bg-transparent text-zinc-600 border-zinc-800'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* 🟢 Product Grid Node */}
-      <div className="grid grid-cols-2 gap-5">
-        {products.map((item) => (
-          <motion.div 
-            key={item.id}
-            whileTap={{ scale: 0.95 }}
-            className="group"
-          >
-            <div className="aspect-[4/5] bg-zinc-900 rounded-[28px] overflow-hidden border border-zinc-800 relative mb-3">
-               <img src={item.img} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-               <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10">
-                  <p className="text-[7px] font-black uppercase tracking-widest text-zinc-400">{item.type}</p>
-               </div>
-            </div>
-            <h3 className="text-[10px] font-black uppercase tracking-tight mb-1 truncate">{item.name}</h3>
-            <div className="flex items-center gap-1.5">
-               <Zap className="w-3 h-3 text-cyan-400 fill-cyan-400" />
-               <span className="text-[12px] font-black">{item.price}</span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      <style>{`
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
     </div>
   );
-};
+}
 
-export default ProductGrid;
+function TrustItem({ icon, label }: any) {
+  return (
+    <div className="flex flex-col items-center gap-2 text-center">
+      <div className="text-cyan-400">{icon}</div>
+      <span className="text-[8px] font-black uppercase tracking-tighter text-zinc-500">{label}</span>
+    </div>
+  );
+}
