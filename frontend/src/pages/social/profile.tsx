@@ -2,184 +2,147 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { 
   ArrowLeft, Settings, Grid, Play, User, 
-  MapPin, Link as LinkIcon, Camera, MoreHorizontal, 
-  Check, X, Globe, Lock, Shield, Bell, Moon
+  Camera, MoreHorizontal, Check, X, 
+  BarChart3, Users, MessageSquare, TrendingUp, 
+  Eye, Zap, DollarSign, Award, ChevronRight
 } from "lucide-react";
 
 export default function UserProfile() {
   const [, setLocation] = useLocation();
   
-  // States for Real Work
+  // States
   const [isEditing, setIsEditing] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [activeTab, setActiveTab] = useState('posts');
 
-  // User Profile Data
-  const [profile, setProfile] = useState({
+  const profile = {
     name: "Race-X Creator",
     username: "nexus_master_01",
-    bio: "Building the future of AI Nexus. 🚀 | Entrepreneur",
-    location: "India",
-    website: "race-x.onrender.com",
-    avatar: "" // Placeholder for real image
-  });
+    stats: { posts: "128", followers: "12.5K", following: "450" }
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24 select-none">
+    <div className="min-h-screen bg-black text-white pb-24">
       
-      {/* --- DYNAMIC HEADER --- */}
+      {/* --- HEADER --- */}
       <div className="sticky top-0 z-[100] bg-black/90 backdrop-blur-xl border-b border-white/5 p-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <ArrowLeft onClick={() => setLocation("/social/feed")} className="cursor-pointer active:scale-75 transition-all" />
+          <ArrowLeft onClick={() => setLocation("/social/feed")} className="cursor-pointer" />
           <h1 className="font-black italic text-lg uppercase tracking-tighter">Nexus Profile</h1>
         </div>
-        <Settings 
-          onClick={() => setShowSettings(true)} 
-          className="text-zinc-400 cursor-pointer hover:rotate-90 transition-all duration-300" 
-        />
+        <Settings className="text-zinc-400 cursor-pointer" />
       </div>
 
-      {/* --- PROFILE CARD (FB STYLE) --- */}
-      <div className="relative">
-        {/* Cover Photo Placeholder */}
-        <div className="h-32 bg-gradient-to-r from-zinc-900 to-black border-b border-white/5"></div>
-        
-        <div className="px-6 -mt-12 flex flex-col items-center">
-          {/* Profile Picture with Glow */}
-          <div className="relative group">
-            <div className="w-28 h-28 rounded-[35px] bg-black border-4 border-black overflow-hidden shadow-[0_0_30px_rgba(34,211,238,0.2)]">
-              <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
-                <User size={40} className="text-zinc-700" />
-              </div>
-            </div>
-            <div className="absolute bottom-1 right-1 bg-cyan-500 p-2 rounded-xl border-4 border-black cursor-pointer active:scale-90">
-              <Camera size={14} className="text-black" />
-            </div>
+      {/* --- PROFILE DATA (Short version for scroll) --- */}
+      <div className="px-6 pt-6 flex flex-col items-center">
+        <div className="w-24 h-24 rounded-[30px] bg-zinc-900 border-2 border-cyan-500/50 overflow-hidden mb-4">
+          <div className="w-full h-full flex items-center justify-center bg-zinc-800">
+            <User size={40} className="text-zinc-600" />
           </div>
-
-          <h2 className="mt-4 text-2xl font-black italic uppercase tracking-tighter text-white">
-            {profile.name}
-          </h2>
-          <p className="text-cyan-500 text-[10px] font-bold tracking-[0.3em] uppercase mb-4">@{profile.username}</p>
         </div>
+        <h2 className="text-xl font-black italic uppercase">{profile.name}</h2>
+        <p className="text-zinc-500 text-[10px] tracking-widest uppercase mb-6">Professional Creator</p>
       </div>
 
-      {/* --- STATS SECTION --- */}
-      <div className="flex justify-center gap-10 py-6 border-y border-white/5 my-4 bg-zinc-900/10">
-        <div className="text-center">
-          <p className="text-xl font-black">12</p>
-          <p className="text-[9px] text-zinc-500 uppercase font-bold">Posts</p>
-        </div>
-        <div className="text-center">
-          <p className="text-xl font-black text-cyan-400">8.4K</p>
-          <p className="text-[9px] text-zinc-500 uppercase font-bold">Followers</p>
-        </div>
-        <div className="text-center">
-          <p className="text-xl font-black">152</p>
-          <p className="text-[9px] text-zinc-500 uppercase font-bold">Following</p>
-        </div>
-      </div>
-
-      {/* --- ACTIONS --- */}
-      <div className="px-6 grid grid-cols-5 gap-2">
+      {/* --- ACTION BUTTONS (Added Dashboard) --- */}
+      <div className="px-6 grid grid-cols-12 gap-2">
         <button 
           onClick={() => setIsEditing(true)}
-          className="col-span-4 bg-cyan-500 text-black font-black py-3 rounded-2xl text-xs uppercase tracking-widest active:scale-95 transition-all"
+          className="col-span-5 bg-zinc-900 border border-white/10 text-white font-black py-3 rounded-2xl text-[10px] uppercase tracking-widest active:scale-95 transition-all"
         >
           Edit Profile
         </button>
-        <button className="bg-zinc-900 flex items-center justify-center rounded-2xl active:scale-95 transition-all border border-white/5">
+        <button 
+          onClick={() => setShowDashboard(true)}
+          className="col-span-5 bg-cyan-500 text-black font-black py-3 rounded-2xl text-[10px] uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2"
+        >
+          <BarChart3 size={14} /> Dashboard
+        </button>
+        <button className="col-span-2 bg-zinc-900 flex items-center justify-center rounded-2xl border border-white/5">
           <MoreHorizontal />
         </button>
       </div>
 
-      {/* --- TABS --- */}
-      <div className="flex mt-8 border-b border-white/5">
-        <button 
-          onClick={() => setActiveTab('posts')}
-          className={`flex-1 py-4 flex justify-center transition-all ${activeTab === 'posts' ? 'border-b-2 border-cyan-500 text-cyan-500' : 'text-zinc-600'}`}
-        >
-          <Grid size={22} />
-        </button>
-        <button 
-          onClick={() => setActiveTab('reels')}
-          className={`flex-1 py-4 flex justify-center transition-all ${activeTab === 'reels' ? 'border-b-2 border-cyan-500 text-cyan-500' : 'text-zinc-600'}`}
-        >
-          <Play size={22} />
-        </button>
+      {/* --- POST TABS & GRID (Same as before) --- */}
+      <div className="flex mt-8 border-y border-white/5">
+        <button onClick={() => setActiveTab('posts')} className={`flex-1 py-4 flex justify-center ${activeTab === 'posts' ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-zinc-600'}`}><Grid size={20}/></button>
+        <button onClick={() => setActiveTab('reels')} className={`flex-1 py-4 flex justify-center ${activeTab === 'reels' ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-zinc-600'}`}><Play size={20}/></button>
       </div>
-
-      {/* --- CONTENT GRID --- */}
       <div className="grid grid-cols-3 gap-1 mt-1">
-        {[1,2,3,4,5,6].map((i) => (
-          <div key={i} className="aspect-square bg-zinc-900/50 animate-pulse border border-white/5"></div>
-        ))}
+        {[1,2,3,4,5,6].map(i => <div key={i} className="aspect-square bg-zinc-900/50"></div>)}
       </div>
 
-      {/* --- MODAL: EDIT PROFILE (Facebook Style Form) --- */}
-      {isEditing && (
-        <div className="fixed inset-0 z-[200] bg-black p-6 animate-in slide-in-from-bottom duration-300">
-          <div className="flex items-center justify-between mb-8">
-            <X onClick={() => setIsEditing(false)} className="cursor-pointer" />
-            <h2 className="font-black uppercase tracking-widest">Edit Profile</h2>
-            <Check 
-              onClick={() => setIsEditing(false)} 
-              className="text-cyan-400 cursor-pointer" 
-            />
+      {/* --- MODAL: PROFESSIONAL DASHBOARD (FB CLONE) --- */}
+      {showDashboard && (
+        <div className="fixed inset-0 z-[300] bg-black overflow-y-auto animate-in slide-in-from-right duration-300">
+          <div className="sticky top-0 bg-black/90 backdrop-blur-md p-4 flex items-center gap-4 border-b border-white/5">
+            <ArrowLeft onClick={() => setShowDashboard(false)} className="cursor-pointer" />
+            <h1 className="font-black uppercase italic tracking-widest">Professional Dashboard</h1>
           </div>
-          
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase font-bold text-zinc-500">Full Name</label>
-              <input 
-                type="text" 
-                value={profile.name}
-                onChange={(e) => setProfile({...profile, name: e.target.value})}
-                className="w-full bg-zinc-900 border border-white/10 p-4 rounded-2xl focus:border-cyan-500 outline-none" 
-              />
+
+          <div className="p-6 space-y-6">
+            {/* Overview Section */}
+            <div>
+              <h3 className="text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Performance (Last 28 Days)</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <StatCard title="Reach" value="45.2K" change="+12%" color="text-green-400" />
+                <StatCard title="Engagement" value="12.8K" change="+5%" color="text-cyan-400" />
+                <StatCard title="Followers" value="12,504" change="+240" color="text-purple-400" />
+                <StatCard title="Net Income" value="₹0.00" change="0%" color="text-zinc-500" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase font-bold text-zinc-500">Bio</label>
-              <textarea 
-                value={profile.bio}
-                onChange={(e) => setProfile({...profile, bio: e.target.value})}
-                className="w-full bg-zinc-900 border border-white/10 p-4 rounded-2xl h-24 focus:border-cyan-500 outline-none"
-              />
+
+            {/* Tools Section */}
+            <div className="space-y-4">
+              <h3 className="text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em]">Next Steps for You</h3>
+              <div className="bg-zinc-900/50 border border-white/5 p-4 rounded-[25px] flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-cyan-500/10 rounded-2xl text-cyan-400"><Zap size={20}/></div>
+                  <div>
+                    <h4 className="text-sm font-bold">Earn with Stars</h4>
+                    <p className="text-[10px] text-zinc-500">Setup your payout account</p>
+                  </div>
+                </div>
+                <ChevronRight className="text-zinc-600" />
+              </div>
+            </div>
+
+            {/* Platform Tools */}
+            <div className="grid grid-cols-1 gap-3">
+              <h3 className="text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em]">Platform Tools</h3>
+              <ToolItem icon={<DollarSign size={18}/>} title="Monetization" status="Not Eligible" />
+              <ToolItem icon={<Award size={18}/>} title="Fan Engagement" status="Active" />
+              <ToolItem icon={<TrendingUp size={18}/>} title="Ads on Reels" status="Reviewing" />
             </div>
           </div>
         </div>
       )}
 
-      {/* --- MODAL: SETTINGS (FB CLONE) --- */}
-      {showSettings && (
-        <div className="fixed inset-0 z-[200] bg-black animate-in fade-in duration-300">
-          <div className="p-4 flex items-center gap-4 border-b border-white/5">
-            <ArrowLeft onClick={() => setShowSettings(false)} className="cursor-pointer" />
-            <h1 className="font-black uppercase italic">Settings & Privacy</h1>
-          </div>
-          
-          <div className="p-4 space-y-2">
-             <SettingsItem icon={<Lock size={18}/>} title="Privacy Center" desc="Manage who sees your content" />
-             <SettingsItem icon={<Shield size={18}/>} title="Security" desc="Two-factor authentication" />
-             <SettingsItem icon={<Bell size={18}/>} title="Notifications" desc="Manage push alerts" />
-             <SettingsItem icon={<Globe size={18}/>} title="Language" desc="System language: English" />
-             <SettingsItem icon={<Moon size={18}/>} title="Dark Mode" desc="System Default" />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-// Helper Component for Settings
-function SettingsItem({ icon, title, desc }: any) {
+// Small Components for Dashboard
+function StatCard({ title, value, change, color }: any) {
   return (
-    <div className="flex items-center gap-4 p-4 hover:bg-zinc-900/50 rounded-2xl transition-all cursor-pointer border border-transparent hover:border-white/5">
-      <div className="p-3 rounded-xl bg-zinc-900 text-cyan-400">{icon}</div>
-      <div>
-        <h3 className="text-sm font-bold">{title}</h3>
-        <p className="text-[10px] text-zinc-500 uppercase tracking-tighter">{desc}</p>
+    <div className="bg-zinc-900/40 border border-white/5 p-4 rounded-[30px]">
+      <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">{title}</p>
+      <p className="text-xl font-black italic">{value}</p>
+      <p className={`text-[10px] font-bold mt-1 ${color}`}>{change}</p>
+    </div>
+  );
+}
+
+function ToolItem({ icon, title, status }: any) {
+  return (
+    <div className="flex items-center justify-between p-4 bg-zinc-900/30 border border-white/5 rounded-2xl">
+      <div className="flex items-center gap-4">
+        <div className="text-zinc-400">{icon}</div>
+        <span className="text-sm font-bold">{title}</span>
       </div>
+      <span className="text-[9px] font-black uppercase text-zinc-500 px-3 py-1 bg-black rounded-lg border border-white/5">
+        {status}
+      </span>
     </div>
   );
 }
