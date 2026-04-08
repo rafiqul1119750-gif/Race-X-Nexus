@@ -4,13 +4,13 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "./components/ui/toaster";
 import { AppProvider } from "./context/AppContext";
 
-// 1. CORE & AUTH (Yeh files /pages/ ke andar hain)
+// 1. CORE & AUTH
 import SplashScreen from "./pages/splash";
 import MainHub from "./pages/hub";
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
 
-// 2. SOCIAL MODULE (Yeh files /pages/social/ ke andar hain)
+// 2. SOCIAL MODULE (All paths synced with your folder)
 import SocialFeed from "./pages/social/feed";
 import ExplorePage from "./pages/social/explore";
 import CreatePost from "./pages/social/create";
@@ -22,8 +22,12 @@ import CommentsPage from "./pages/social/comments";
 // 3. OTHER MODULES
 import RXStudio from "./pages/studio/index";
 
+// Placeholder: Taki app crash na ho agar file abhi tak nahi bani
 const Placeholder = ({ title }: { title: string }) => (
-  <div className="h-screen bg-black flex items-center justify-center text-cyan-400 font-black italic">{title} COMING SOON</div>
+  <div className="h-screen bg-black flex flex-col items-center justify-center text-cyan-400 font-black italic p-6 text-center">
+    <h1 className="text-2xl mb-2">{title}</h1>
+    <p className="text-[10px] tracking-[0.3em] text-zinc-500 uppercase">System Node Online</p>
+  </div>
 );
 
 export default function App() {
@@ -46,14 +50,14 @@ export default function App() {
           <Route path="/social/comments/:id" component={CommentsPage} />
           <Route path="/profile" component={UserProfile} />
           
-          {/* --- MODULES --- */}
+          {/* --- AI & CREATIVE MODULES --- */}
           <Route path="/studio" component={RXStudio} />
           <Route path="/magic"><Placeholder title="RX MAGIC AI" /></Route>
           <Route path="/chat"><Placeholder title="RX CHAT SYSTEM" /></Route>
           <Route path="/music"><Placeholder title="RX MUSIC LIBRARY" /></Route>
           <Route path="/shop"><Placeholder title="RX SHOP" /></Route>
 
-          {/* Fallback */}
+          {/* Fallback: Agar kuch galat ho toh hamesha Hub par bheje */}
           <Route><Redirect to="/hub" /></Route>
         </Switch>
         <Toaster />
