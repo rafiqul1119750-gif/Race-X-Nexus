@@ -4,13 +4,13 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "./components/ui/toaster";
 import { AppProvider } from "./context/AppContext";
 
-// 1. CORE & AUTH
+// 1. CORE & AUTH (Yeh files /pages/ ke andar hain)
 import SplashScreen from "./pages/splash";
 import MainHub from "./pages/hub";
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
 
-// 2. SOCIAL MODULE
+// 2. SOCIAL MODULE (Yeh files /pages/social/ ke andar hain)
 import SocialFeed from "./pages/social/feed";
 import ExplorePage from "./pages/social/explore";
 import CreatePost from "./pages/social/create";
@@ -22,7 +22,6 @@ import CommentsPage from "./pages/social/comments";
 // 3. OTHER MODULES
 import RXStudio from "./pages/studio/index";
 
-// Placeholder component
 const Placeholder = ({ title }: { title: string }) => (
   <div className="h-screen bg-black flex items-center justify-center text-cyan-400 font-black italic">{title} COMING SOON</div>
 );
@@ -54,7 +53,7 @@ export default function App() {
           <Route path="/music"><Placeholder title="RX MUSIC LIBRARY" /></Route>
           <Route path="/shop"><Placeholder title="RX SHOP" /></Route>
 
-          {/* Fallback - Seedha Hub par bheje agar route na mile */}
+          {/* Fallback */}
           <Route><Redirect to="/hub" /></Route>
         </Switch>
         <Toaster />
