@@ -1,33 +1,43 @@
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { ArrowLeft, Mail, Lock } from "lucide-react";
 
 export default function SignIn() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="h-screen bg-black flex flex-col items-center justify-center p-6 text-white">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full max-w-sm space-y-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-black italic tracking-tighter text-white">RACE-X</h1>
-          <p className="text-[10px] text-zinc-500 uppercase tracking-[0.4em] mt-2">Nexus Terminal Login</p>
+    <div className="min-h-screen bg-black text-white p-8 flex flex-col justify-center font-sans">
+      <ArrowLeft onClick={() => setLocation('/')} className="absolute top-10 left-8 text-zinc-500" />
+      <h1 className="text-4xl font-black italic tracking-tighter mb-2 uppercase">Welcome Back</h1>
+      <p className="text-zinc-500 text-xs font-bold tracking-widest mb-12 uppercase">Access the Nexus Engine</p>
+
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 ml-2">Email Address</p>
+          <div className="flex items-center gap-4 bg-zinc-900 p-5 rounded-3xl border border-white/5">
+            <Mail size={18} className="text-zinc-500" />
+            <input type="email" placeholder="nexus@race-x.com" className="bg-transparent outline-none text-xs font-bold w-full" />
+          </div>
         </div>
 
-        <div className="space-y-4">
-          <input type="email" placeholder="EMAIL ADDRESS" className="w-full bg-zinc-900 border border-white/5 p-4 rounded-2xl text-xs outline-none focus:border-cyan-500" />
-          <input type="password" placeholder="PASSCODE" className="w-full bg-zinc-900 border border-white/5 p-4 rounded-2xl text-xs outline-none focus:border-cyan-500" />
+        <div className="space-y-2">
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 ml-2">Security Key</p>
+          <div className="flex items-center gap-4 bg-zinc-900 p-5 rounded-3xl border border-white/5">
+            <Lock size={18} className="text-zinc-500" />
+            <input type="password" placeholder="••••••••" className="bg-transparent outline-none text-xs font-bold w-full" />
+          </div>
         </div>
 
         <button 
-          onClick={() => setLocation("/hub")} 
-          className="w-full bg-cyan-500 text-black font-black py-4 rounded-2xl text-[10px] uppercase tracking-widest shadow-lg shadow-cyan-500/20"
+          onClick={() => setLocation('/hub')}
+          className="w-full bg-white text-black py-6 rounded-[30px] text-xs font-black uppercase tracking-widest shadow-[0_20px_40px_rgba(255,255,255,0.1)] active:scale-95 transition-transform"
         >
-          Initialize Nexus
+          Initialize Login
         </button>
+      </div>
 
-        <p className="text-center text-[10px] text-zinc-500">
-          NEW USER? <span onClick={() => setLocation("/auth/signup")} className="text-cyan-400 cursor-pointer">CREATE NODE</span>
-        </p>
-      </motion.div>
+      <p className="mt-10 text-center text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+        New to Nexus? <span onClick={() => setLocation('/auth/signup')} className="text-cyan-400 cursor-pointer">Register Node</span>
+      </p>
     </div>
   );
 }
