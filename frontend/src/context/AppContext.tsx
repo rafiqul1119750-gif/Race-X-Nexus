@@ -1,22 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-// import { account, databases } from '@/lib/appwrite'; // Backend setup ke waqt uncomment karein
 
 const AppContext = createContext<any>(null);
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
-  const [diamonds, setDiamonds] = useState(500); // Default balance
   const [loading, setLoading] = useState(false);
   
-  // 🌓 THEME STATE
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem("rx-theme") || "dark";
-    }
-    return "dark";
+  // 💎 DIAMONDS LOGIC
+  const [diamonds, setDiamonds] = useState(() => {
+    return Number(localStorage.getItem("rx-diamonds")) || 0;
   });
 
-  // 🔄 THEME SIDE EFFECT
+  // 🌓 THEME LOGIC
+  const [theme, setTheme] = useState(() => localStorage.getItem("rx-theme") || "dark");
+
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
@@ -24,50 +21,37 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem("rx-theme", theme);
   }, [theme]);
 
-  // 🛠️ THEME TOGGLE FUNCTION
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  // 🎁 WELCOME REWARD (10 Diamonds)
+  const claimWelcomeGift = () => {
+    if (!localStorage.getItem("rx-claimed-welcome")) {
+      const bonus = 10;
+      const total = diamonds + bonus;
+      setDiamonds(total);
+      localStorage.setItem("rx-diamonds", total.toString());
+      localStorage.setItem("rx-claimed-welcome", "true");
+      return true;
+    }
+    return false;
   };
 
-  /* // APPWRITE INITIALIZATION LOGIC (Saved for later)
-  useEffect(() => {
-    const init = async () => {
-      try {
-        setLoading(true);
-        // const session = await account.get();
-        // setUser(session);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
-  */
+  // 🔗 REFERRAL REWARD (5 Diamonds)
+  const addReferralBonus = () => {
+    const total = diamonds + 5;
+    setDiamonds(total);
+    localStorage.setItem("rx-diamonds", total.toString());
+  };
+
+  const toggleTheme = () => setTheme(prev => prev === "dark" ? "light" : "dark");
 
   return (
-    <AppContext.Provider 
-      value={{ 
-        user, 
-        setUser, 
-        diamonds, 
-        setDiamonds, 
-        loading, 
-        theme, 
-        setTheme, 
-        toggleTheme 
-      }}
-    >
+    <AppContext.Provider value={{ 
+      user, setUser, diamonds, setDiamonds, 
+      loading, theme, toggleTheme, 
+      claimWelcomeGift, addReferralBonus 
+    }}>
       {children}
     </AppContext.Provider>
   );
 };
 
-export const useAppContext = () => {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error("useAppContext must be used within AppProvider");
-  }
-  return context;
-};
+export const useAppContext = () => useContext(AppContext);
