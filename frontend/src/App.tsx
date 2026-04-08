@@ -4,13 +4,13 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "./components/ui/toaster";
 import { AppProvider } from "./context/AppContext";
 
-// 1. CORE & AUTH (Diagram: SPLASH -> AUTH -> HUB)
+// 1. CORE & AUTH
 import SplashScreen from "./pages/splash";
 import MainHub from "./pages/hub";
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
 
-// 2. SOCIAL MODULE (Diagram: SOCIAL APP)
+// 2. SOCIAL MODULE
 import SocialFeed from "./pages/social/feed";
 import ExplorePage from "./pages/social/explore";
 import CreatePost from "./pages/social/create";
@@ -19,9 +19,10 @@ import UserProfile from "./pages/social/profile";
 import SearchPage from "./pages/social/search";
 import CommentsPage from "./pages/social/comments";
 
-// 3. OTHER MODULES (Diagram: STUDIO, MAGIC, CHAT, MUSIC, SHOP)
+// 3. OTHER MODULES
 import RXStudio from "./pages/studio/index";
-// Inke liye agar files nahi hain, toh main placeholder de raha hoon taaki app crash na ho
+
+// Placeholder component
 const Placeholder = ({ title }: { title: string }) => (
   <div className="h-screen bg-black flex items-center justify-center text-cyan-400 font-black italic">{title} COMING SOON</div>
 );
@@ -33,11 +34,11 @@ export default function App() {
         <Switch>
           {/* --- CORE FLOW --- */}
           <Route path="/" component={SplashScreen} />
+          <Route path="/hub" component={MainHub} />
           <Route path="/auth/signin" component={SignIn} />
           <Route path="/auth/signup" component={SignUp} />
-          <Route path="/hub" component={MainHub} />
           
-          {/* --- SOCIAL SYSTEM (All Buttons Live) --- */}
+          {/* --- SOCIAL SYSTEM --- */}
           <Route path="/social/feed" component={SocialFeed} />
           <Route path="/social/explore" component={ExplorePage} />
           <Route path="/social/search" component={SearchPage} />
@@ -53,7 +54,7 @@ export default function App() {
           <Route path="/music"><Placeholder title="RX MUSIC LIBRARY" /></Route>
           <Route path="/shop"><Placeholder title="RX SHOP" /></Route>
 
-          {/* Fallback */}
+          {/* Fallback - Seedha Hub par bheje agar route na mile */}
           <Route><Redirect to="/hub" /></Route>
         </Switch>
         <Toaster />
