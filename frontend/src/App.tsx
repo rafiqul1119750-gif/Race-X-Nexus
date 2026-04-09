@@ -12,7 +12,7 @@ import SplashScreen from "./pages/splash";
 import MainHub from "./pages/hub/index";
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
-import TermsConditions from "./pages/Auth/terms"; // ✅ Legal Protocol
+import TermsConditions from "./pages/Auth/terms"; // ✅ Legal Protocol Integrated
 
 // 2. SOCIAL MODULE
 import SocialIndex from "./pages/social/index";
@@ -24,7 +24,7 @@ import UserProfile from "./pages/social/profile";
 import EditProfile from "./pages/social/edit-profile"; 
 import SearchPage from "./pages/social/search";
 import CommentsPage from "./pages/social/comments";
-import NexusChat from "./pages/social/chat"; // ✅ Added Real-time Chat
+import NexusChat from "./pages/social/chat"; // ✅ Real-time Chat Integrated
 
 // 3. MUSIC & SHOP
 import MusicIndex from "./pages/music/index";
@@ -38,7 +38,7 @@ import CinemaAI from "./pages/studio/video-gen";
 // --- 👑 ADMIN & CREATOR DASHBOARD ---
 import AdminDashboard from "./pages/dashboard"; 
 import ApiManager from "./pages/admin/api-manager";
-import CreatorDashboard from "./pages/dashboard/index"; // ✅ FB Clone Dashboard
+import CreatorDashboard from "./pages/dashboard/index"; // ✅ FB Clone Dashboard Integrated
 
 // --- 🌌 MAGIC ---
 import MagicMain from "./pages/magic/index";
@@ -68,7 +68,7 @@ export default function App() {
           <Route path="/social/create" component={CreatePost} />
           <Route path="/social/activity" component={ActivityPage} />
           <Route path="/social/comments/:id" component={CommentsPage} />
-          <Route path="/social/chat" component={NexusChat} /> {/* ✅ Real-time Chat Node */}
+          <Route path="/social/chat" component={NexusChat} /> 
           
           {/* --- PROFILE NODES --- */}
           <Route path="/profile" component={UserProfile} />
