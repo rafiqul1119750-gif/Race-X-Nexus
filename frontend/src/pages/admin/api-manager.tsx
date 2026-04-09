@@ -2,15 +2,16 @@ import { useState, useEffect } from "react";
 import { 
   Key, Save, RefreshCw, Zap, ShieldCheck, 
   Plus, Eye, EyeOff, AlertCircle, X, Terminal, ChevronRight,
-  ShieldAlert, Ghost, Diamond, UserX
+  ShieldAlert, Ghost, Diamond, UserX, ArrowLeft
 } from "lucide-react";
+import { useLocation } from "wouter"; // ✅ Import for navigation
 import { databases, ID } from "../../lib/appwrite"; 
 
-// ✅ Database IDs Updated to Race-X-Nexus
 const DATABASE_ID = 'Race-X-Nexus'; 
 const COLLECTION_ID = 'api_configs';
 
 export default function ApiManager() {
+  const [, setLocation] = useLocation(); // ✅ Hook for navigation
   const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [showKey, setShowKey] = useState<string | null>(null);
@@ -22,7 +23,6 @@ export default function ApiManager() {
   const fetchKeys = async () => {
     setLoading(true);
     try {
-      // Live fetch from Race-X-Nexus
       const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
       setApiKeys(response.documents);
     } catch (error) {
@@ -39,10 +39,8 @@ export default function ApiManager() {
     setIsUpdating(editModal.id);
     
     try {
-      // 🛡️ ACTUAL INJECTION LOGIC
       await databases.updateDocument(DATABASE_ID, COLLECTION_ID, editModal.id, {
         key_value: newKeyValue,
-        // Ensure this attribute exists in Appwrite, otherwise remove this line
         last_updated: new Date().toISOString() 
       });
       
@@ -55,7 +53,7 @@ export default function ApiManager() {
       alert(`${editModal.name} Node Re-Injected! 🚀`);
     } catch (error) {
       console.error("Injection Error:", error);
-      alert("Injection Blocked: Database Link Failed. Check Appwrite Attributes.");
+      alert("Injection Blocked: Database Link Failed.");
     } finally {
       setIsUpdating(null);
     }
@@ -69,19 +67,29 @@ export default function ApiManager() {
   );
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans selection:bg-cyan-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans selection:bg-cyan-500/20 overflow-x-hidden">
       
-      {/* 1. Launch Header */}
+      {/* ✅ Added Back Button & Launch Header Integration */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-2 h-2 bg-cyan-500 rounded-full animate-ping" />
-            <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.4em]">Live Production Node</span>
+        <div className="flex items-start gap-6">
+          {/* Back Navigation Button */}
+          <button 
+            onClick={() => setLocation("/hub")} 
+            className="p-4 bg-zinc-900 rounded-[20px] border border-white/5 active:scale-75 transition-all shadow-lg"
+          >
+            <ArrowLeft size={24} className="text-zinc-400" />
+          </button>
+          
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-2 h-2 bg-cyan-500 rounded-full animate-ping" />
+              <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.4em]">Live Production Node</span>
+            </div>
+            <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none">
+              Injection Hub
+            </h1>
+            <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.3em] mt-3">Race-X Nexus Core Management</p>
           </div>
-          <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none flex items-center gap-4">
-            Injection Hub
-          </h1>
-          <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.3em] mt-3">Race-X Nexus Core Management</p>
         </div>
         
         <div className="flex gap-4 w-full md:w-auto">
