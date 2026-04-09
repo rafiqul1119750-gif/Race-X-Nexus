@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { Sparkles, MessageSquare, Image as ImageIcon, Wand2, Zap, Brain, Stars } from "lucide-react";
+import { Sparkles, MessageSquare, Image as ImageIcon, Wand2 } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function MagicMain() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 pb-32 selection:bg-purple-500">
+    <div className="min-h-screen bg-black text-white p-6 pb-32">
       <header className="flex justify-between items-center mb-12">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-purple-500 rounded-2xl shadow-[0_0_30px_rgba(168,85,247,0.4)] animate-pulse">
+          <div className="p-3 bg-purple-500 rounded-2xl shadow-[0_0_30px_rgba(168,85,247,0.4)]">
             <Sparkles size={24} className="text-black" />
           </div>
           <h1 className="text-3xl font-black italic uppercase tracking-tighter">Nexus Magic</h1>
@@ -22,7 +22,6 @@ export default function MagicMain() {
           desc="Gemini-Powered AI Intelligence"
           icon={<MessageSquare size={32}/>}
           color="from-blue-600 to-purple-600"
-          // 🔥 Joda: Ensure path matches App.tsx
           onClick={() => setLocation("/magic/ai-chat")}
         />
         <MagicCard 
@@ -37,7 +36,6 @@ export default function MagicMain() {
           desc="Upscale & Enhance Everything"
           icon={<Wand2 size={32}/>}
           color="from-pink-600 to-orange-600"
-          // 🔥 Joda: Studio page par bhejne ke liye
           onClick={() => setLocation("/studio")} 
         />
       </div>
@@ -53,14 +51,9 @@ export default function MagicMain() {
 
 function MagicCard({ title, desc, icon, color, onClick }: any) {
   return (
-    <div 
-      onClick={onClick}
-      className={`relative h-48 rounded-[45px] overflow-hidden p-8 flex flex-col justify-end group cursor-pointer active:scale-95 transition-all`}
-    >
+    <div onClick={onClick} className={`relative h-48 rounded-[45px] overflow-hidden p-8 flex flex-col justify-end group cursor-pointer active:scale-95 transition-all`}>
       <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-80 group-hover:scale-110 transition-transform duration-1000`} />
-      <div className="absolute top-8 right-8 text-white/20 group-hover:text-white transition-colors">
-        {icon}
-      </div>
+      <div className="absolute top-8 right-8 text-white/20 group-hover:text-white transition-colors">{icon}</div>
       <div className="relative z-10">
         <h3 className="text-2xl font-black uppercase italic tracking-tighter text-white">{title}</h3>
         <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{desc}</p>
