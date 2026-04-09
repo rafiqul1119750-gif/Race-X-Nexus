@@ -1,18 +1,30 @@
 import { 
   ArrowLeft, Settings, Share2, Camera, ExternalLink, 
-  Plus, LayoutGrid, BarChart3, Edit3, MoreHorizontal, User 
+  Plus, LayoutGrid, BarChart3, Edit3, MoreHorizontal, User, Activity 
 } from "lucide-react";
 import { useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast"; // Notification ke liye
+import { useToast } from "@/hooks/use-toast";
 
 export default function UserProfile() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  // --- 🔗 CLEAN SHARE LOGIC (No Admin Details) ---
+  // --- 📸 CAMERA LOGIC (Bina kuch kate) ---
+  const handleProfileImage = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        toast({ title: "Uploading...", description: `${file.name} is being synced to Nexus.` });
+      }
+    };
+    input.click();
+  };
+
   const handleShare = async () => {
-    const publicUrl = `${window.location.origin}/profile/nexus_master_01`; // ✅ Pure Public Link
-    
+    const publicUrl = `${window.location.origin}/profile/nexus_master_01`;
     try {
       if (navigator.share) {
         await navigator.share({
@@ -24,17 +36,15 @@ export default function UserProfile() {
         navigator.clipboard.writeText(publicUrl);
         toast({ title: "Link Copied!", description: "Public profile link saved to clipboard." });
       }
-    } catch (err) {
-      console.error("Share failed", err);
-    }
+    } catch (err) { console.error("Share failed", err); }
   };
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-cyan-500/30 overflow-x-hidden">
       
-      {/* --- 1. HEADER (Design Match) --- */}
+      {/* --- 1. HEADER --- */}
       <header className="flex items-center justify-between px-6 py-6 sticky top-0 z-50 bg-black/80 backdrop-blur-xl">
-        <button onClick={() => setLocation("/social")} className="active:scale-75 transition-all">
+        <button onClick={() => setLocation("/hub")} className="active:scale-75 transition-all">
           <ArrowLeft size={24} />
         </button>
         <div className="flex items-center gap-2">
@@ -42,7 +52,6 @@ export default function UserProfile() {
           <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse" />
         </div>
         <div className="flex gap-5">
-          {/* Share Button (Fully Public) */}
           <Share2 
             size={20} 
             className="active:scale-75 transition-all text-zinc-400 cursor-pointer hover:text-white" 
@@ -51,7 +60,7 @@ export default function UserProfile() {
           <Settings 
             size={20} 
             className="active:scale-75 transition-all text-zinc-400 cursor-pointer hover:text-white" 
-            onClick={() => setLocation("/admin")} 
+            onClick={() => setLocation("/admin/api")} 
           />
         </div>
       </header>
@@ -59,7 +68,7 @@ export default function UserProfile() {
       {/* --- 2. STORIES/HIGHLIGHTS --- */}
       <div className="flex gap-4 px-6 overflow-x-auto no-scrollbar mb-10 pt-2">
         <div className="flex flex-col items-center gap-3 shrink-0" onClick={() => setLocation("/social/create")}>
-          <div className="w-20 h-20 rounded-[32px] border-2 border-dashed border-zinc-800 flex items-center justify-center active:scale-90 transition-all group">
+          <div className="w-20 h-20 rounded-[32px] border-2 border-dashed border-zinc-800 flex items-center justify-center active:scale-90 transition-all group cursor-pointer">
             <Plus size={24} className="text-zinc-600 group-hover:text-cyan-500 transition-colors" />
           </div>
           <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">Live</span>
@@ -77,18 +86,24 @@ export default function UserProfile() {
         ))}
       </div>
 
-      {/* --- 3. PROFILE AVATAR & INFO --- */}
+      {/* --- 3. PROFILE AVATAR & INFO (Fixed Camera Click) --- */}
       <div className="flex flex-col items-center mb-8 px-6 text-center">
         <div className="relative mb-6">
           <div className="w-40 h-40 rounded-[55px] border-2 border-white/5 p-1.5 flex items-center justify-center bg-zinc-900/20">
-            <div className="w-full h-full rounded-[50px] bg-zinc-900 border border-white/10 flex items-center justify-center overflow-hidden relative group">
+            <div 
+              onClick={handleProfileImage} 
+              className="w-full h-full rounded-[50px] bg-zinc-900 border border-white/10 flex items-center justify-center overflow-hidden relative group cursor-pointer"
+            >
                <User size={60} className="text-zinc-800" />
                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <Camera size={24} className="text-white" />
                </div>
             </div>
           </div>
-          <button className="absolute bottom-1 right-1 bg-cyan-500 p-3 rounded-2xl border-[6px] border-black text-black active:scale-75 transition-all shadow-xl">
+          <button 
+            onClick={handleProfileImage} 
+            className="absolute bottom-1 right-1 bg-cyan-500 p-3 rounded-2xl border-[6px] border-black text-black active:scale-75 transition-all shadow-xl"
+          >
             <Camera size={18} fill="black" />
           </button>
         </div>
@@ -109,7 +124,7 @@ export default function UserProfile() {
         </p>
       </div>
 
-      {/* --- 4. STATS (Functional Links) --- */}
+      {/* --- 4. STATS --- */}
       <div className="flex justify-between px-10 py-10 border-t border-zinc-900/50">
         <div className="text-center active:scale-90 transition-all cursor-pointer group" onClick={() => setLocation("/social/feed")}>
           <h4 className="text-2xl font-black italic tracking-tighter group-hover:text-cyan-400">128</h4>
@@ -125,7 +140,7 @@ export default function UserProfile() {
         </div>
       </div>
 
-      {/* --- 5. ACTION BUTTONS (Design Match) --- */}
+      {/* --- 5. ACTION BUTTONS (Fully Linked) --- */}
       <div className="flex gap-4 px-6 mt-2 mb-20 relative">
         <button 
           onClick={() => setLocation("/social/edit-profile")}
@@ -136,14 +151,13 @@ export default function UserProfile() {
         </button>
         
         <button 
-          onClick={() => setLocation("/admin")}
+          onClick={() => setLocation("/admin/analytics")} // ✅ Fixed: Points to your new Analytics node
           className="flex-1 bg-cyan-500 text-black py-6 rounded-[30px] flex items-center justify-center gap-3 active:scale-[0.97] transition-all shadow-[0_20px_40px_rgba(6,182,212,0.2)]"
         >
           <BarChart3 size={16} />
           <span className="text-[10px] font-black uppercase italic tracking-[0.2em]">Insights</span>
         </button>
 
-        {/* Floating Menu Button (Bina kuch kate) */}
         <button className="p-6 bg-zinc-900/80 border border-white/5 rounded-[30px] active:scale-90 transition-all">
           <MoreHorizontal size={20} className="text-zinc-400" />
         </button>
