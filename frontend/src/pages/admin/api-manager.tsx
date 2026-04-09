@@ -4,9 +4,10 @@ import {
   Plus, Eye, EyeOff, AlertCircle, X, Terminal, ChevronRight,
   ShieldAlert, Ghost, Diamond, UserX
 } from "lucide-react";
-import { databases, ID } from "../../lib/appwrite"; // Paths confirmed
+import { databases, ID } from "../../lib/appwrite"; 
 
-const DATABASE_ID = 'nexus_core'; 
+// ✅ Database IDs Updated to Race-X-Nexus
+const DATABASE_ID = 'Race-X-Nexus'; 
 const COLLECTION_ID = 'api_configs';
 
 export default function ApiManager() {
@@ -15,13 +16,13 @@ export default function ApiManager() {
   const [showKey, setShowKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Modal State for Real Injection
   const [editModal, setEditModal] = useState<{id: string, name: string} | null>(null);
   const [newKeyValue, setNewKeyValue] = useState("");
 
   const fetchKeys = async () => {
     setLoading(true);
     try {
+      // Live fetch from Race-X-Nexus
       const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
       setApiKeys(response.documents);
     } catch (error) {
@@ -38,9 +39,11 @@ export default function ApiManager() {
     setIsUpdating(editModal.id);
     
     try {
+      // 🛡️ ACTUAL INJECTION LOGIC
       await databases.updateDocument(DATABASE_ID, COLLECTION_ID, editModal.id, {
         key_value: newKeyValue,
-        last_updated: new Date().toISOString()
+        // Ensure this attribute exists in Appwrite, otherwise remove this line
+        last_updated: new Date().toISOString() 
       });
       
       setApiKeys(prev => prev.map(item => 
@@ -51,7 +54,8 @@ export default function ApiManager() {
       setNewKeyValue("");
       alert(`${editModal.name} Node Re-Injected! 🚀`);
     } catch (error) {
-      alert("Injection Blocked: Database Link Failed");
+      console.error("Injection Error:", error);
+      alert("Injection Blocked: Database Link Failed. Check Appwrite Attributes.");
     } finally {
       setIsUpdating(null);
     }
@@ -60,7 +64,7 @@ export default function ApiManager() {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-black text-cyan-400">
       <Terminal size={40} className="mb-4 animate-bounce" />
-      <div className="font-black tracking-[0.5em] animate-pulse uppercase">Booting Nexus API Hub...</div>
+      <div className="font-black tracking-[0.5em] animate-pulse uppercase">Booting Race-X Nexus Hub...</div>
     </div>
   );
 
