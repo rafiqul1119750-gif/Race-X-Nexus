@@ -22,6 +22,10 @@ import CommentsPage from "./pages/social/comments";
 // 3. OTHER MODULES
 import RXStudio from "./pages/studio/index";
 
+// --- 👑 ADMIN & API MODULES (NEW ADDED) ---
+import AdminDashboard from "./pages/admin/dashboard";
+import ApiManager from "./pages/admin/api-manager";
+
 // Placeholder: Taki app crash na ho agar file abhi tak nahi bani
 const Placeholder = ({ title }: { title: string }) => (
   <div className="h-screen bg-black flex flex-col items-center justify-center text-cyan-400 font-black italic p-6 text-center">
@@ -53,9 +57,14 @@ export default function App() {
           {/* --- AI & CREATIVE MODULES --- */}
           <Route path="/studio" component={RXStudio} />
           <Route path="/magic"><Placeholder title="RX MAGIC AI" /></Route>
+          {/* Yahan aap AI Chat page import karke connect kar sakte hain */}
           <Route path="/chat"><Placeholder title="RX CHAT SYSTEM" /></Route>
           <Route path="/music"><Placeholder title="RX MUSIC LIBRARY" /></Route>
           <Route path="/shop"><Placeholder title="RX SHOP" /></Route>
+
+          {/* --- 🔥 ADMIN COMMAND CENTER ROUTES (NEW ADDED) --- */}
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/api" component={ApiManager} />
 
           {/* Fallback: Agar kuch galat ho toh hamesha Hub par bheje */}
           <Route><Redirect to="/hub" /></Route>
