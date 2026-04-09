@@ -10,7 +10,7 @@ export default function MainHub() {
     { title: "RX STUDIO", desc: "Cinema AI & Voice Lab", icon: <Zap className="text-black" />, color: "bg-cyan-400", path: "/studio" },
     { title: "RX MAGIC CHAT", desc: "Neural AI Assistant", icon: <Sparkles className="text-yellow-400" />, color: "bg-zinc-900", path: "/magic/ai-chat" },
     { title: "RX SOCIAL", desc: "Creator Community", icon: <Users className="text-white" />, color: "bg-purple-600", path: "/social" },
-    { title: "RX MUSIC", desc: "Spotify Engine", icon: <Music className="text-white" />, color: "bg-zinc-800", path: "/music" },
+    { title: "RX MUSIC", desc: "Spotify Engine", icon: <Music className="text-white" />, color: "bg-music" || "/music", path: "/music" },
     { title: "RX SHOPPING", desc: "70% Off Coupons", icon: <ShoppingBag className="text-cyan-400" />, color: "bg-black", border: "border-cyan-500", path: "/shop" },
   ];
 
@@ -27,8 +27,12 @@ export default function MainHub() {
           </div>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => setLocation("/admin")} className="p-3 bg-zinc-900 rounded-2xl border border-white/5 active:scale-90 transition-all">
-            <LayoutGrid size={20} className="text-zinc-500" />
+          {/* ✅ Fixed: Now redirects to Admin Dashboard */}
+          <button 
+            onClick={() => setLocation("/admin")} 
+            className="p-3 bg-zinc-900 rounded-2xl border border-white/5 active:scale-90 hover:bg-zinc-800 transition-all shadow-lg"
+          >
+            <LayoutGrid size={20} className="text-cyan-400" />
           </button>
         </div>
       </header>
