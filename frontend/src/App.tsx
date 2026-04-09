@@ -12,7 +12,7 @@ import SplashScreen from "./pages/splash";
 import MainHub from "./pages/hub/index";
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
-import TermsConditions from "./pages/Auth/terms"; // ✅ Legal Protocol Integrated
+import TermsConditions from "./pages/Auth/terms"; 
 
 // 2. SOCIAL MODULE
 import SocialIndex from "./pages/social/index";
@@ -24,7 +24,7 @@ import UserProfile from "./pages/social/profile";
 import EditProfile from "./pages/social/edit-profile"; 
 import SearchPage from "./pages/social/search";
 import CommentsPage from "./pages/social/comments";
-import NexusChat from "./pages/social/chat"; // ✅ Real-time Chat Integrated
+import NexusChat from "./pages/social/chat"; 
 
 // 3. MUSIC & SHOP
 import MusicIndex from "./pages/music/index";
@@ -38,7 +38,8 @@ import CinemaAI from "./pages/studio/video-gen";
 // --- 👑 ADMIN & CREATOR DASHBOARD ---
 import AdminDashboard from "./pages/dashboard"; 
 import ApiManager from "./pages/admin/api-manager";
-import CreatorDashboard from "./pages/dashboard/index"; // ✅ FB Clone Dashboard Integrated
+import Analytics from "./pages/admin/analytics"; // ✅ New Analytics Node Added
+import CreatorDashboard from "./pages/dashboard/index"; 
 
 // --- 🌌 MAGIC ---
 import MagicMain from "./pages/magic/index";
@@ -46,7 +47,6 @@ import NeuralChat from "./pages/magic/ai-chat";
 import ImageGen from "./pages/magic/image-gen";
 
 export default function App() {
-  // Debug log to confirm economy system
   console.log(`🛡️ Nexus Protocol: ${ECONOMY_RULES.CURRENCY_NAME} System Active`);
 
   return (
@@ -91,6 +91,7 @@ export default function App() {
           {/* --- 🔥 ADMIN & CREATOR ROUTES --- */}
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/api" component={ApiManager} />
+          <Route path="/admin/analytics" component={Analytics} /> {/* ✅ Analytics Route Linked */}
           <Route path="/creator/dashboard" component={CreatorDashboard} />
 
           {/* Fallback to Hub */}
