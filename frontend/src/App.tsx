@@ -12,6 +12,7 @@ import SplashScreen from "./pages/splash";
 import MainHub from "./pages/hub/index";
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
+import TermsConditions from "./pages/Auth/terms"; // ✅ Added for Legal Protocol
 
 // 2. SOCIAL MODULE
 import SocialIndex from "./pages/social/index";
@@ -20,7 +21,7 @@ import ExplorePage from "./pages/social/explore";
 import CreatePost from "./pages/social/create";
 import ActivityPage from "./pages/social/activity";
 import UserProfile from "./pages/social/profile";
-import EditProfile from "./pages/social/edit-profile"; // ✅ New Edit Page
+import EditProfile from "./pages/social/edit-profile"; 
 import SearchPage from "./pages/social/search";
 import CommentsPage from "./pages/social/comments";
 
@@ -33,9 +34,10 @@ import RXStudio from "./pages/studio/index";
 import VoiceLab from "./pages/studio/voice-lab"; 
 import CinemaAI from "./pages/studio/video-gen"; 
 
-// --- 👑 ADMIN & API ---
+// --- 👑 ADMIN & CREATOR DASHBOARD ---
 import AdminDashboard from "./pages/dashboard"; 
 import ApiManager from "./pages/admin/api-manager";
+import CreatorDashboard from "./pages/dashboard/index"; // ✅ Added FB Clone Dashboard
 
 // --- 🌌 MAGIC ---
 import MagicMain from "./pages/magic/index";
@@ -55,6 +57,7 @@ export default function App() {
           <Route path="/hub" component={MainHub} />
           <Route path="/auth/signin" component={SignIn} />
           <Route path="/auth/signup" component={SignUp} />
+          <Route path="/auth/terms" component={TermsConditions} /> {/* ✅ Critical for 18+/Legal */}
           
           {/* --- SOCIAL SYSTEM --- */}
           <Route path="/social" component={SocialIndex} />
@@ -67,13 +70,14 @@ export default function App() {
           
           {/* --- PROFILE NODES --- */}
           <Route path="/profile" component={UserProfile} />
-          <Route path="/social/edit-profile" component={EditProfile} /> {/* ✅ Added Edit Route */}
+          <Route path="/social/edit-profile" component={EditProfile} /> 
           
           {/* --- AI & CREATIVE MODULES --- */}
           <Route path="/studio" component={RXStudio} />
           <Route path="/studio/voice-lab" component={VoiceLab} /> 
           <Route path="/magic/video-gen" component={CinemaAI} />  
           
+          {/* --- MAGIC SYSTEM --- */}
           <Route path="/magic" component={MagicMain} />
           <Route path="/magic/ai-chat" component={NeuralChat} />
           <Route path="/magic/image-gen" component={ImageGen} />
@@ -82,9 +86,10 @@ export default function App() {
           <Route path="/music" component={MusicIndex} />
           <Route path="/shop" component={ShopIndex} />
 
-          {/* --- 🔥 ADMIN ROUTES --- */}
+          {/* --- 🔥 ADMIN & CREATOR ROUTES --- */}
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/api" component={ApiManager} />
+          <Route path="/creator/dashboard" component={CreatorDashboard} /> {/* ✅ Facebook Clone Dashboard */}
 
           {/* Fallback to Hub */}
           <Route><Redirect to="/hub" /></Route>
