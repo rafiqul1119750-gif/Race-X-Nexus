@@ -12,7 +12,7 @@ import SplashScreen from "./pages/splash";
 import MainHub from "./pages/hub/index";
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
-import TermsConditions from "./pages/Auth/terms"; // ✅ Added for Legal Protocol
+import TermsConditions from "./pages/Auth/terms"; // ✅ Legal Protocol
 
 // 2. SOCIAL MODULE
 import SocialIndex from "./pages/social/index";
@@ -24,6 +24,7 @@ import UserProfile from "./pages/social/profile";
 import EditProfile from "./pages/social/edit-profile"; 
 import SearchPage from "./pages/social/search";
 import CommentsPage from "./pages/social/comments";
+import NexusChat from "./pages/social/chat"; // ✅ Added Real-time Chat
 
 // 3. MUSIC & SHOP
 import MusicIndex from "./pages/music/index";
@@ -37,7 +38,7 @@ import CinemaAI from "./pages/studio/video-gen";
 // --- 👑 ADMIN & CREATOR DASHBOARD ---
 import AdminDashboard from "./pages/dashboard"; 
 import ApiManager from "./pages/admin/api-manager";
-import CreatorDashboard from "./pages/dashboard/index"; // ✅ Added FB Clone Dashboard
+import CreatorDashboard from "./pages/dashboard/index"; // ✅ FB Clone Dashboard
 
 // --- 🌌 MAGIC ---
 import MagicMain from "./pages/magic/index";
@@ -57,7 +58,7 @@ export default function App() {
           <Route path="/hub" component={MainHub} />
           <Route path="/auth/signin" component={SignIn} />
           <Route path="/auth/signup" component={SignUp} />
-          <Route path="/auth/terms" component={TermsConditions} /> {/* ✅ Critical for 18+/Legal */}
+          <Route path="/auth/terms" component={TermsConditions} />
           
           {/* --- SOCIAL SYSTEM --- */}
           <Route path="/social" component={SocialIndex} />
@@ -67,6 +68,7 @@ export default function App() {
           <Route path="/social/create" component={CreatePost} />
           <Route path="/social/activity" component={ActivityPage} />
           <Route path="/social/comments/:id" component={CommentsPage} />
+          <Route path="/social/chat" component={NexusChat} /> {/* ✅ Real-time Chat Node */}
           
           {/* --- PROFILE NODES --- */}
           <Route path="/profile" component={UserProfile} />
@@ -89,7 +91,7 @@ export default function App() {
           {/* --- 🔥 ADMIN & CREATOR ROUTES --- */}
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/api" component={ApiManager} />
-          <Route path="/creator/dashboard" component={CreatorDashboard} /> {/* ✅ Facebook Clone Dashboard */}
+          <Route path="/creator/dashboard" component={CreatorDashboard} />
 
           {/* Fallback to Hub */}
           <Route><Redirect to="/hub" /></Route>
