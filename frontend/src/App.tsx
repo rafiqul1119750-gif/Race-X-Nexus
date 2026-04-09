@@ -4,13 +4,14 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "./components/ui/toaster";
 import { AppProvider } from "./context/AppContext";
 
-// 1. CORE & AUTH
+// 1. CORE & AUTH (Matching your new index.tsx structure)
 import SplashScreen from "./pages/splash";
-import MainHub from "./pages/hub";
+import MainHub from "./pages/hub/index"; // Updated to folder index
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
 
-// 2. SOCIAL MODULE
+// 2. SOCIAL MODULE (Exactly as you requested)
+import SocialIndex from "./pages/social/index"; // New Social Index
 import SocialFeed from "./pages/social/feed";
 import ExplorePage from "./pages/social/explore";
 import CreatePost from "./pages/social/create";
@@ -19,20 +20,23 @@ import UserProfile from "./pages/social/profile";
 import SearchPage from "./pages/social/search";
 import CommentsPage from "./pages/social/comments";
 
-// 3. OTHER MODULES
+// 3. MUSIC & SHOP (New folder indexes)
+import MusicIndex from "./pages/music/index";
+import ShopIndex from "./pages/shop/index";
+
+// 4. STUDIO & CREATIVE
 import RXStudio from "./pages/studio/index";
 
-// --- 👑 ADMIN & API (Matching your exact GitHub paths) ---
-// Aapki screenshot ke hisaab se dashboard baahar hai aur api-manager admin folder mein
+// --- 👑 ADMIN & API ---
 import AdminDashboard from "./pages/dashboard"; 
 import ApiManager from "./pages/admin/api-manager";
 
-// --- 🌌 MAGIC (Matching your magic folder screenshot) ---
-import MagicMain from "./pages/magic/main";
+// --- 🌌 MAGIC ---
+import MagicMain from "./pages/magic/index"; // Updated to magic index
 import NeuralChat from "./pages/magic/ai-chat";
 import ImageGen from "./pages/magic/image-gen";
 
-// Placeholder
+// Placeholder (Keeping for future sub-pages)
 const Placeholder = ({ title }: { title: string }) => (
   <div className="h-screen bg-black flex flex-col items-center justify-center text-cyan-400 font-black italic p-6 text-center">
     <h1 className="text-2xl mb-2">{title}</h1>
@@ -52,6 +56,7 @@ export default function App() {
           <Route path="/auth/signup" component={SignUp} />
           
           {/* --- SOCIAL SYSTEM --- */}
+          <Route path="/social" component={SocialIndex} /> {/* Social Main */}
           <Route path="/social/feed" component={SocialFeed} />
           <Route path="/social/explore" component={ExplorePage} />
           <Route path="/social/search" component={SearchPage} />
@@ -63,17 +68,18 @@ export default function App() {
           {/* --- AI & CREATIVE MODULES --- */}
           <Route path="/studio" component={RXStudio} />
           <Route path="/magic" component={MagicMain} />
-          <Route path="/chat" component={NeuralChat} />
+          <Route path="/magic/ai-chat" component={NeuralChat} />
           <Route path="/magic/image-gen" component={ImageGen} />
           
-          <Route path="/music"><Placeholder title="RX MUSIC LIBRARY" /></Route>
-          <Route path="/shop"><Placeholder title="RX SHOP" /></Route>
+          {/* --- NEW MODULES --- */}
+          <Route path="/music" component={MusicIndex} />
+          <Route path="/shop" component={ShopIndex} />
 
           {/* --- 🔥 ADMIN ROUTES --- */}
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/api" component={ApiManager} />
 
-          {/* Fallback */}
+          {/* Fallback to Hub */}
           <Route><Redirect to="/hub" /></Route>
         </Switch>
         <Toaster />
