@@ -1,42 +1,60 @@
-import { ArrowLeft, Video, Image as ImageIcon, Mic, Sparkles, BarChart2 } from "lucide-react";
+import { ArrowLeft, Video, Mic, Sparkles, BarChart2, Wand2, Scissors, Zap } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function StudioIndex() {
   const [, setLocation] = useLocation();
 
+  const tools = [
+    { name: "Cinema AI", icon: <Video className="text-purple-500" />, path: "/studio/editor", desc: "Text to 4K Video" },
+    { name: "Voice Lab", icon: <Mic className="text-red-500" />, path: "/studio/voice", desc: "Cloning & Dubbing" },
+    { name: "Magic Fix", icon: <Wand2 className="text-cyan-500" />, path: "/studio/enhance", desc: "Photo Restoration" },
+    { name: "Creator Stats", icon: <BarChart2 className="text-yellow-500" />, path: "/studio/analytics", desc: "Engagement Data" },
+  ];
+
   return (
-    <div className="min-h-screen bg-black text-white p-6 font-sans">
-      <div className="flex items-center gap-4 mb-10">
-        <button onClick={() => setLocation("/hub")} className="p-2 active:scale-75 transition-all"><ArrowLeft size={24} /></button>
-        <h1 className="text-xl font-black italic uppercase tracking-widest">RX Studio Hub</h1>
-      </div>
+    <div className="min-h-screen bg-black text-white p-6 pb-24 font-sans overflow-hidden">
+      <header className="flex items-center gap-4 mb-10">
+        <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900/80 rounded-2xl active:scale-75 transition-all border border-white/5">
+          <ArrowLeft size={24} className="text-purple-400" />
+        </button>
+        <h1 className="text-xl font-black italic uppercase tracking-[0.2em]">RX Studio</h1>
+      </header>
 
-      <div className="relative h-44 rounded-[40px] bg-gradient-to-br from-zinc-900 to-black border border-white/5 p-8 overflow-hidden mb-10">
+      {/* Featured Tool - Cinema AI */}
+      <div 
+        onClick={() => setLocation("/studio/editor")}
+        className="relative h-56 rounded-[50px] bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/20 p-8 mb-8 cursor-pointer active:scale-[0.98] transition-all group overflow-hidden"
+      >
         <div className="relative z-10">
-          <h2 className="text-3xl font-black italic leading-tight">Create the<br/>Impossible.</h2>
-          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-2">Select an AI Node to begin</p>
+          <div className="flex items-center gap-2 mb-4">
+            <Zap size={12} className="text-purple-400 fill-purple-400" />
+            <span className="text-[8px] font-black uppercase tracking-widest">Production Mode</span>
+          </div>
+          <h2 className="text-4xl font-black italic uppercase leading-none mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-400">Cinema<br/>Engine</h2>
+          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Start generating AI movies</p>
         </div>
-        <Sparkles className="absolute right-6 top-6 text-zinc-800/40" size={100} />
+        <Video className="absolute right-[-20px] bottom-[-20px] text-purple-500/10 group-hover:rotate-12 transition-transform" size={180} />
       </div>
 
+      {/* Tools List */}
       <div className="space-y-4">
-        <StudioNode title="Text to Video" icon={<Video size={20} className="text-purple-500" />} onClick={() => setLocation("/studio/editor")} />
-        <StudioNode title="AI Image Gen" icon={<ImageIcon size={20} className="text-cyan-500" />} onClick={() => setLocation("/magic/image-gen")} />
-        <StudioNode title="Voice Clone" icon={<Mic size={20} className="text-red-500" />} onClick={() => setLocation("/studio/voice")} />
-        <StudioNode title="Analytics" icon={<BarChart2 size={20} className="text-yellow-500" />} onClick={() => setLocation("/studio/analytics")} />
+        {tools.map((tool) => (
+          <button 
+            key={tool.name} 
+            onClick={() => setLocation(tool.path)}
+            className="w-full bg-zinc-900/20 border border-white/5 p-6 rounded-[35px] flex items-center justify-between active:scale-[0.97] transition-all hover:bg-zinc-900/40 group"
+          >
+            <div className="flex items-center gap-5">
+              <div className="p-4 bg-black rounded-[22px] border border-white/5 group-hover:border-purple-500/30 transition-colors">{tool.icon}</div>
+              <div className="text-left">
+                <span className="block text-xs font-black uppercase tracking-widest">{tool.name}</span>
+                <span className="text-[9px] font-bold text-zinc-600 uppercase mt-1">{tool.desc}</span>
+              </div>
+            </div>
+            <Scissors size={14} className="text-zinc-700" />
+          </button>
+        ))}
       </div>
     </div>
-  );
-}
-
-function StudioNode({ title, icon, onClick }: any) {
-  return (
-    <button onClick={onClick} className="w-full bg-zinc-900/30 border border-white/5 p-6 rounded-[30px] flex items-center justify-between active:scale-[0.97] transition-all">
-      <div className="flex items-center gap-4">
-        <div className="p-3 bg-black rounded-2xl border border-white/5">{icon}</div>
-        <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-200">{title}</span>
-      </div>
-      <Sparkles size={16} className="text-zinc-800" />
-    </button>
   );
 }
