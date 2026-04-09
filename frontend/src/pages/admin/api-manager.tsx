@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { 
   Key, Save, RefreshCw, Zap, ShieldCheck, 
-  Trash2, Plus, Eye, EyeOff, AlertCircle
+  Plus, Eye, EyeOff, AlertCircle, X, Terminal, ChevronRight
 } from "lucide-react";
-import { databases, ID, Query } from "../../lib/appwrite";
+import { databases, ID } from "../../lib/appwrite"; // Make sure path is correct
 
-// DATABASE CONSTANTS (Aapne Appwrite console mein ye banaye honge)
 const DATABASE_ID = 'nexus_core'; 
 const COLLECTION_ID = 'api_configs';
 
@@ -14,158 +13,174 @@ export default function ApiManager() {
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [showKey, setShowKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Modal State for Real Injection
+  const [editModal, setEditModal] = useState<{id: string, name: string} | null>(null);
+  const [newKeyValue, setNewKeyValue] = useState("");
 
-  // --- 1. FETCH ACTUAL KEYS FROM APPWRITE ---
-  useEffect(() => {
-    const fetchKeys = async () => {
-      try {
-        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-        setApiKeys(response.documents);
-      } catch (error) {
-        console.error("Fetch Error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchKeys();
-  }, []);
+  const fetchKeys = async () => {
+    setLoading(true);
+    try {
+      const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+      setApiKeys(response.documents);
+    } catch (error) {
+      console.error("Nexus Sync Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // --- 2. REAL INJECTION LOGIC (Update Appwrite Doc) ---
-  const handleUpdateKey = async (docId: string, serviceName: string, newKeyValue: string) => {
-    if (!newKeyValue) return;
-    setIsUpdating(docId);
+  useEffect(() => { fetchKeys(); }, []);
+
+  const handleUpdateKey = async () => {
+    if (!editModal || !newKeyValue) return;
+    setIsUpdating(editModal.id);
     
     try {
-      await databases.updateDocument(DATABASE_ID, COLLECTION_ID, docId, {
+      await databases.updateDocument(DATABASE_ID, COLLECTION_ID, editModal.id, {
         key_value: newKeyValue,
         last_updated: new Date().toISOString()
       });
       
-      // Update local state
       setApiKeys(prev => prev.map(item => 
-        item.$id === docId ? { ...item, key_value: newKeyValue } : item
+        item.$id === editModal.id ? { ...item, key_value: newKeyValue } : item
       ));
       
-      alert(`${serviceName} Injected into Core!`);
+      setEditModal(null);
+      setNewKeyValue("");
+      alert(`${editModal.name} Node Re-Injected! 🚀`);
     } catch (error) {
-      alert("Injection Failed: Database Connection Error");
+      alert("Injection Blocked: Database Link Failed");
     } finally {
       setIsUpdating(null);
     }
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-black text-cyan-400 font-black tracking-widest animate-pulse">BOOTING API HUB...</div>;
+  if (loading) return (
+    <div className="h-screen flex flex-col items-center justify-center bg-black text-cyan-400">
+      <Terminal size={40} className="mb-4 animate-bounce" />
+      <div className="font-black tracking-[0.5em] animate-pulse uppercase">Booting Nexus API Hub...</div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 md:p-10 animate-in fade-in duration-700">
+    <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans selection:bg-cyan-500/30 overflow-x-hidden">
       
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+      {/* 1. Launch Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
         <div>
-          <h1 className="text-4xl font-black italic uppercase tracking-tighter flex items-center gap-4">
-            <Key className="text-cyan-500" size={36} /> API Injection Hub
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-2 h-2 bg-cyan-500 rounded-full animate-ping" />
+            <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.4em]">Live Production Node</span>
+          </div>
+          <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none flex items-center gap-4">
+            Injection Hub
           </h1>
-          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mt-2">
-            Secure Dynamic Credential Management
-          </p>
+          <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.3em] mt-3">Race-X Nexus Core Management</p>
         </div>
-        <div className="flex gap-4">
-            <button className="flex items-center gap-2 px-6 py-3 bg-zinc-900 border border-white/10 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
-                <RefreshCw size={14}/> Sync Cloud
+        
+        <div className="flex gap-4 w-full md:w-auto">
+            <button onClick={fetchKeys} className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
+                <RefreshCw size={14} className={loading ? "animate-spin" : ""}/> Sync Cloud
             </button>
-            <button className="flex items-center gap-2 px-6 py-3 bg-cyan-500 text-black rounded-2xl text-[9px] font-black uppercase tracking-widest shadow-[0_0_30px_rgba(34,211,238,0.3)] hover:scale-105 transition-all">
+            <button className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 transition-all">
                 <Plus size={14}/> New Engine
             </button>
         </div>
       </div>
 
-      {/* API Grid - Actual Data from Appwrite */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      {/* 2. Responsive API Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
         {apiKeys.map((api) => (
-          <div key={api.$id} className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[35px] space-y-5 hover:border-cyan-500/30 transition-all group relative overflow-hidden">
-            <div className="flex justify-between items-center">
-              <span className={`text-[8px] font-black uppercase px-3 py-1 rounded-full ${api.status === 'active' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                {api.status || 'active'}
-              </span>
-              <div className="flex gap-2">
-                 <button onClick={() => setShowKey(showKey === api.$id ? null : api.$id)} className="text-zinc-600 hover:text-white transition-colors">
-                    {showKey === api.$id ? <EyeOff size={16}/> : <Eye size={16}/>}
-                 </button>
+          <div key={api.$id} className="group relative bg-zinc-900/10 border border-white/5 p-8 rounded-[45px] hover:border-cyan-500/40 transition-all duration-500 overflow-hidden">
+            {/* Background Glow */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/5 blur-[100px] group-hover:bg-cyan-500/10 transition-all" />
+            
+            <div className="flex justify-between items-center mb-8">
+              <div className="flex items-center gap-2">
+                 <div className={`w-1.5 h-1.5 rounded-full ${api.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`} />
+                 <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500">{api.service_name}</span>
               </div>
+              <button onClick={() => setShowKey(showKey === api.$id ? null : api.$id)} className="p-2 bg-black rounded-lg text-zinc-600 hover:text-white transition-all">
+                {showKey === api.$id ? <EyeOff size={14}/> : <Eye size={14}/>}
+              </button>
             </div>
             
-            <div>
-              <h3 className="text-xl font-black italic uppercase tracking-tighter text-zinc-100">{api.service_name}</h3>
-              <div className="mt-2 bg-black/50 p-3 rounded-xl border border-white/5 flex items-center justify-between">
-                <code className="text-[10px] text-cyan-500/80 font-mono truncate mr-2">
-                  {showKey === api.$id ? api.key_value : '••••••••••••••••••••'}
-                </code>
+            <div className="mb-8">
+              <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-4">{api.service_name}</h3>
+              <div className="bg-black/80 p-5 rounded-2xl border border-white/5 font-mono text-[10px] text-cyan-500/60 truncate">
+                {showKey === api.$id ? api.key_value : '••••••••••••••••••••••••'}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between text-[8px] font-black uppercase text-zinc-600">
-                <span>Usage Load</span>
-                <span className={parseInt(api.usage_percent) > 80 ? 'text-red-500' : 'text-cyan-500'}>{api.usage_percent || '0'}%</span>
+            <div className="space-y-3 mb-8">
+              <div className="flex justify-between text-[8px] font-black uppercase tracking-widest">
+                <span className="text-zinc-600">Load Factor</span>
+                <span className="text-cyan-500">{api.usage_percent || '0'}%</span>
               </div>
-              <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-                <div 
-                  style={{ width: `${api.usage_percent || 0}%` }} 
-                  className={`h-full transition-all duration-1000 ${parseInt(api.usage_percent) > 80 ? 'bg-red-500 shadow-[0_0_10px_red]' : 'bg-cyan-500'}`} 
-                />
+              <div className="h-1 bg-zinc-900 rounded-full overflow-hidden">
+                <div style={{ width: `${api.usage_percent || 0}%` }} className="h-full bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all duration-1000" />
               </div>
             </div>
 
             <button 
-              onClick={() => handleUpdateKey(api.$id, api.service_name, 'prompt-for-new-key')}
-              disabled={isUpdating === api.$id}
-              className="w-full py-4 bg-zinc-900 border border-white/10 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-black hover:border-cyan-500 transition-all flex items-center justify-center gap-2"
+              onClick={() => setEditModal({id: api.$id, name: api.service_name})}
+              className="w-full py-5 bg-zinc-900 hover:bg-white hover:text-black rounded-[25px] text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 border border-white/5"
             >
-              {isUpdating === api.$id ? <RefreshCw size={14} className="animate-spin"/> : <Zap size={14}/>}
-              {isUpdating === api.$id ? "Injecting..." : "Update Engine Key"}
+              <Zap size={14} className="group-hover:fill-current"/> Re-Inject Key
             </button>
           </div>
         ))}
       </div>
 
-      {/* Advanced Raw Injection Control */}
-      <div className="bg-gradient-to-br from-[#0A0A0A] to-black rounded-[45px] border border-white/5 p-8 md:p-12 relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
-            <ShieldCheck size={200} />
-        </div>
-        
-        <h3 className="text-sm font-black uppercase italic tracking-[0.2em] mb-10 flex items-center gap-3 text-cyan-400">
-          <AlertCircle size={18}/> Emergency Master Injection
-        </h3>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <label className="text-[9px] font-black uppercase text-zinc-500 tracking-widest ml-1">Core Service Target</label>
-              <select className="w-full bg-zinc-900/50 border border-white/10 rounded-2xl p-4 text-xs font-bold outline-none focus:border-cyan-500 transition-all appearance-none cursor-pointer">
-                <option>SELECT ENGINE...</option>
-                {apiKeys.map(k => <option key={k.$id} value={k.$id}>{k.service_name}</option>)}
-              </select>
+      {/* 3. Injection Modal (Asli Interaction) */}
+      {editModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
+          <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl animate-in zoom-in duration-300">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-xl font-black italic uppercase tracking-widest">Injecting: {editModal.name}</h2>
+              <button onClick={() => setEditModal(null)} className="p-2 hover:bg-white/10 rounded-full"><X/></button>
             </div>
-            <div className="space-y-3">
-              <label className="text-[9px] font-black uppercase text-zinc-500 tracking-widest ml-1">New Secret Payload</label>
-              <input type="password" placeholder="Paste encrypted key here..." className="w-full bg-zinc-900/50 border border-white/10 rounded-2xl p-4 text-xs font-bold outline-none focus:border-cyan-500 transition-all" />
+            
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase text-zinc-500 ml-2">New Payload Secret</label>
+                <input 
+                  type="password"
+                  value={newKeyValue}
+                  onChange={(e) => setNewKeyValue(e.target.value)}
+                  placeholder="Paste Encrypted API Key..."
+                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
+                />
+              </div>
+              
+              <button 
+                onClick={handleUpdateKey}
+                disabled={isUpdating === editModal.id}
+                className="w-full py-6 bg-cyan-500 text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                {isUpdating === editModal.id ? <RefreshCw className="animate-spin" /> : <ShieldCheck />}
+                {isUpdating === editModal.id ? "PROCESING..." : "CONFIRM INJECTION"}
+              </button>
             </div>
           </div>
-          
-          <div className="flex flex-col justify-center bg-cyan-500/5 rounded-[40px] p-8 border border-cyan-500/10">
-             <div className="flex items-start gap-4 mb-8">
-               <div className="p-3 bg-cyan-500/10 rounded-2xl text-cyan-400"><ShieldCheck size={24}/></div>
-               <div>
-                 <p className="text-[10px] font-black uppercase text-zinc-300 tracking-tight">System-Wide Propagation</p>
-                 <p className="text-[9px] font-medium text-zinc-500 mt-1 leading-relaxed">Injection will update all active nodes across Race-X Nexus instantly. Key encryption is handled server-side.</p>
-               </div>
-             </div>
-             <button className="w-full py-5 bg-white text-black rounded-[22px] text-[11px] font-black uppercase tracking-[0.2em] hover:bg-cyan-400 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)]">
-               Execute Master Sync
-             </button>
-          </div>
         </div>
+      )}
+
+      {/* 4. Emergency Master Section */}
+      <div className="bg-gradient-to-r from-zinc-900/50 to-black p-10 md:p-16 rounded-[60px] border border-white/5 relative overflow-hidden group">
+         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-4 text-cyan-400">Master Sync</h3>
+              <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest leading-relaxed">
+                Execute a system-wide propagation to all nodes. Use only for emergency key rotations.
+              </p>
+            </div>
+            <button className="h-20 bg-white text-black rounded-[30px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-cyan-400 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl">
+              Execute Propagation <ChevronRight size={20}/>
+            </button>
+         </div>
+         <AlertCircle size={300} className="absolute right-[-100px] top-[-100px] text-white/5 rotate-12 pointer-events-none group-hover:rotate-45 transition-transform duration-1000" />
       </div>
     </div>
   );
