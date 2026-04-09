@@ -1,6 +1,7 @@
-import { ArrowLeft, Send, Sparkles, Mic, Zap, Bot, User, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Mic, Zap, Bot, User, Trash2, RefreshCw } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
+import { databases } from "../../lib/appwrite"; // ✅ Appwrite Connection Link
 
 export default function MagicChat() {
   const [, setLocation] = useLocation();
@@ -9,6 +10,7 @@ export default function MagicChat() {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Auto-scroll logic
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -22,31 +24,46 @@ export default function MagicChat() {
     setIsTyping(true);
 
     try {
-      const hfKey = localStorage.getItem("api_hugging");
+      // 🛡️ 1. DYNAMIC API INJECTION (Fetch from Appwrite)
+      // Hum wahi 'nexus_core' aur 'api_configs' use kar rahe hain jo humne Admin Dashboard mein banaya tha
+      const config = await databases.listDocuments('nexus_core', 'api_configs');
+      const hfKey = config.documents.find((doc: any) => doc.service_name === 'HUGGINGFACE')?.key_value;
       
       if (!hfKey) {
-        setTimeout(() => {
-          setMessages(prev => [...prev, { role: "ai", content: "Bhai, API Key missing hai. Admin Console mein jaakar HuggingFace Key update koro." }]);
-          setIsTyping(false);
-        }, 1000);
+        setMessages(prev => [...prev, { 
+          role: "ai", 
+          content: "⚠️ Nexus Link Failed: API Key missing in Injection Hub. Admin Console mein jaakar HUGGINGFACE key update koro." 
+        }]);
+        setIsTyping(false);
         return;
       }
 
+      // 🛡️ 2. CALL NEURAL ENGINE
       const response = await fetch(
         "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
         {
-          headers: { Authorization: `Bearer ${hfKey}`, "Content-Type": "application/json" },
+          headers: { 
+            Authorization: `Bearer ${hfKey}`, 
+            "Content-Type": "application/json" 
+          },
           method: "POST",
           body: JSON.stringify({ inputs: userMsg }),
         }
       );
       
       const result = await response.json();
-      const aiResponse = result[0]?.generated_text || "System Node online. Process complete.";
       
-      setMessages(prev => [...prev, { role: "ai", content: aiResponse.split(userMsg)[1] || aiResponse }]);
+      // Clean result logic (Removing prompt prefix if AI repeats it)
+      let aiContent = "";
+      if (Array.isArray(result) && result[0]?.generated_text) {
+        aiContent = result[0].generated_text.split(userMsg)[1] || result[0].generated_text;
+      } else {
+        aiContent = "Node Response Error. Check API status in Admin Hub.";
+      }
+      
+      setMessages(prev => [...prev, { role: "ai", content: aiContent.trim() }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: "ai", content: "Connection lost. RX Protocol reconnecting..." }]);
+      setMessages(prev => [...prev, { role: "ai", content: "❌ Connection Lost. RX Protocol reconnecting to Nexus..." }]);
     } finally {
       setIsTyping(false);
     }
@@ -57,7 +74,7 @@ export default function MagicChat() {
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-cyan-500/30">
       
-      {/* --- PREMIUM GEMINI HEADER --- */}
+      {/* --- PREMIUM HEADER (RX STYLE) --- */}
       <header className="p-6 flex items-center justify-between border-b border-white/5 bg-black/50 backdrop-blur-2xl sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900/80 rounded-2xl active:scale-75 transition-all border border-white/5">
@@ -67,7 +84,7 @@ export default function MagicChat() {
             <h1 className="text-md font-black uppercase italic tracking-tighter flex items-center gap-2">
               <Sparkles size={16} className="text-cyan-400" /> RX Magic Chat
             </h1>
-            <span className="text-[7px] font-black text-zinc-600 uppercase tracking-[0.3em]">AI Engine v4.0 Active</span>
+            <span className="text-[7px] font-black text-zinc-600 uppercase tracking-[0.3em]">Neural Engine v4.0 Active</span>
           </div>
         </div>
         <button onClick={clearChat} className="p-3 text-zinc-600 hover:text-red-400 transition-colors">
@@ -75,7 +92,7 @@ export default function MagicChat() {
         </button>
       </header>
 
-      {/* --- CHAT AREA --- */}
+      {/* --- CHAT FEED AREA --- */}
       <div className="flex-1 overflow-y-auto px-6 py-8 space-y-8 scrollbar-hide">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col justify-center items-center text-center space-y-4 pt-20">
@@ -83,8 +100,8 @@ export default function MagicChat() {
               <Bot size={40} className="text-black" />
             </div>
             <div>
-              <p className="text-lg font-black italic uppercase tracking-widest text-white">How can I help, Boss?</p>
-              <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] mt-1">RX Neural Link is ready for commands</p>
+              <p className="text-lg font-black italic uppercase tracking-widest text-white">Ready for Commands?</p>
+              <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] mt-1">RX Nexus Link is standing by</p>
             </div>
           </div>
         ) : (
@@ -100,13 +117,15 @@ export default function MagicChat() {
                 ? 'bg-zinc-900 text-zinc-200 rounded-tr-none border border-white/5 shadow-xl' 
                 : 'bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 text-zinc-200 rounded-tl-none border border-white/10'
               }`}>
-                <p className="text-[13px] leading-relaxed font-medium">{m.content}</p>
+                <p className="text-[13px] leading-relaxed font-medium whitespace-pre-wrap">{m.content}</p>
               </div>
             </div>
           ))
         )}
+        
+        {/* Typing Animation */}
         {isTyping && (
-          <div className="flex gap-4 items-center animate-pulse">
+          <div className="flex gap-4 items-center">
             <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center border border-white/10">
               <Bot size={14} className="text-zinc-600" />
             </div>
@@ -120,7 +139,7 @@ export default function MagicChat() {
         <div ref={scrollRef} />
       </div>
 
-      {/* --- GEMINI-STYLE INPUT BAR --- */}
+      {/* --- PREMIUM INPUT BAR --- */}
       <div className="p-6 bg-gradient-to-t from-black via-black to-transparent">
         <div className="relative max-w-4xl mx-auto flex items-center gap-3">
           <div className="relative flex-1 group">
@@ -139,17 +158,17 @@ export default function MagicChat() {
               />
               <button 
                 onClick={handleSend}
-                disabled={!input.trim()}
+                disabled={!input.trim() || isTyping}
                 className={`p-4 rounded-[22px] transition-all ${
-                  input.trim() ? 'bg-white text-black shadow-lg scale-100' : 'bg-zinc-800 text-zinc-600 scale-90'
+                  input.trim() && !isTyping ? 'bg-white text-black shadow-lg scale-100' : 'bg-zinc-800 text-zinc-600 scale-90'
                 }`}
               >
-                <Send size={18} fill="currentColor" />
+                {isTyping ? <RefreshCw size={18} className="animate-spin" /> : <Send size={18} fill="currentColor" />}
               </button>
             </div>
           </div>
         </div>
-        <p className="text-center text-[8px] font-bold text-zinc-700 uppercase tracking-[0.3em] mt-4">Powered by Race-X Neural Protocol</p>
+        <p className="text-center text-[8px] font-bold text-zinc-700 uppercase tracking-[0.3em] mt-4">Race-X Nexus Core | Live Propagation</p>
       </div>
     </div>
   );
