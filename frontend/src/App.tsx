@@ -4,14 +4,18 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "./components/ui/toaster";
 import { AppProvider } from "./context/AppContext";
 
-// 1. CORE & AUTH (Matching your new index.tsx structure)
+// --- 💎 ECONOMY CONFIG ---
+// Isse humne import kiya taaki global rules load ho jayein
+import { ECONOMY_RULES } from "./lib/economy"; 
+
+// 1. CORE & AUTH
 import SplashScreen from "./pages/splash";
-import MainHub from "./pages/hub/index"; // Updated to folder index
+import MainHub from "./pages/hub/index";
 import SignIn from "./pages/Auth/signin";
 import SignUp from "./pages/Auth/signup";
 
-// 2. SOCIAL MODULE (Exactly as you requested)
-import SocialIndex from "./pages/social/index"; // New Social Index
+// 2. SOCIAL MODULE
+import SocialIndex from "./pages/social/index";
 import SocialFeed from "./pages/social/feed";
 import ExplorePage from "./pages/social/explore";
 import CreatePost from "./pages/social/create";
@@ -20,7 +24,7 @@ import UserProfile from "./pages/social/profile";
 import SearchPage from "./pages/social/search";
 import CommentsPage from "./pages/social/comments";
 
-// 3. MUSIC & SHOP (New folder indexes)
+// 3. MUSIC & SHOP
 import MusicIndex from "./pages/music/index";
 import ShopIndex from "./pages/shop/index";
 
@@ -32,19 +36,14 @@ import AdminDashboard from "./pages/dashboard";
 import ApiManager from "./pages/admin/api-manager";
 
 // --- 🌌 MAGIC ---
-import MagicMain from "./pages/magic/index"; // Updated to magic index
+import MagicMain from "./pages/magic/index";
 import NeuralChat from "./pages/magic/ai-chat";
 import ImageGen from "./pages/magic/image-gen";
 
-// Placeholder (Keeping for future sub-pages)
-const Placeholder = ({ title }: { title: string }) => (
-  <div className="h-screen bg-black flex flex-col items-center justify-center text-cyan-400 font-black italic p-6 text-center">
-    <h1 className="text-2xl mb-2">{title}</h1>
-    <p className="text-[10px] tracking-[0.3em] text-zinc-500 uppercase">System Node Online</p>
-  </div>
-);
-
 export default function App() {
+  // Console mein check karne ke liye ki economy load hui ya nahi
+  console.log(`🛡️ Nexus Protocol: ${ECONOMY_RULES.CURRENCY_NAME} System Active`);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider> 
@@ -56,7 +55,7 @@ export default function App() {
           <Route path="/auth/signup" component={SignUp} />
           
           {/* --- SOCIAL SYSTEM --- */}
-          <Route path="/social" component={SocialIndex} /> {/* Social Main */}
+          <Route path="/social" component={SocialIndex} />
           <Route path="/social/feed" component={SocialFeed} />
           <Route path="/social/explore" component={ExplorePage} />
           <Route path="/social/search" component={SearchPage} />
