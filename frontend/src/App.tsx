@@ -5,7 +5,6 @@ import { Toaster } from "./components/ui/toaster";
 import { AppProvider } from "./context/AppContext";
 
 // --- 💎 ECONOMY CONFIG ---
-// Isse humne import kiya taaki global rules load ho jayein
 import { ECONOMY_RULES } from "./lib/economy"; 
 
 // 1. CORE & AUTH
@@ -30,6 +29,8 @@ import ShopIndex from "./pages/shop/index";
 
 // 4. STUDIO & CREATIVE
 import RXStudio from "./pages/studio/index";
+import VoiceLab from "./pages/studio/voice-lab"; // ✅ Added under Studio
+import CinemaAI from "./pages/studio/video-gen"; // ✅ Added under Studio
 
 // --- 👑 ADMIN & API ---
 import AdminDashboard from "./pages/dashboard"; 
@@ -41,7 +42,6 @@ import NeuralChat from "./pages/magic/ai-chat";
 import ImageGen from "./pages/magic/image-gen";
 
 export default function App() {
-  // Console mein check karne ke liye ki economy load hui ya nahi
   console.log(`🛡️ Nexus Protocol: ${ECONOMY_RULES.CURRENCY_NAME} System Active`);
 
   return (
@@ -66,6 +66,9 @@ export default function App() {
           
           {/* --- AI & CREATIVE MODULES --- */}
           <Route path="/studio" component={RXStudio} />
+          <Route path="/studio/voice-lab" component={VoiceLab} /> {/* ✅ Full Function Route */}
+          <Route path="/magic/video-gen" component={CinemaAI} />  {/* ✅ Full Function Route */}
+          
           <Route path="/magic" component={MagicMain} />
           <Route path="/magic/ai-chat" component={NeuralChat} />
           <Route path="/magic/image-gen" component={ImageGen} />
