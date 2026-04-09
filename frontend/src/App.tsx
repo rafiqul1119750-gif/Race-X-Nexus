@@ -20,6 +20,7 @@ import ExplorePage from "./pages/social/explore";
 import CreatePost from "./pages/social/create";
 import ActivityPage from "./pages/social/activity";
 import UserProfile from "./pages/social/profile";
+import EditProfile from "./pages/social/edit-profile"; // ✅ New Edit Page
 import SearchPage from "./pages/social/search";
 import CommentsPage from "./pages/social/comments";
 
@@ -29,8 +30,8 @@ import ShopIndex from "./pages/shop/index";
 
 // 4. STUDIO & CREATIVE
 import RXStudio from "./pages/studio/index";
-import VoiceLab from "./pages/studio/voice-lab"; // ✅ Added under Studio
-import CinemaAI from "./pages/studio/video-gen"; // ✅ Added under Studio
+import VoiceLab from "./pages/studio/voice-lab"; 
+import CinemaAI from "./pages/studio/video-gen"; 
 
 // --- 👑 ADMIN & API ---
 import AdminDashboard from "./pages/dashboard"; 
@@ -42,6 +43,7 @@ import NeuralChat from "./pages/magic/ai-chat";
 import ImageGen from "./pages/magic/image-gen";
 
 export default function App() {
+  // Debug log to confirm economy system
   console.log(`🛡️ Nexus Protocol: ${ECONOMY_RULES.CURRENCY_NAME} System Active`);
 
   return (
@@ -62,12 +64,15 @@ export default function App() {
           <Route path="/social/create" component={CreatePost} />
           <Route path="/social/activity" component={ActivityPage} />
           <Route path="/social/comments/:id" component={CommentsPage} />
+          
+          {/* --- PROFILE NODES --- */}
           <Route path="/profile" component={UserProfile} />
+          <Route path="/social/edit-profile" component={EditProfile} /> {/* ✅ Added Edit Route */}
           
           {/* --- AI & CREATIVE MODULES --- */}
           <Route path="/studio" component={RXStudio} />
-          <Route path="/studio/voice-lab" component={VoiceLab} /> {/* ✅ Full Function Route */}
-          <Route path="/magic/video-gen" component={CinemaAI} />  {/* ✅ Full Function Route */}
+          <Route path="/studio/voice-lab" component={VoiceLab} /> 
+          <Route path="/magic/video-gen" component={CinemaAI} />  
           
           <Route path="/magic" component={MagicMain} />
           <Route path="/magic/ai-chat" component={NeuralChat} />
