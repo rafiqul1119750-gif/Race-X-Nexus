@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
-import { ShieldCheck, FileText, CheckCircle2, ChevronRight, AlertCircle } from 'lucide-react';
+import { 
+  ShieldCheck, FileText, CheckCircle2, ChevronRight, 
+  AlertCircle, Zap, Ban, Clock, Ghost 
+} from 'lucide-react';
 
 const TermsConditions = () => {
   const [, setLocation] = useLocation();
@@ -35,26 +38,38 @@ const TermsConditions = () => {
             <h2 className="text-cyan-400 font-black mb-2 flex items-center gap-2">
               <ShieldCheck className="w-3 h-3" /> 01. CONTENT GOVERNANCE
             </h2>
-            <p>Race-X uses real-time AI to monitor all uploads. 18+, NSFW, or copyright-infringing content will lead to an immediate permanent ban. No warnings will be issued.</p>
+            <p>Race-X uses real-time AI to monitor all uploads. 18+, NSFW, or copyright-infringing content is strictly prohibited. If you attempt to post restricted content 3 times, your account will be **permanently frozen**. No real-time appeals allowed.</p>
           </section>
 
           <section>
             <h2 className="text-white font-black mb-2 flex items-center gap-2">
-              <FileText className="w-3 h-3" /> 02. DATA PRIVACY & ENCRYPTION
+              <Zap className="w-3 h-3" /> 02. STUDIO REDIRECT PROTOCOL
             </h2>
-            <p>Your biometric and personal data are encrypted via Quantum-Shield. We do not sell user data. AI training is restricted to content explicitly marked as 'Public'.</p>
+            <p>All posts, reels (max 30s), and videos (max 60s) must pass through the **Race-X Studio**. Direct gallery uploads are prohibited to ensure AI-copyright scanning. Saving to gallery is allowed only after final AI processing.</p>
           </section>
 
           <section>
             <h2 className="text-purple-400 font-black mb-2 flex items-center gap-2">
-              <AlertCircle className="w-3 h-3" /> 03. MONETIZATION & WALLET
+              <Ghost className="w-3 h-3" /> 03. INACTIVITY & AUTO-PURGE
             </h2>
-            <p>Diamond-to-Gem conversion rates are dynamic. Withdrawals are subject to 24-hour verification. Fraudulent diamond farming will result in a wallet freeze.</p>
+            <p>To maintain Nexus speed: 
+              <br/>• 30 Days Inactive: Moved to Inactive List.
+              <br/>• 45 Days Inactive: Account Frozen.
+              <br/>• 90 Days Inactive: **AUTOMATIC ACCOUNT DELETION** (All data purged).</p>
+          </section>
+
+          <section>
+            <h2 className="text-yellow-400 font-black mb-2 flex items-center gap-2">
+              <AlertCircle className="w-3 h-3" /> 04. ECONOMY & AD REVENUE
+            </h2>
+            <p>Diamonds are only for shopping and gifting. 1000 Gems = 1 Diamond. No real money withdrawals. Voice/Video Ads will trigger every 5 contents. 18+ content attempt = Gem Reset.</p>
           </section>
 
           <section className="opacity-50">
-            <h2 className="text-zinc-500 font-black mb-2">04. COMMUNITY CONDUCT</h2>
-            <p>Harassment, hate speech, or system exploitation is strictly prohibited. Respect the creator community.</p>
+            <h2 className="text-zinc-500 font-black mb-2 flex items-center gap-2 text-[9px]">
+              <FileText className="w-3 h-3" /> 05. DATA PRIVACY
+            </h2>
+            <p>Biometric data is Quantum-Shield encrypted. AI training only uses public interaction data.</p>
           </section>
         </div>
       </div>
@@ -69,27 +84,27 @@ const TermsConditions = () => {
             {isAgreed && <CheckCircle2 className="w-4 h-4 text-black stroke-[3]" />}
           </div>
           <span className="text-[10px] font-bold text-zinc-300 uppercase leading-tight">
-            I confirm that I am 18+ and I agree to the <span className="text-cyan-400">Privacy Policy</span> and <span className="text-cyan-400">Rules</span>.
+            I confirm that I am 18+, and I accept the <span className="text-cyan-400">90-day deletion policy</span> and the <span className="text-cyan-400">Ad-Economy Rules</span>.
           </span>
         </button>
 
         {/* 📜 View Full Docs Button */}
         <button className="w-full py-3 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] hover:text-white transition-colors">
-          View Full Legal Documentation
+          Download Legal Whitepaper
         </button>
 
-        {/* ✅ Agree & Create Account Node (Redirect → MAIN HUB) */}
+        {/* ✅ Agree & Create Account Node (Redirect → SIGN UP) */}
         <motion.button 
           whileTap={isAgreed ? { scale: 0.98 } : {}}
           disabled={!isAgreed}
-          onClick={() => setLocation('/hub')}
+          onClick={() => setLocation('/auth/signup')}
           className={`w-full p-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${
             isAgreed 
             ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:bg-cyan-400' 
             : 'bg-zinc-900 text-zinc-700 opacity-50 cursor-not-allowed'
           }`}
         >
-          CREATE ACCOUNT <ChevronRight className="w-5 h-5" />
+          ACCEPT PROTOCOL <ChevronRight className="w-5 h-5" />
         </motion.button>
       </div>
 
