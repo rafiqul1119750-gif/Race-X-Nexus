@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { 
   Key, Save, RefreshCw, Zap, ShieldCheck, 
-  Plus, Eye, EyeOff, AlertCircle, X, Terminal, ChevronRight
+  Plus, Eye, EyeOff, AlertCircle, X, Terminal, ChevronRight,
+  ShieldAlert, Ghost, Diamond, UserX
 } from "lucide-react";
-import { databases, ID } from "../../lib/appwrite"; // Make sure path is correct
+import { databases, ID } from "../../lib/appwrite"; // Paths confirmed
 
 const DATABASE_ID = 'nexus_core'; 
 const COLLECTION_ID = 'api_configs';
@@ -93,7 +94,6 @@ export default function ApiManager() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
         {apiKeys.map((api) => (
           <div key={api.$id} className="group relative bg-zinc-900/10 border border-white/5 p-8 rounded-[45px] hover:border-cyan-500/40 transition-all duration-500 overflow-hidden">
-            {/* Background Glow */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/5 blur-[100px] group-hover:bg-cyan-500/10 transition-all" />
             
             <div className="flex justify-between items-center mb-8">
@@ -133,7 +133,7 @@ export default function ApiManager() {
         ))}
       </div>
 
-      {/* 3. Injection Modal (Asli Interaction) */}
+      {/* 3. Injection Modal */}
       {editModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
           <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl animate-in zoom-in duration-300">
@@ -141,34 +141,29 @@ export default function ApiManager() {
               <h2 className="text-xl font-black italic uppercase tracking-widest">Injecting: {editModal.name}</h2>
               <button onClick={() => setEditModal(null)} className="p-2 hover:bg-white/10 rounded-full"><X/></button>
             </div>
-            
             <div className="space-y-6">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase text-zinc-500 ml-2">New Payload Secret</label>
-                <input 
-                  type="password"
-                  value={newKeyValue}
-                  onChange={(e) => setNewKeyValue(e.target.value)}
-                  placeholder="Paste Encrypted API Key..."
-                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
-                />
-              </div>
-              
+              <input 
+                type="password"
+                value={newKeyValue}
+                onChange={(e) => setNewKeyValue(e.target.value)}
+                placeholder="Paste Encrypted API Key..."
+                className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
+              />
               <button 
                 onClick={handleUpdateKey}
                 disabled={isUpdating === editModal.id}
                 className="w-full py-6 bg-cyan-500 text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
               >
                 {isUpdating === editModal.id ? <RefreshCw className="animate-spin" /> : <ShieldCheck />}
-                {isUpdating === editModal.id ? "PROCESING..." : "CONFIRM INJECTION"}
+                {isUpdating === editModal.id ? "PROCESSING..." : "CONFIRM INJECTION"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 4. Emergency Master Section */}
-      <div className="bg-gradient-to-r from-zinc-900/50 to-black p-10 md:p-16 rounded-[60px] border border-white/5 relative overflow-hidden group">
+      {/* 4. Emergency Master Sync */}
+      <div className="bg-gradient-to-r from-zinc-900/50 to-black p-10 md:p-16 rounded-[60px] border border-white/5 relative overflow-hidden group mb-12">
          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-4 text-cyan-400">Master Sync</h3>
