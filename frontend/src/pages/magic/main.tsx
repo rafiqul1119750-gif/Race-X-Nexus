@@ -22,6 +22,7 @@ export default function MagicMain() {
           desc="Gemini-Powered AI Intelligence"
           icon={<MessageSquare size={32}/>}
           color="from-blue-600 to-purple-600"
+          // 🔥 Joda: Ab ye chat page par le jayega
           onClick={() => setLocation("/magic/ai-chat")}
         />
         <MagicCard 
@@ -36,11 +37,12 @@ export default function MagicMain() {
           desc="Upscale & Enhance Everything"
           icon={<Wand2 size={32}/>}
           color="from-pink-600 to-orange-600"
-          onClick={() => {}}
+          // 🔥 Joda: Ab ye studio enhance par le jayega
+          onClick={() => setLocation("/studio")} 
         />
       </div>
 
-      {/* Stats Board */}
+      {/* Stats Board (Bilkul wahi hai) */}
       <div className="mt-10 p-6 bg-zinc-900/50 rounded-[40px] border border-white/5 flex justify-around">
         <MagicStat label="AI Tokens" value="1.2M" />
         <div className="w-[1px] bg-white/10" />
