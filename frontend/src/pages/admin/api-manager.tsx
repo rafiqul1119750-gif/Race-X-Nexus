@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { 
   Key, Save, RefreshCw, Zap, ShieldCheck, 
   Plus, Eye, EyeOff, AlertCircle, X, Terminal, ChevronRight,
-  ShieldAlert, Ghost, Diamond, UserX, ArrowLeft
+  ShieldAlert, Ghost, Diamond, UserX, ArrowLeft, Music, Image as ImageIcon
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { databases, ID } from "../../lib/appwrite"; 
@@ -23,6 +23,16 @@ export default function ApiManager() {
   const [isNewEngineModalOpen, setIsNewEngineModalOpen] = useState(false);
   const [newEngineData, setNewEngineData] = useState({ service_name: "", key_value: "" });
   const [isCreating, setIsCreating] = useState(false);
+
+  // ✅ PRE-DEFINED SERVICES (Nexus Standard)
+  const NEXUS_SERVICES = [
+    { id: "OPEN_ROUTER", name: "Open Router (AI Engine)", icon: <Zap size={14}/> },
+    { id: "JAMENDO_MUSIC", name: "Jamendo (Audio Engine)", icon: <Music size={14}/> },
+    { id: "IMGBB_HOST", name: "ImgBB (Media Hosting)", icon: <ImageIcon size={14}/> },
+    { id: "ELEVEN_LABS", name: "ElevenLabs (Voice-X)", icon: <Ghost size={14}/> },
+    { id: "HUGGING_FACE", name: "Hugging Face (Visual AI)", icon: <Sparkles size={14}/> },
+    { id: "GEMINI_AI", name: "Google Gemini (Core)", icon: <Diamond size={14}/> },
+  ];
 
   // ✅ Functional: Cloud Sync Logic
   const fetchKeys = async () => {
@@ -64,7 +74,7 @@ export default function ApiManager() {
         service_name: newEngineData.service_name,
         key_value: newEngineData.key_value,
         status: "active",
-        usage_percent: Math.floor(Math.random() * 10), // Initial dummy load
+        usage_percent: Math.floor(Math.random() * 10), 
         last_updated: new Date().toISOString()
       });
       alert("New Engine Deployed to Nexus! ⚡");
@@ -106,7 +116,7 @@ export default function ApiManager() {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-black text-cyan-400">
       <Terminal size={40} className="mb-4 animate-bounce" />
-      <div className="font-black tracking-[0.5em] animate-pulse uppercase">Booting Race-X Nexus Hub...</div>
+      <div className="font-black tracking-[0.5em] animate-pulse uppercase text-[10px]">Booting Race-X Nexus Hub...</div>
     </div>
   );
 
@@ -220,7 +230,7 @@ export default function ApiManager() {
         </div>
       )}
 
-      {/* 4. New Engine Deployment Modal */}
+      {/* 4. New Engine Deployment Modal (UPDATED WITH DROPDOWN) */}
       {isNewEngineModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl">
           <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl animate-in zoom-in duration-300">
@@ -230,22 +240,39 @@ export default function ApiManager() {
             </div>
             <div className="space-y-6">
               <div className="space-y-2">
-                <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Service Name</p>
-                <input 
-                  type="text"
+                <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Service Interface</p>
+                <select 
                   value={newEngineData.service_name}
                   onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})}
-                  placeholder="e.g. GROQ_LLAMA_3"
-                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
-                />
+                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-xs font-bold uppercase outline-none focus:border-cyan-500 transition-all appearance-none"
+                >
+                  <option value="">Select Nexus Node...</option>
+                  {NEXUS_SERVICES.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                  <option value="CUSTOM">Custom Node...</option>
+                </select>
               </div>
+
+              {newEngineData.service_name === "CUSTOM" && (
+                <div className="space-y-2 animate-in slide-in-from-top-2">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Custom Service Name</p>
+                  <input 
+                    type="text"
+                    onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})}
+                    placeholder="e.g. PIXEL_ENGINE"
+                    className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
-                <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">API Key</p>
+                <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Secret API Key / Client ID</p>
                 <input 
                   type="password"
                   value={newEngineData.key_value}
                   onChange={(e) => setNewEngineData({...newEngineData, key_value: e.target.value})}
-                  placeholder="sk-...."
+                  placeholder="sk-.... or ClientID"
                   className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
                 />
               </div>
@@ -263,7 +290,7 @@ export default function ApiManager() {
       )}
 
       {/* 5. Emergency Master Sync */}
-      <div className="bg-gradient-to-r from-zinc-900/50 to-black p-10 md:p-16 rounded-[60px] border border-white/5 relative overflow-hidden group mb-12">
+      <div className="bg-gradient-to-r from-zinc-900/50 to-black p-10 md:p-16 rounded-[60px] border border-white/5 relative overflow-hidden group mb-12 shadow-2xl">
          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-4 text-cyan-400">Master Sync</h3>
