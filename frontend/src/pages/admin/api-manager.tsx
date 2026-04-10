@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { 
   Key, Save, RefreshCw, Zap, ShieldCheck, 
   Plus, Eye, EyeOff, AlertCircle, X, Terminal, ChevronRight,
-  ShieldAlert, Ghost, Diamond, UserX, ArrowLeft, Music, Image as ImageIcon
+  ArrowLeft, Music, Image as ImageIcon, Ghost, Diamond
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { databases, ID } from "../../lib/appwrite"; 
@@ -24,66 +24,55 @@ export default function ApiManager() {
   const [newEngineData, setNewEngineData] = useState({ service_name: "", key_value: "" });
   const [isCreating, setIsCreating] = useState(false);
 
-  // ✅ PRE-DEFINED SERVICES (Icons simplified for safety)
   const NEXUS_SERVICES = [
-    { id: "OPEN_ROUTER", name: "Open Router (AI Engine)", icon: <Zap size={14}/> },
-    { id: "JAMENDO_MUSIC", name: "Jamendo (Audio Engine)", icon: <Music size={14}/> },
-    { id: "IMGBB_HOST", name: "ImgBB (Media Hosting)", icon: <ImageIcon size={14}/> },
-    { id: "ELEVEN_LABS", name: "ElevenLabs (Voice-X)", icon: <Ghost size={14}/> },
-    { id: "HUGGING_FACE", name: "Hugging Face (Visual AI)", icon: <Zap size={14}/> },
-    { id: "GEMINI_AI", name: "Google Gemini (Core)", icon: <Diamond size={14}/> },
+    { id: "OPEN_ROUTER", name: "Open Router (AI Engine)" },
+    { id: "JAMENDO_MUSIC", name: "Jamendo (Audio Engine)" },
+    { id: "IMGBB_HOST", name: "ImgBB (Media Hosting)" },
+    { id: "ELEVEN_LABS", name: "ElevenLabs (Voice-X)" },
+    { id: "HUGGING_FACE", name: "Hugging Face (Visual AI)" },
+    { id: "GEMINI_AI", name: "Google Gemini (Core)" },
   ];
 
-  // ✅ Functional: Cloud Sync Logic
   const fetchKeys = async () => {
-    setLoading(true);
     try {
       const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-      setApiKeys(response.documents);
+      setApiKeys(response.documents || []);
     } catch (error) {
       console.error("Nexus Sync Error:", error);
-      // Fail-safe: loading band karo agar error aaye
-      setLoading(false); 
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchKeys(); }, []);
+  useEffect(() => {
+    fetchKeys();
+    // 🚨 Emergency Guard: 4 second baad loading screen hata do chahe jo ho
+    const emergencyTimer = setTimeout(() => setLoading(false), 4000);
+    return () => clearTimeout(emergencyTimer);
+  }, []);
 
-  // ✅ Functional: Master Propagation
   const executePropagation = async () => {
     setLoading(true);
-    try {
-      await fetchKeys();
-      alert("Nexus Propagation Complete: All API nodes synchronized across Race-X network! 🌐");
-    } catch (err) {
-      alert("Propagation Failed: Cloud Link Interrupted.");
-    } finally {
-      setLoading(false);
-    }
+    await fetchKeys();
+    alert("Nexus Propagation Finished! 🌐");
   };
 
   const handleCreateEngine = async () => {
-    if (!newEngineData.service_name || !newEngineData.key_value) {
-      alert("System Error: Fields cannot be empty!");
-      return;
-    }
+    if (!newEngineData.service_name || !newEngineData.key_value) return alert("System Error: Empty Fields!");
     setIsCreating(true);
     try {
       await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
         service_name: newEngineData.service_name,
         key_value: newEngineData.key_value,
         status: "active",
-        usage_percent: Math.floor(Math.random() * 10), 
+        usage_percent: 0, 
         last_updated: new Date().toISOString()
       });
-      alert("New Engine Deployed to Nexus! ⚡");
       setIsNewEngineModalOpen(false);
       setNewEngineData({ service_name: "", key_value: "" });
       fetchKeys();
     } catch (error) {
-      alert("Deployment Blocked: Check Appwrite Schema.");
+      alert("Deployment Blocked!");
     } finally {
       setIsCreating(false);
     }
@@ -97,150 +86,121 @@ export default function ApiManager() {
         key_value: newKeyValue,
         last_updated: new Date().toISOString() 
       });
-      setApiKeys(prev => prev.map(item => 
-        item.$id === editModal.id ? { ...item, key_value: newKeyValue } : item
-      ));
       setEditModal(null);
       setNewKeyValue("");
-      alert(`${editModal.name} Node Re-Injected! 🚀`);
+      fetchKeys();
     } catch (error) {
-      alert("Injection Blocked: Check Database Link.");
+      alert("Injection Blocked!");
     } finally {
       setIsUpdating(null);
     }
   };
 
+  // 1. Loading State (If stays black, something is fundamentally wrong with imports)
   if (loading) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-black text-cyan-400">
+    <div className="h-screen flex flex-col items-center justify-center bg-black text-cyan-400 font-sans">
       <Terminal size={40} className="mb-4 animate-bounce" />
-      <div className="font-black tracking-[0.5em] animate-pulse uppercase text-[10px]">Booting Race-X Nexus Hub...</div>
+      <div className="font-black tracking-[0.3em] uppercase text-[10px]">Booting Nexus Hub...</div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans selection:bg-cyan-500/20 overflow-x-hidden">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
-        <div className="flex items-start gap-6">
-          <button onClick={() => setLocation("/hub")} className="p-4 bg-zinc-900 rounded-[20px] border border-white/5 active:scale-75 transition-all shadow-lg">
-            <ArrowLeft size={24} className="text-zinc-400" />
+    <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans overflow-x-hidden">
+      
+      {/* Header */}
+      <div className="flex justify-between items-center mb-12">
+        <button onClick={() => setLocation("/hub")} className="p-4 bg-zinc-900 rounded-2xl border border-white/5 active:scale-90 transition-all">
+          <ArrowLeft size={24} />
+        </button>
+        <div className="flex gap-4">
+          <button onClick={fetchKeys} className="p-4 bg-zinc-900 rounded-2xl border border-white/5 text-cyan-400">
+            <RefreshCw size={20} className={isCreating ? "animate-spin" : ""} />
           </button>
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-2 h-2 bg-cyan-500 rounded-full animate-ping" />
-              <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.4em]">Live Production Node</span>
-            </div>
-            <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none">Injection Hub</h1>
-            <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.3em] mt-3">Race-X Nexus Core Management</p>
-          </div>
-        </div>
-        <div className="flex gap-4 w-full md:w-auto">
-            <button onClick={fetchKeys} className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
-                <RefreshCw size={14} className={loading ? "animate-spin" : ""}/> Sync Cloud
-            </button>
-            <button onClick={() => setIsNewEngineModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 transition-all">
-                <Plus size={14}/> New Engine
-            </button>
+          <button onClick={() => setIsNewEngineModalOpen(true)} className="px-6 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest">
+            New Engine
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+      <h1 className="text-4xl font-black italic uppercase tracking-tighter mb-10">Injection Hub</h1>
+
+      {/* API Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        {apiKeys.length === 0 && (
+          <div className="col-span-full py-20 text-center border border-dashed border-white/10 rounded-[40px]">
+             <p className="text-zinc-600 font-black uppercase text-[10px] tracking-widest">No Active Nodes Detected</p>
+          </div>
+        )}
         {apiKeys.map((api) => (
-          <div key={api.$id} className="group relative bg-zinc-900/10 border border-white/5 p-8 rounded-[45px] hover:border-cyan-500/40 transition-all duration-500 overflow-hidden">
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/5 blur-[100px] group-hover:bg-cyan-500/10 transition-all" />
-            <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-2">
-                 <div className={`w-1.5 h-1.5 rounded-full ${api.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`} />
-                 <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500">{api.service_name}</span>
-              </div>
-              <button onClick={() => setShowKey(showKey === api.$id ? null : api.$id)} className="p-2 bg-black rounded-lg text-zinc-600 hover:text-white transition-all">
-                {showKey === api.$id ? <EyeOff size={14}/> : <Eye size={14}/>}
-              </button>
+          <div key={api.$id} className="bg-zinc-900/40 border border-white/5 p-8 rounded-[40px] hover:border-cyan-500/50 transition-all">
+            <div className="flex justify-between items-center mb-6">
+               <span className="text-[10px] font-black text-cyan-500 uppercase">{api.service_name}</span>
+               <button onClick={() => setShowKey(showKey === api.$id ? null : api.$id)} className="text-zinc-600">
+                {showKey === api.$id ? <EyeOff size={16}/> : <Eye size={16}/>}
+               </button>
             </div>
-            <div className="mb-8">
-              <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-4">{api.service_name}</h3>
-              <div className="bg-black/80 p-5 rounded-2xl border border-white/5 font-mono text-[10px] text-cyan-500/60 truncate">
-                {showKey === api.$id ? api.key_value : '••••••••••••••••••••••••'}
-              </div>
+            <div className="bg-black/60 p-5 rounded-2xl font-mono text-[10px] text-zinc-400 truncate mb-6 border border-white/5">
+              {showKey === api.$id ? api.key_value : '••••••••••••••••'}
             </div>
-            <div className="space-y-3 mb-8">
-              <div className="flex justify-between text-[8px] font-black uppercase tracking-widest">
-                <span className="text-zinc-600">Load Factor</span>
-                <span className="text-cyan-500">{api.usage_percent || '0'}%</span>
-              </div>
-              <div className="h-1 bg-zinc-900 rounded-full overflow-hidden">
-                <div style={{ width: `${api.usage_percent || 0}%` }} className="h-full bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all duration-1000" />
-              </div>
-            </div>
-            <button onClick={() => setEditModal({id: api.$id, name: api.service_name})} className="w-full py-5 bg-zinc-900 hover:bg-white hover:text-black rounded-[25px] text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 border border-white/5">
-              <Zap size={14} className="group-hover:fill-current"/> Re-Inject Key
+            <button 
+              onClick={() => setEditModal({id: api.$id, name: api.service_name})}
+              className="w-full py-4 bg-zinc-900 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+            >
+              Re-Inject Key
             </button>
           </div>
         ))}
       </div>
 
+      {/* Modals are simplified for pure stability */}
       {editModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
-          <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xl font-black italic uppercase tracking-widest">Injecting: {editModal.name}</h2>
-              <button onClick={() => setEditModal(null)} className="p-2 hover:bg-white/10 rounded-full"><X/></button>
-            </div>
-            <div className="space-y-6">
-              <input type="password" value={newKeyValue} onChange={(e) => setNewKeyValue(e.target.value)} placeholder="Paste Encrypted API Key..." className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all text-white" />
-              <button onClick={handleUpdateKey} disabled={isUpdating === editModal.id} className="w-full py-6 bg-cyan-500 text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3">
-                {isUpdating === editModal.id ? <RefreshCw className="animate-spin" /> : <ShieldCheck />}
-                {isUpdating === editModal.id ? "PROCESSING..." : "CONFIRM INJECTION"}
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
+          <div className="bg-zinc-900 border border-white/10 w-full max-w-md rounded-[40px] p-8">
+            <h2 className="text-xl font-black uppercase italic mb-6">Injecting: {editModal.name}</h2>
+            <input 
+              type="password" 
+              placeholder="Paste Key..." 
+              className="w-full bg-black border border-white/10 p-5 rounded-2xl text-white mb-6 outline-none focus:border-cyan-500"
+              onChange={(e) => setNewKeyValue(e.target.value)}
+            />
+            <button onClick={handleUpdateKey} className="w-full py-5 bg-cyan-500 text-black rounded-2xl font-black uppercase">Confirm</button>
+            <button onClick={() => setEditModal(null)} className="w-full mt-4 text-[10px] uppercase font-black text-zinc-500">Cancel</button>
           </div>
         </div>
       )}
 
       {isNewEngineModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl">
-          <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xl font-black italic uppercase tracking-widest text-cyan-400">Deploy New Engine</h2>
-              <button onClick={() => setIsNewEngineModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full"><X/></button>
-            </div>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Service Interface</p>
-                <select value={newEngineData.service_name} onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})} className="w-full bg-black border border-white/5 rounded-3xl p-6 text-xs font-bold uppercase outline-none focus:border-cyan-500 text-white appearance-none">
-                  <option value="">Select Nexus Node...</option>
-                  {NEXUS_SERVICES.map(s => <option key={s.id} value={s.id} className="bg-zinc-900 text-white">{s.name}</option>)}
-                  <option value="CUSTOM" className="bg-zinc-900 text-white">Custom Node...</option>
-                </select>
-              </div>
-              {newEngineData.service_name === "CUSTOM" && (
-                <div className="space-y-2">
-                  <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Custom Service Name</p>
-                  <input type="text" onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})} placeholder="e.g. PIXEL_ENGINE" className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 text-white" />
-                </div>
-              )}
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Secret API Key / Client ID</p>
-                <input type="password" value={newEngineData.key_value} onChange={(e) => setNewEngineData({...newEngineData, key_value: e.target.value})} placeholder="sk-.... or ClientID" className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 text-white" />
-              </div>
-              <button onClick={handleCreateEngine} disabled={isCreating} className="w-full py-6 bg-white text-black rounded-3xl font-black uppercase italic tracking-widest flex items-center justify-center gap-3">
-                {isCreating ? <RefreshCw className="animate-spin" /> : <ShieldCheck />}
-                {isCreating ? "INITIALIZING NODE..." : "CONFIRM DEPLOYMENT"}
-              </button>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
+          <div className="bg-zinc-900 border border-white/10 w-full max-w-md rounded-[40px] p-8">
+            <h2 className="text-xl font-black uppercase italic mb-6 text-cyan-400">Deploy New Node</h2>
+            <div className="space-y-4">
+              <select 
+                onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})}
+                className="w-full bg-black border border-white/10 p-5 rounded-2xl text-white outline-none"
+              >
+                <option value="">Select Service...</option>
+                {NEXUS_SERVICES.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                <option value="CUSTOM">Custom Node</option>
+              </select>
+              <input 
+                type="password" 
+                placeholder="API Secret Key" 
+                className="w-full bg-black border border-white/10 p-5 rounded-2xl text-white outline-none"
+                onChange={(e) => setNewEngineData({...newEngineData, key_value: e.target.value})}
+              />
+              <button onClick={handleCreateEngine} className="w-full py-5 bg-white text-black rounded-2xl font-black uppercase tracking-widest">Deploy</button>
+              <button onClick={() => setIsNewEngineModalOpen(false)} className="w-full text-[10px] uppercase font-black text-zinc-500">Close</button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="bg-gradient-to-r from-zinc-900/50 to-black p-10 md:p-16 rounded-[60px] border border-white/5 relative overflow-hidden group mb-12 shadow-2xl">
-         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-4 text-cyan-400">Master Sync</h3>
-              <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest leading-relaxed">System-wide propagation across Race-X network.</p>
-            </div>
-            <button onClick={executePropagation} className="h-20 bg-white text-black rounded-[30px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-cyan-400 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl">
-              Execute Propagation <ChevronRight size={20}/>
-            </button>
-         </div>
+      {/* Footer Sync */}
+      <div className="mt-12 p-10 bg-zinc-900/30 border border-white/5 rounded-[50px] flex flex-col md:flex-row justify-between items-center gap-6">
+        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Master Propagation System</p>
+        <button onClick={executePropagation} className="px-10 py-5 bg-white text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all">
+          Execute Sync
+        </button>
       </div>
     </div>
   );
