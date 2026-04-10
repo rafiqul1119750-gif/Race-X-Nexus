@@ -30,15 +30,16 @@ import NexusChat from "./pages/social/chat";
 import MusicIndex from "./pages/music/index";
 import ShopIndex from "./pages/shop/index";
 
-// 4. STUDIO & CREATIVE
+// 4. STUDIO & CREATIVE (MODIFIED)
 import RXStudio from "./pages/studio/index";
+import ProEditor from "./pages/studio/editor"; // ✅ New Pro Editor Added
 import VoiceLab from "./pages/studio/voice-lab"; 
 import CinemaAI from "./pages/studio/video-gen"; 
 
 // --- 👑 ADMIN & CREATOR DASHBOARD ---
 import AdminDashboard from "./pages/dashboard"; 
 import ApiManager from "./pages/admin/api-manager";
-import Analytics from "./pages/admin/analytics"; // ✅ New Analytics Node Added
+import Analytics from "./pages/admin/analytics"; 
 import CreatorDashboard from "./pages/dashboard/index"; 
 
 // --- 🌌 MAGIC ---
@@ -76,22 +77,24 @@ export default function App() {
           
           {/* --- AI & CREATIVE MODULES --- */}
           <Route path="/studio" component={RXStudio} />
+          <Route path="/studio/editor" component={ProEditor} /> {/* ✅ Direct Editor Access */}
           <Route path="/studio/voice-lab" component={VoiceLab} /> 
-          <Route path="/magic/video-gen" component={CinemaAI} />  
+          <Route path="/studio/video-gen" component={CinemaAI} />  
           
           {/* --- MAGIC SYSTEM --- */}
           <Route path="/magic" component={MagicMain} />
           <Route path="/magic/ai-chat" component={NeuralChat} />
           <Route path="/magic/image-gen" component={ImageGen} />
+          <Route path="/magic/video-gen" component={CinemaAI} /> {/* Secondary Mapping */}
           
-          {/* --- NEW MODULES (FIXED PATHS) --- */}
+          {/* --- NEW MODULES --- */}
           <Route path="/music/:rest*" component={MusicIndex} /> 
           <Route path="/shop/:rest*" component={ShopIndex} />
 
           {/* --- 🔥 ADMIN & CREATOR ROUTES --- */}
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/api" component={ApiManager} />
-          <Route path="/admin/analytics" component={Analytics} /> {/* ✅ Analytics Route Linked */}
+          <Route path="/admin/analytics" component={Analytics} /> 
           <Route path="/creator/dashboard" component={CreatorDashboard} />
 
           {/* Fallback to Hub */}
