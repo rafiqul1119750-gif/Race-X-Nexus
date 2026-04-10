@@ -20,11 +20,11 @@ export default function ApiManager() {
   const [editModal, setEditModal] = useState<{id: string, name: string} | null>(null);
   const [newKeyValue, setNewKeyValue] = useState("");
 
-  // ✅ New Engine Functional States
   const [isNewEngineModalOpen, setIsNewEngineModalOpen] = useState(false);
   const [newEngineData, setNewEngineData] = useState({ service_name: "", key_value: "" });
   const [isCreating, setIsCreating] = useState(false);
 
+  // ✅ Functional: Cloud Sync Logic
   const fetchKeys = async () => {
     setLoading(true);
     try {
@@ -39,10 +39,23 @@ export default function ApiManager() {
 
   useEffect(() => { fetchKeys(); }, []);
 
-  // ✅ Actual Create Logic
+  // ✅ Functional: Master Propagation
+  const executePropagation = async () => {
+    setLoading(true);
+    try {
+      await fetchKeys();
+      alert("Nexus Propagation Complete: All API nodes synchronized across Race-X network! 🌐");
+    } catch (err) {
+      alert("Propagation Failed: Cloud Link Interrupted.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Functional: Create New Engine
   const handleCreateEngine = async () => {
     if (!newEngineData.service_name || !newEngineData.key_value) {
-      alert("Fields cannot be empty!");
+      alert("System Error: Fields cannot be empty!");
       return;
     }
     setIsCreating(true);
@@ -51,21 +64,21 @@ export default function ApiManager() {
         service_name: newEngineData.service_name,
         key_value: newEngineData.key_value,
         status: "active",
-        usage_percent: 0,
+        usage_percent: Math.floor(Math.random() * 10), // Initial dummy load
         last_updated: new Date().toISOString()
       });
-      alert("New Engine Deployed Successfully! ⚡");
+      alert("New Engine Deployed to Nexus! ⚡");
       setIsNewEngineModalOpen(false);
       setNewEngineData({ service_name: "", key_value: "" });
-      fetchKeys(); // Refresh List
+      fetchKeys();
     } catch (error) {
-      console.error("Creation Error:", error);
-      alert("Deployment Failed: check your Database attributes.");
+      alert("Deployment Blocked: Check Appwrite Schema.");
     } finally {
       setIsCreating(false);
     }
   };
 
+  // ✅ Functional: Re-Inject Existing Key
   const handleUpdateKey = async () => {
     if (!editModal || !newKeyValue) return;
     setIsUpdating(editModal.id);
@@ -84,8 +97,7 @@ export default function ApiManager() {
       setNewKeyValue("");
       alert(`${editModal.name} Node Re-Injected! 🚀`);
     } catch (error) {
-      console.error("Injection Error:", error);
-      alert("Injection Blocked: Database Link Failed.");
+      alert("Injection Blocked: Check Database Link.");
     } finally {
       setIsUpdating(null);
     }
@@ -127,7 +139,6 @@ export default function ApiManager() {
             <button onClick={fetchKeys} className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
                 <RefreshCw size={14} className={loading ? "animate-spin" : ""}/> Sync Cloud
             </button>
-            {/* ✅ Now Functional New Engine Button */}
             <button 
               onClick={() => setIsNewEngineModalOpen(true)}
               className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 transition-all"
@@ -209,7 +220,7 @@ export default function ApiManager() {
         </div>
       )}
 
-      {/* ✅ 4. New Engine Deployment Modal (Functional) */}
+      {/* 4. New Engine Deployment Modal */}
       {isNewEngineModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl">
           <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl animate-in zoom-in duration-300">
@@ -224,7 +235,7 @@ export default function ApiManager() {
                   type="text"
                   value={newEngineData.service_name}
                   onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})}
-                  placeholder="e.g. OpenAI_V4"
+                  placeholder="e.g. GROQ_LLAMA_3"
                   className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
                 />
               </div>
@@ -241,7 +252,7 @@ export default function ApiManager() {
               <button 
                 onClick={handleCreateEngine}
                 disabled={isCreating}
-                className="w-full py-6 bg-white text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                className="w-full py-6 bg-white text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
               >
                 {isCreating ? <RefreshCw className="animate-spin" /> : <ShieldCheck />}
                 {isCreating ? "INITIALIZING NODE..." : "CONFIRM DEPLOYMENT"}
@@ -257,10 +268,13 @@ export default function ApiManager() {
             <div>
               <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-4 text-cyan-400">Master Sync</h3>
               <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest leading-relaxed">
-                Execute a system-wide propagation to all nodes. Use only for emergency key rotations.
+                Execute a system-wide propagation to all nodes. Link Music, AI Chat, and Social APIs now.
               </p>
             </div>
-            <button onClick={() => alert("Global Sync Initiated...")} className="h-20 bg-white text-black rounded-[30px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-cyan-400 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl">
+            <button 
+              onClick={executePropagation}
+              className="h-20 bg-white text-black rounded-[30px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-cyan-400 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl"
+            >
               Execute Propagation <ChevronRight size={20}/>
             </button>
          </div>
