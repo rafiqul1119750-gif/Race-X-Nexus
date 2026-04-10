@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { 
   Key, Save, RefreshCw, Zap, ShieldCheck, 
   Plus, Eye, EyeOff, AlertCircle, X, Terminal, ChevronRight,
-  ShieldAlert, Ghost, Diamond, UserX, ArrowLeft, Music, Image as ImageIcon, Sparkles 
+  ShieldAlert, Ghost, Diamond, UserX, ArrowLeft, Music, Image as ImageIcon
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { databases, ID } from "../../lib/appwrite"; 
@@ -24,13 +24,13 @@ export default function ApiManager() {
   const [newEngineData, setNewEngineData] = useState({ service_name: "", key_value: "" });
   const [isCreating, setIsCreating] = useState(false);
 
-  // ✅ PRE-DEFINED SERVICES (Nexus Standard)
+  // ✅ PRE-DEFINED SERVICES (Icons simplified for safety)
   const NEXUS_SERVICES = [
     { id: "OPEN_ROUTER", name: "Open Router (AI Engine)", icon: <Zap size={14}/> },
     { id: "JAMENDO_MUSIC", name: "Jamendo (Audio Engine)", icon: <Music size={14}/> },
     { id: "IMGBB_HOST", name: "ImgBB (Media Hosting)", icon: <ImageIcon size={14}/> },
     { id: "ELEVEN_LABS", name: "ElevenLabs (Voice-X)", icon: <Ghost size={14}/> },
-    { id: "HUGGING_FACE", name: "Hugging Face (Visual AI)", icon: <Sparkles size={14}/> },
+    { id: "HUGGING_FACE", name: "Hugging Face (Visual AI)", icon: <Zap size={14}/> },
     { id: "GEMINI_AI", name: "Google Gemini (Core)", icon: <Diamond size={14}/> },
   ];
 
@@ -42,6 +42,8 @@ export default function ApiManager() {
       setApiKeys(response.documents);
     } catch (error) {
       console.error("Nexus Sync Error:", error);
+      // Fail-safe: loading band karo agar error aaye
+      setLoading(false); 
     } finally {
       setLoading(false);
     }
@@ -62,7 +64,6 @@ export default function ApiManager() {
     }
   };
 
-  // ✅ Functional: Create New Engine
   const handleCreateEngine = async () => {
     if (!newEngineData.service_name || !newEngineData.key_value) {
       alert("System Error: Fields cannot be empty!");
@@ -88,21 +89,17 @@ export default function ApiManager() {
     }
   };
 
-  // ✅ Functional: Re-Inject Existing Key
   const handleUpdateKey = async () => {
     if (!editModal || !newKeyValue) return;
     setIsUpdating(editModal.id);
-    
     try {
       await databases.updateDocument(DATABASE_ID, COLLECTION_ID, editModal.id, {
         key_value: newKeyValue,
         last_updated: new Date().toISOString() 
       });
-      
       setApiKeys(prev => prev.map(item => 
         item.$id === editModal.id ? { ...item, key_value: newKeyValue } : item
       ));
-      
       setEditModal(null);
       setNewKeyValue("");
       alert(`${editModal.name} Node Re-Injected! 🚀`);
@@ -122,48 +119,34 @@ export default function ApiManager() {
 
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans selection:bg-cyan-500/20 overflow-x-hidden">
-      
-      {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
         <div className="flex items-start gap-6">
-          <button 
-            onClick={() => setLocation("/hub")} 
-            className="p-4 bg-zinc-900 rounded-[20px] border border-white/5 active:scale-75 transition-all shadow-lg"
-          >
+          <button onClick={() => setLocation("/hub")} className="p-4 bg-zinc-900 rounded-[20px] border border-white/5 active:scale-75 transition-all shadow-lg">
             <ArrowLeft size={24} className="text-zinc-400" />
           </button>
-          
           <div>
             <div className="flex items-center gap-3 mb-2">
               <div className="w-2 h-2 bg-cyan-500 rounded-full animate-ping" />
               <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.4em]">Live Production Node</span>
             </div>
-            <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none">
-              Injection Hub
-            </h1>
+            <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none">Injection Hub</h1>
             <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.3em] mt-3">Race-X Nexus Core Management</p>
           </div>
         </div>
-        
         <div className="flex gap-4 w-full md:w-auto">
             <button onClick={fetchKeys} className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
                 <RefreshCw size={14} className={loading ? "animate-spin" : ""}/> Sync Cloud
             </button>
-            <button 
-              onClick={() => setIsNewEngineModalOpen(true)}
-              className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 transition-all"
-            >
+            <button onClick={() => setIsNewEngineModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 transition-all">
                 <Plus size={14}/> New Engine
             </button>
         </div>
       </div>
 
-      {/* 2. Responsive API Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
         {apiKeys.map((api) => (
           <div key={api.$id} className="group relative bg-zinc-900/10 border border-white/5 p-8 rounded-[45px] hover:border-cyan-500/40 transition-all duration-500 overflow-hidden">
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/5 blur-[100px] group-hover:bg-cyan-500/10 transition-all" />
-            
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-2">
                  <div className={`w-1.5 h-1.5 rounded-full ${api.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -173,14 +156,12 @@ export default function ApiManager() {
                 {showKey === api.$id ? <EyeOff size={14}/> : <Eye size={14}/>}
               </button>
             </div>
-            
             <div className="mb-8">
               <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-4">{api.service_name}</h3>
               <div className="bg-black/80 p-5 rounded-2xl border border-white/5 font-mono text-[10px] text-cyan-500/60 truncate">
                 {showKey === api.$id ? api.key_value : '••••••••••••••••••••••••'}
               </div>
             </div>
-
             <div className="space-y-3 mb-8">
               <div className="flex justify-between text-[8px] font-black uppercase tracking-widest">
                 <span className="text-zinc-600">Load Factor</span>
@@ -190,38 +171,23 @@ export default function ApiManager() {
                 <div style={{ width: `${api.usage_percent || 0}%` }} className="h-full bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all duration-1000" />
               </div>
             </div>
-
-            <button 
-              onClick={() => setEditModal({id: api.$id, name: api.service_name})}
-              className="w-full py-5 bg-zinc-900 hover:bg-white hover:text-black rounded-[25px] text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 border border-white/5"
-            >
+            <button onClick={() => setEditModal({id: api.$id, name: api.service_name})} className="w-full py-5 bg-zinc-900 hover:bg-white hover:text-black rounded-[25px] text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 border border-white/5">
               <Zap size={14} className="group-hover:fill-current"/> Re-Inject Key
             </button>
           </div>
         ))}
       </div>
 
-      {/* 3. Re-Inject Modal */}
       {editModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
-          <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl animate-in zoom-in duration-300">
+          <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-black italic uppercase tracking-widest">Injecting: {editModal.name}</h2>
               <button onClick={() => setEditModal(null)} className="p-2 hover:bg-white/10 rounded-full"><X/></button>
             </div>
             <div className="space-y-6">
-              <input 
-                type="password"
-                value={newKeyValue}
-                onChange={(e) => setNewKeyValue(e.target.value)}
-                placeholder="Paste Encrypted API Key..."
-                className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
-              />
-              <button 
-                onClick={handleUpdateKey}
-                disabled={isUpdating === editModal.id}
-                className="w-full py-6 bg-cyan-500 text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-              >
+              <input type="password" value={newKeyValue} onChange={(e) => setNewKeyValue(e.target.value)} placeholder="Paste Encrypted API Key..." className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all text-white" />
+              <button onClick={handleUpdateKey} disabled={isUpdating === editModal.id} className="w-full py-6 bg-cyan-500 text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3">
                 {isUpdating === editModal.id ? <RefreshCw className="animate-spin" /> : <ShieldCheck />}
                 {isUpdating === editModal.id ? "PROCESSING..." : "CONFIRM INJECTION"}
               </button>
@@ -230,10 +196,9 @@ export default function ApiManager() {
         </div>
       )}
 
-      {/* 4. New Engine Deployment Modal (UPDATED WITH DROPDOWN) */}
       {isNewEngineModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl">
-          <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl animate-in zoom-in duration-300">
+          <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-black italic uppercase tracking-widest text-cyan-400">Deploy New Engine</h2>
               <button onClick={() => setIsNewEngineModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full"><X/></button>
@@ -241,46 +206,23 @@ export default function ApiManager() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Service Interface</p>
-                <select 
-                  value={newEngineData.service_name}
-                  onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})}
-                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-xs font-bold uppercase outline-none focus:border-cyan-500 transition-all appearance-none text-white"
-                >
+                <select value={newEngineData.service_name} onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})} className="w-full bg-black border border-white/5 rounded-3xl p-6 text-xs font-bold uppercase outline-none focus:border-cyan-500 text-white appearance-none">
                   <option value="">Select Nexus Node...</option>
-                  {NEXUS_SERVICES.map(s => (
-                    <option key={s.id} value={s.id} className="bg-zinc-900">{s.name}</option>
-                  ))}
-                  <option value="CUSTOM" className="bg-zinc-900">Custom Node...</option>
+                  {NEXUS_SERVICES.map(s => <option key={s.id} value={s.id} className="bg-zinc-900 text-white">{s.name}</option>)}
+                  <option value="CUSTOM" className="bg-zinc-900 text-white">Custom Node...</option>
                 </select>
               </div>
-
               {newEngineData.service_name === "CUSTOM" && (
-                <div className="space-y-2 animate-in slide-in-from-top-2">
+                <div className="space-y-2">
                   <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Custom Service Name</p>
-                  <input 
-                    type="text"
-                    onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})}
-                    placeholder="e.g. PIXEL_ENGINE"
-                    className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all text-white"
-                  />
+                  <input type="text" onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})} placeholder="e.g. PIXEL_ENGINE" className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 text-white" />
                 </div>
               )}
-
               <div className="space-y-2">
                 <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Secret API Key / Client ID</p>
-                <input 
-                  type="password"
-                  value={newEngineData.key_value}
-                  onChange={(e) => setNewEngineData({...newEngineData, key_value: e.target.value})}
-                  placeholder="sk-.... or ClientID"
-                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all text-white"
-                />
+                <input type="password" value={newEngineData.key_value} onChange={(e) => setNewEngineData({...newEngineData, key_value: e.target.value})} placeholder="sk-.... or ClientID" className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 text-white" />
               </div>
-              <button 
-                onClick={handleCreateEngine}
-                disabled={isCreating}
-                className="w-full py-6 bg-white text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-              >
+              <button onClick={handleCreateEngine} disabled={isCreating} className="w-full py-6 bg-white text-black rounded-3xl font-black uppercase italic tracking-widest flex items-center justify-center gap-3">
                 {isCreating ? <RefreshCw className="animate-spin" /> : <ShieldCheck />}
                 {isCreating ? "INITIALIZING NODE..." : "CONFIRM DEPLOYMENT"}
               </button>
@@ -289,23 +231,16 @@ export default function ApiManager() {
         </div>
       )}
 
-      {/* 5. Emergency Master Sync */}
       <div className="bg-gradient-to-r from-zinc-900/50 to-black p-10 md:p-16 rounded-[60px] border border-white/5 relative overflow-hidden group mb-12 shadow-2xl">
          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-4 text-cyan-400">Master Sync</h3>
-              <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest leading-relaxed">
-                Execute a system-wide propagation to all nodes. Link Music, AI Chat, and Social APIs now.
-              </p>
+              <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest leading-relaxed">System-wide propagation across Race-X network.</p>
             </div>
-            <button 
-              onClick={executePropagation}
-              className="h-20 bg-white text-black rounded-[30px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-cyan-400 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl"
-            >
+            <button onClick={executePropagation} className="h-20 bg-white text-black rounded-[30px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-cyan-400 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl">
               Execute Propagation <ChevronRight size={20}/>
             </button>
          </div>
-         <AlertCircle size={300} className="absolute right-[-100px] top-[-100px] text-white/5 rotate-12 pointer-events-none group-hover:rotate-45 transition-transform duration-1000" />
       </div>
     </div>
   );
