@@ -1,68 +1,74 @@
-import { ArrowLeft, Play, Mic2, Music, ChevronRight, Cpu } from "lucide-react";
+import { ArrowLeft, Sparkles, Box, History, RefreshCw, Video, Music, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
-export default function RXStudio() {
+export default function CinemaAI() {
   const [, setLocation] = useLocation();
+  const [prompt, setPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
 
-  const studioTools = [
-    {
-      title: "SOUND ENGINE",
-      desc: "SAFE 30S CLIPS FOR SOCIAL",
-      icon: <Music className="text-pink-400" size={24} />,
-      path: "/music/main", // 👈 EXACT PATH: App.tsx ke :rest* ko handle karega
-      color: "from-pink-600/20 to-transparent",
-    },
-    {
-      title: "CINEMA AI",
-      desc: "TEXT TO CINEMATIC VIDEO",
-      icon: <Play className="text-cyan-400" fill="currentColor" size={24} />,
-      path: "/magic/video-gen", // 👈 MATCHED: App.tsx ke route se match hai
-      color: "from-blue-600/20 to-transparent",
-    },
-    {
-      title: "VOICE LAB",
-      desc: "AI VOICE CLONING",
-      icon: <Mic2 className="text-purple-400" size={24} />,
-      path: "/studio/voice-lab", 
-      color: "from-purple-600/20 to-transparent",
-    }
-  ];
+  const handleStartGeneration = () => {
+    if (!prompt) return;
+    setIsGenerating(true);
+    setTimeout(() => {
+      setIsGenerating(false);
+      setGeneratedVideo("https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4");
+    }, 4000);
+  };
 
   return (
     <div className="min-h-screen bg-[#050505] text-white p-6 pb-24 font-sans">
-      <header className="flex items-center justify-between mb-10">
-        <button onClick={() => setLocation("/hub")} className="p-4 bg-zinc-900/80 rounded-2xl border border-white/5 active:scale-75 transition-all">
+      <header className="flex items-center justify-between mb-8">
+        <button onClick={() => setLocation("/studio")} className="p-3 bg-zinc-900 rounded-2xl border border-white/5 active:scale-75 transition-all">
           <ArrowLeft size={20}/>
         </button>
         <div className="text-center">
-          <h2 className="text-2xl font-black italic tracking-tighter uppercase leading-none">RX STUDIO</h2>
-          <p className="text-[7px] font-bold text-zinc-600 uppercase tracking-[0.3em] mt-1">Protocol v4.0 Active</p>
+          <h2 className="text-[10px] font-black italic uppercase tracking-[0.4em] text-cyan-400">RX CINEMA</h2>
+          <p className="text-[7px] font-bold text-zinc-700 mt-1 uppercase tracking-widest italic">Nexus Node Active</p>
         </div>
-        <Cpu size={20} className="text-cyan-500 animate-pulse" />
+        <History size={20} className="text-zinc-700" />
       </header>
 
-      <div className="space-y-4">
-        {studioTools.map((tool) => (
-          <button 
-            key={tool.title} 
-            onClick={() => setLocation(tool.path)}
-            className="relative overflow-hidden w-full bg-zinc-900/40 border border-white/5 p-8 rounded-[35px] flex items-center justify-between active:scale-[0.98] group transition-all"
-          >
-            <div className={`absolute inset-0 bg-gradient-to-r ${tool.color} opacity-0 group-hover:opacity-100 transition-opacity`} />
-            <div className="flex items-center gap-6 relative z-10">
-              <div className="p-5 bg-black rounded-2xl border border-white/5 group-hover:scale-110 transition-transform">
-                {tool.icon}
-              </div>
-              <div className="text-left">
-                <h4 className="text-lg font-black italic uppercase tracking-widest leading-none mb-2">{tool.title}</h4>
-                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">{tool.desc}</p>
-              </div>
-            </div>
-            <div className="p-3 bg-white/5 rounded-full relative z-10 group-hover:bg-white group-hover:text-black transition-all">
-              <ChevronRight size={18} />
-            </div>
-          </button>
-        ))}
+      {/* Cinematic Preview */}
+      <div className="relative aspect-[9/16] w-full max-w-[280px] mx-auto bg-zinc-900/40 rounded-[45px] border-2 border-white/5 overflow-hidden mb-8 shadow-2xl">
+        {isGenerating ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-black/70 backdrop-blur-md">
+            <RefreshCw className="animate-spin text-cyan-500 mb-4" size={32} />
+            <p className="text-[8px] font-black uppercase tracking-[0.4em] text-cyan-500">Generating...</p>
+          </div>
+        ) : generatedVideo ? (
+          <video src={generatedVideo} autoPlay loop muted className="w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20">
+            <Box size={40} className="mb-4 text-zinc-500" />
+            <p className="text-[7px] font-black uppercase tracking-[0.5em]">No Buffer</p>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4 max-w-md mx-auto">
+        {/* Quick Link to Music Engine - Matching App.tsx Route */}
+        <button 
+          onClick={() => setLocation("/music/main")}
+          className="w-full py-4 bg-zinc-900/60 border border-white/10 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition-all"
+        >
+          <Music size={14} className="text-pink-500" />
+          <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Add Music Engine</span>
+        </button>
+
+        <textarea 
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="ENTER SCENE PROMPT..."
+          className="w-full bg-zinc-900/40 border border-white/10 rounded-[30px] p-6 text-xs focus:border-cyan-500 outline-none h-32 resize-none transition-all placeholder:text-zinc-800"
+        />
+        <button 
+          onClick={handleStartGeneration}
+          className="w-full py-6 bg-white text-black rounded-[30px] font-black uppercase italic tracking-widest active:scale-95 transition-all shadow-xl"
+        >
+          {isGenerating ? "Processing..." : "Launch Render"}
+        </button>
       </div>
     </div>
   );
