@@ -1,150 +1,145 @@
+import { ArrowLeft, Play, Pause, SkipBack, SkipForward, Disc, Heart, Search, ListMusic, MoreVertical, RefreshCw } from "lucide-react";
+import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
-import { 
-  Play, Pause, SkipForward, SkipBack, 
-  Heart, Share2, ListMusic, Volume2, 
-  Search, MoreHorizontal, Flame, Disc, Radio
-} from "lucide-react";
-import { getNexusKey } from "../../lib/appwrite"; // Path check kar lena bhai
+import { databases } from "../../lib/appwrite"; 
 
-export default function NexusMusicMain() {
-  const [isPlaying, setIsPlaying] = useState(false);
+const DATABASE_ID = 'racex_db'; 
+const COLLECTION_ID = 'api_configs';
+
+export default function RXMusic() {
+  const [, setLocation] = useLocation();
+  const [musicApiKey, setMusicApiKey] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [tracks, setTracks] = useState<any[]>([]);
-  const [currentTrack, setCurrentTrack] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [likedTracks, setLikedTracks] = useState<string[]>([]);
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const currentTrack = tracks[currentTrackIndex];
 
-  // 🎵 JAMENDO SE GAANE FETCH KARNA
   useEffect(() => {
-    const syncNexusAudio = async () => {
+    const initMusicEngine = async () => {
       try {
-        const apiKey = await getNexusKey('JAMENDO_MUSIC');
-        if (!apiKey) return;
-
-        const res = await fetch(
-          `https://api.jamendo.com/v1.2/tracks/?client_id=${apiKey}&format=json&limit=30&order=popularity_month&include=musicinfo&tags=electronic+lofi`
-        );
-        const data = await res.json();
-        setTracks(data.results);
-        if (data.results.length > 0) setCurrentTrack(data.results[0]);
-      } catch (err) {
-        console.error("Nexus Sync Fail:", err);
+        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+        const config = response.documents.find(doc => doc.service_name === 'JAMENDO_MUSIC');
+        
+        if (config) {
+          setMusicApiKey(config.key_value);
+          fetchJamendoTracks(config.key_value);
+        }
+      } catch (error) {
+        console.error("Nexus Link Failed:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-    syncNexusAudio();
+    initMusicEngine();
   }, []);
 
-  // ⏯️ PLAY/PAUSE LOGIC
-  const togglePlay = (track?: any) => {
-    if (track) {
-      if (currentTrack?.id === track.id) {
-        isPlaying ? audioRef.current?.pause() : audioRef.current?.play();
-        setIsPlaying(!isPlaying);
-      } else {
-        setCurrentTrack(track);
-        setIsPlaying(true);
-      }
-    } else {
-      isPlaying ? audioRef.current?.pause() : audioRef.current?.play();
-      setIsPlaying(!isPlaying);
+  const fetchJamendoTracks = async (key: string) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${key}&format=json&limit=20&order=popularity_week&hasimage=true`);
+      const data = await res.json();
+      if (data.results) setTracks(data.results);
+    } catch (err) {
+      console.error("Music Fetch Error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if ('mediaSession' in navigator && currentTrack) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentTrack.name,
+        artist: currentTrack.artist_name,
+        artwork: [{ src: currentTrack.image, sizes: '512x512', type: 'image/jpeg' }]
+      });
+    }
+  }, [currentTrack]);
+
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) { audioRef.current.pause(); } 
+    else { audioRef.current.play().catch(() => {}); }
+    setIsPlaying(!isPlaying);
+  };
+
+  const nextTrack = () => {
+    if (currentTrackIndex < tracks.length - 1) {
+      setCurrentTrackIndex(prev => prev + 1);
+      setIsPlaying(true);
+    }
+  };
+
+  const prevTrack = () => {
+    if (currentTrackIndex > 0) {
+      setCurrentTrackIndex(prev => prev - 1);
+      setIsPlaying(true);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-32 overflow-x-hidden">
-      {/* Hidden Audio Element */}
-      <audio 
-        ref={audioRef} 
-        src={currentTrack?.audio} 
-        onPlay={() => setIsPlaying(true)} 
-        onPause={() => setIsPlaying(false)}
-        autoPlay={isPlaying}
-      />
+    <div className="min-h-screen bg-[#050505] text-white p-6 pb-40 font-sans">
+      <audio ref={audioRef} src={currentTrack?.audio} onEnded={nextTrack} autoPlay={isPlaying} />
 
-      {/* Header */}
-      <header className="p-6 flex justify-between items-center sticky top-0 z-50 bg-black/40 backdrop-blur-3xl border-b border-white/5">
+      <header className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-cyan-500/10 rounded-2xl border border-cyan-500/20">
-            <Disc className={`text-cyan-400 ${isPlaying ? 'animate-spin-slow' : ''}`} size={20} />
+          <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900 rounded-2xl active:scale-75 transition-all">
+            <ArrowLeft size={18} />
+          </button>
+          <div>
+             <h1 className="text-lg font-black italic uppercase text-green-500">RX Music</h1>
+             <span className="text-[6px] font-black text-zinc-600 uppercase tracking-widest">
+               {isLoading ? "Syncing..." : "Neural Engine Active"}
+             </span>
           </div>
-          <h1 className="font-black italic uppercase tracking-tighter text-xl">Nexus Audio</h1>
+        </div>
+        <div className="flex gap-4">
+          <Search size={22} className="text-zinc-400" onClick={() => musicApiKey && fetchJamendoTracks(musicApiKey)} />
+          <ListMusic size={22} className="text-zinc-400" onClick={() => setLocation("/music/library")} />
         </div>
       </header>
 
-      {/* Hero Section */}
-      <div className="p-6">
-        <div className="relative h-64 md:h-80 w-full rounded-[40px] overflow-hidden group">
-          <img 
-            src={currentTrack?.image || "https://picsum.photos/1200/600?random=102"} 
-            className="w-full h-full object-cover transition-all duration-1000 opacity-60" 
-            alt="Featured" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent" />
-          <div className="absolute bottom-10 left-10">
-            <h2 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter">
-              {currentTrack ? "Now Playing" : "Loading..."}
-            </h2>
-            <p className="text-xs font-bold text-cyan-400 uppercase tracking-widest mt-2">
-              {currentTrack?.name || "Initializing Nexus Hub"}
-            </p>
-          </div>
+      <div className="relative h-64 rounded-[45px] overflow-hidden border border-white/10 mb-10 bg-zinc-900">
+        <img src={currentTrack?.image} className="absolute inset-0 w-full h-full object-cover opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black" />
+        <div className="absolute bottom-8 left-8">
+          <h2 className="text-3xl font-black italic uppercase truncate max-w-[250px]">{currentTrack?.name || "Ready"}</h2>
+          <p className="text-[9px] font-black text-zinc-500 uppercase mt-2">{currentTrack?.artist_name}</p>
         </div>
       </div>
 
-      {/* Dynamic Track List */}
-      <div className="px-6 mt-12 space-y-8">
-        <h3 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-500">Live Sonic Feed</h3>
-        <div className="space-y-2">
-          {loading ? (
-             <div className="text-center py-20 animate-pulse font-black text-zinc-800">SYNCING WITH JAMENDO NODES...</div>
-          ) : (
-            tracks.map((track, i) => (
-              <div 
-                key={track.id} 
-                onClick={() => togglePlay(track)}
-                className={`flex items-center gap-6 p-4 rounded-3xl hover:bg-white/5 transition-all group cursor-pointer ${currentTrack?.id === track.id ? 'bg-white/5 border border-white/10' : ''}`}
-              >
-                <span className="text-zinc-700 font-black italic w-4">{i + 1}</span>
-                <img src={track.image} className="w-12 h-12 rounded-xl border border-white/5" alt="Cover" />
-                <div className="flex-1">
-                  <h5 className={`font-bold text-sm uppercase tracking-tighter transition-all ${currentTrack?.id === track.id ? 'text-cyan-400' : 'group-hover:text-cyan-400'}`}>
-                    {track.name}
-                  </h5>
-                  <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">{track.artist_name}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                   {currentTrack?.id === track.id && isPlaying && <div className="w-1 h-4 bg-cyan-500 animate-bounce" />}
-                   <span className="text-[10px] font-black text-zinc-700">{(track.duration / 60).toFixed(2)}</span>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Master Player Bar */}
-      {currentTrack && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-4xl bg-zinc-950/80 backdrop-blur-2xl border border-white/10 p-4 rounded-[32px] shadow-2xl z-[100]">
-          <div className="flex items-center gap-4">
-            <img src={currentTrack.image} className={`w-14 h-14 rounded-2xl shadow-xl transition-all ${isPlaying ? 'animate-pulse' : ''}`} alt="Cover" />
-            <div className="flex-1 min-w-0">
-              <h4 className="font-black uppercase italic tracking-tighter truncate text-cyan-400">{currentTrack.name}</h4>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase truncate">{currentTrack.artist_name}</p>
-            </div>
-            
+      <div className="space-y-4">
+        {tracks.map((track, idx) => (
+          <div key={track.id} onClick={() => { setCurrentTrackIndex(idx); setIsPlaying(true); }} className={`flex items-center justify-between p-4 rounded-[25px] border ${currentTrackIndex === idx ? 'bg-zinc-900 border-green-500' : 'bg-zinc-900/30 border-white/5'}`}>
             <div className="flex items-center gap-4">
-              <button onClick={() => togglePlay()} className="bg-white text-black p-4 rounded-full active:scale-90 transition-all">
-                {isPlaying ? <Pause size={20} fill="black"/> : <Play size={20} fill="black"/>}
-              </button>
+              <img src={track.image} className="w-12 h-12 rounded-xl object-cover" />
+              <div>
+                <p className={`text-[11px] font-black uppercase ${currentTrackIndex === idx ? 'text-green-500' : ''}`}>{track.name}</p>
+                <p className="text-[9px] font-bold text-zinc-600 uppercase">{track.artist_name}</p>
+              </div>
             </div>
+            <Heart size={16} className={likedTracks.includes(track.id) ? 'fill-red-500 text-red-500' : 'text-zinc-600'} />
           </div>
-          
-          <div className="absolute -top-[1px] left-8 right-8 h-[2px] bg-zinc-800 rounded-full overflow-hidden">
-            <div className={`h-full bg-cyan-500 shadow-[0_0_10px_#22d3ee] ${isPlaying ? 'w-full transition-all duration-[200s]' : 'w-0'}`} />
-          </div>
+        ))}
+      </div>
+
+      <div className="fixed bottom-6 left-6 right-6 z-[100] bg-zinc-900/90 backdrop-blur-3xl p-4 rounded-[35px] flex items-center justify-between">
+        <div className="flex items-center gap-4 max-w-[40%]">
+           <img src={currentTrack?.image} className={`w-12 h-12 rounded-xl ${isPlaying ? 'animate-spin-slow' : ''}`} />
+           <div className="truncate"><p className="text-[10px] font-black uppercase truncate">{currentTrack?.name}</p></div>
         </div>
-      )}
+        <div className="flex items-center gap-6">
+          <SkipBack onClick={prevTrack} size={20} />
+          <button onClick={togglePlay} className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center">
+            {isPlaying ? <Pause size={20} fill="black" /> : <Play size={20} fill="black" />}
+          </button>
+          <SkipForward onClick={nextTrack} size={20} />
+        </div>
+      </div>
     </div>
   );
 }
