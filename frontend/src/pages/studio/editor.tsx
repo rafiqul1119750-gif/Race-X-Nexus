@@ -1,235 +1,128 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState } from 'react';
+import { useLocation } from 'wouter';
 import { 
-  ChevronLeft, Layers, Plus, ZoomIn, ZoomOut, Download, 
-  Wand2, Mic, Video, Music, Image as ImageIcon, Trash2, 
-  Settings, Play, Pause, RefreshCw, Volume2, Sparkles, Share2, Search, CheckCircle2
-} from "lucide-react";
-import { useLocation } from "wouter";
+  ArrowLeft, Music, Scissors, Sparkles, Type, 
+  Sticker, Play, Pause, Save, X, Search, Volume2, Plus, Layers
+} from 'lucide-react';
 
-// --- TYPES ---
-type StudioElement = {
-  id: string;
-  type: 'text' | 'image' | 'video' | 'voice' | 'sfx';
-  content: string;
-  x: number; y: number;
-  scale: number;
-  rotation: number;
-};
-
-export default function NexusStudioEditor() {
+export default function ProEditor() {
   const [, setLocation] = useLocation();
-  const [elements, setElements] = useState<StudioElement[]>([]);
-  const [activeLayer, setActiveLayer] = useState<string | null>(null);
-  const [isRendering, setIsRendering] = useState(false);
-  const [activeTool, setActiveTool] = useState<'none' | 'ai-voice' | 'ai-video' | 'audio' | 'design'>('none');
-  
-  // --- MUSIC STATES ---
-  const [musicQuery, setMusicQuery] = useState("");
-  const [musicClips, setMusicClips] = useState<any[]>([]);
-  const [selectedMusic, setSelectedMusic] = useState<any>(null);
-  const [isSearchingMusic, setIsSearchingMusic] = useState(false);
-  const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
+  const [showMusic, setShowMusic] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const canvasRef = useRef<HTMLDivElement>(null);
-
-  // --- MUSIC FETCH LOGIC (30s SAFE CLIPS) ---
-  const searchMusicClips = async () => {
-    if (!musicQuery) return;
-    setIsSearchingMusic(true);
-    try {
-      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(musicQuery)}&country=in&media=music&limit=15`);
-      const data = await res.json();
-      setMusicClips(data.results || []);
-    } catch (e) {
-      console.error("Music Fetch Error");
-    } finally {
-      setIsSearchingMusic(false);
-    }
-  };
-
-  const playMusicPreview = (url: string) => {
-    if (audioPreviewRef.current) {
-      audioPreviewRef.current.pause();
-    }
-    audioPreviewRef.current = new Audio(url);
-    audioPreviewRef.current.play();
-  };
-
-  const handlePremiumExport = async () => {
-    setIsRendering(true);
-    setTimeout(() => {
-      setIsRendering(false);
-      alert("Nexus Engine: Render Complete. Video saved with selected audio.");
-    }, 3000);
-  };
+  // Mock Music Data for Drawer
+  const musicLibrary = [
+    { id: 1, title: "Race-X Main Theme", artist: "Nexus Node", dur: "0:30" },
+    { id: 2, title: "Cyberpunk Drift", artist: "Studio AI", dur: "0:15" },
+    { id: 3, title: "Indian Viral Bass", artist: "Phonk Gen", dur: "1:00" },
+    { id: 4, title: "Cinematic Mood", artist: "Director Cut", dur: "0:45" },
+  ];
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col overflow-hidden font-sans selection:bg-cyan-500">
+    <div className="min-h-screen bg-black text-white overflow-hidden flex flex-col font-sans select-none">
       
-      {/* --- TOP NAVIGATION --- */}
-      <header className="h-16 border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl flex items-center justify-between px-6 z-50">
-        <div className="flex items-center gap-4">
-          <div onClick={() => setLocation("/hub")} className="p-2 bg-zinc-900 rounded-xl hover:bg-zinc-800 cursor-pointer transition-all active:scale-90">
-            <ChevronLeft size={20} className="text-zinc-400" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest leading-none mb-1">Nexus Studio v3</span>
-            <input type="text" defaultValue="Untitled_Project" className="bg-transparent text-sm font-bold uppercase tracking-tighter outline-none text-zinc-400 focus:text-white" />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button onClick={handlePremiumExport} disabled={isRendering} className="flex items-center gap-2 px-5 py-2.5 bg-cyan-500 text-black rounded-xl text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(34,211,238,0.4)] active:scale-95 transition-all disabled:opacity-50">
-            {isRendering ? <RefreshCw className="animate-spin" size={14}/> : <Download size={14}/>}
-            {isRendering ? "Rendering..." : "Export"}
-          </button>
+      {/* --- TOP BAR (Standard Pro App Layout) --- */}
+      <header className="flex items-center justify-between p-6 z-40">
+        <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900/90 rounded-2xl border border-white/5 active:scale-75 transition-all">
+          <ArrowLeft size={20} />
+        </button>
+        <div className="flex gap-2">
+          <button className="px-5 py-2.5 bg-zinc-900 border border-white/5 rounded-full text-[9px] font-black uppercase tracking-widest">Draft</button>
+          <button className="px-6 py-2.5 bg-white rounded-full text-[9px] font-black uppercase tracking-widest text-black shadow-xl">Export</button>
         </div>
       </header>
 
-      <main className="flex-1 flex overflow-hidden">
-        
-        {/* --- LEFT TOOLBAR --- */}
-        <aside className="w-20 border-r border-white/5 bg-zinc-950 flex flex-col items-center py-6 gap-8">
-          <ToolIcon icon={<Sparkles/>} label="AI Gen" active={activeTool === 'none'} onClick={() => setActiveTool('none')} />
-          <ToolIcon icon={<Mic/>} label="Voice" active={activeTool === 'ai-voice'} onClick={() => setActiveTool('ai-voice')} />
-          <ToolIcon icon={<Video/>} label="AI Video" active={activeTool === 'ai-video'} onClick={() => setActiveTool('ai-video')} />
-          <ToolIcon icon={<Music/>} label="Audio" active={activeTool === 'audio'} onClick={() => setActiveTool('audio')} />
-          <ToolIcon icon={<ImageIcon/>} label="Media" active={activeTool === 'design'} onClick={() => setActiveTool('design')} />
-          <div className="mt-auto"><ToolIcon icon={<Settings/>} label="Setup" active={false} onClick={() => {}} /></div>
-        </aside>
-
-        {/* --- DYNAMIC PANEL (SIDEBAR) --- */}
-        <section className={`transition-all duration-500 bg-zinc-950/50 backdrop-blur-md border-r border-white/5 ${activeTool !== 'none' ? 'w-80 opacity-100' : 'w-0 opacity-0 overflow-hidden'}`}>
-          <div className="p-6 w-80">
-            
-            {/* AUDIO TOOL PANEL */}
-            {activeTool === 'audio' && (
-              <div className="space-y-6 animate-in slide-in-from-left duration-300">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-cyan-400">Clip Library</h3>
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    placeholder="Search for sounds..." 
-                    className="w-full bg-zinc-900 border border-white/5 rounded-xl p-3 text-xs outline-none focus:border-cyan-500"
-                    value={musicQuery}
-                    onChange={(e) => setMusicQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && searchMusicClips()}
-                  />
-                  <button onClick={searchMusicClips} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-cyan-500/10 rounded-lg text-cyan-500">
-                    {isSearchingMusic ? <RefreshCw size={14} className="animate-spin" /> : <Search size={14} />}
-                  </button>
-                </div>
-
-                <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                  {musicClips.map((clip) => (
-                    <div 
-                      key={clip.trackId}
-                      onClick={() => setSelectedMusic(clip)}
-                      className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${selectedMusic?.trackId === clip.trackId ? 'bg-cyan-500/10 border-cyan-500' : 'bg-zinc-900/40 border-white/5'}`}
-                    >
-                      <img src={clip.artworkUrl60} className="w-10 h-10 rounded-lg object-cover" alt="" />
-                      <div className="flex-1 truncate text-left">
-                        <p className="text-[10px] font-black text-white uppercase truncate">{clip.trackName}</p>
-                        <p className="text-[8px] font-bold text-zinc-500 uppercase">{clip.artistName}</p>
-                      </div>
-                      <button onClick={(e) => { e.stopPropagation(); playMusicPreview(clip.previewUrl); }} className="p-2 bg-zinc-800 rounded-full hover:text-cyan-400 transition-all">
-                        <Volume2 size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* AI VOICE PANEL (AS PER SCREENSHOT) */}
-            {activeTool === 'ai-voice' && (
-              <div className="space-y-6 animate-in slide-in-from-left duration-300">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-cyan-400">AI Voice Engine</h3>
-                <div className="p-4 bg-zinc-900 rounded-[25px] border border-white/5 cursor-pointer hover:border-cyan-500 transition-all group">
-                  <p className="text-[9px] font-black text-zinc-500 uppercase mb-1">Voice Clone</p>
-                  <p className="font-bold text-sm group-hover:text-cyan-400">Instant Mimic</p>
-                </div>
-                <textarea placeholder="Write text to speak..." className="w-full h-32 bg-zinc-900/50 border border-white/5 rounded-2xl p-4 text-xs font-medium outline-none focus:border-cyan-500" />
-                <button className="w-full py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">Generate Audio</button>
-              </div>
-            )}
-            
-            {/* AI VIDEO PANEL */}
-            {activeTool === 'ai-video' && (
-              <div className="space-y-6 animate-in slide-in-from-left duration-300">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-purple-400">Cinema Engine</h3>
-                <div className="aspect-video bg-zinc-900 rounded-2xl border border-dashed border-zinc-700 flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-purple-500 transition-all">
-                    <Plus className="text-zinc-600 group-hover:text-purple-400" />
-                    <span className="text-[9px] font-black uppercase text-zinc-600">Start with AI Prompt</span>
-                </div>
-                <input placeholder="Describe your scene..." className="w-full bg-zinc-900 border border-white/5 rounded-xl p-3 text-xs outline-none focus:border-purple-500" />
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* --- MAIN CANVAS --- */}
-        <section className="flex-1 bg-zinc-900/10 flex flex-col items-center justify-center p-8 relative">
-          <div ref={canvasRef} className="aspect-[9/16] w-[340px] md:w-[380px] bg-zinc-900 rounded-[40px] border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] relative overflow-hidden group">
-            
-            {/* Preview Label */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-800 pointer-events-none">
-               <ImageIcon size={48} className="opacity-10 mb-2"/>
-               <span className="text-[9px] font-black uppercase tracking-widest opacity-20 italic">Nexus Render Surface</span>
-            </div>
-
-            {/* Selected Music HUD */}
-            {selectedMusic && (
-               <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-cyan-500/30 flex items-center gap-2 animate-bounce-slow">
-                  <Music size={12} className="text-cyan-400" />
-                  <span className="text-[8px] font-black uppercase tracking-widest text-white truncate max-w-[120px]">{selectedMusic.trackName}</span>
-               </div>
-            )}
-
-            {/* Controls */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-               <button className="p-4 bg-black/80 backdrop-blur-xl rounded-full border border-white/10 text-cyan-400 active:scale-90"><Play size={20} fill="currentColor"/></button>
-               <button className="p-4 bg-black/80 backdrop-blur-xl rounded-full border border-white/10 text-white active:scale-90"><Share2 size={20}/></button>
-            </div>
+      {/* --- MAIN EDITING CANVAS --- */}
+      <main className="flex-1 relative flex items-center justify-center p-4">
+        <div className="aspect-[9/16] h-[72vh] bg-zinc-900/40 rounded-[45px] border-2 border-white/5 overflow-hidden shadow-2xl relative group">
+          
+          {/* Action Tools (Right Sidebar) */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-6 z-30">
+             <EditBtn icon={<Music size={18}/>} label="Audio" color="text-pink-500" onClick={() => setShowMusic(true)} />
+             <EditBtn icon={<Sparkles size={18}/>} label="AI Gen" color="text-cyan-400" onClick={() => setLocation("/magic/video-gen")} />
+             <EditBtn icon={<Type size={18}/>} label="Text" color="text-purple-400" onClick={() => {}} />
+             <EditBtn icon={<Scissors size={18}/>} label="Split" color="text-yellow-500" onClick={() => {}} />
+             <EditBtn icon={<Layers size={18}/>} label="Overlay" color="text-green-500" onClick={() => {}} />
           </div>
 
-          {/* Zoom UI */}
-          <div className="absolute bottom-8 right-8 flex flex-col gap-2">
-            <button className="p-3 bg-zinc-950 rounded-xl border border-white/5 text-zinc-500 hover:text-white"><ZoomIn size={18}/></button>
-            <button className="p-3 bg-zinc-950 rounded-xl border border-white/5 text-zinc-500 hover:text-white"><ZoomOut size={18}/></button>
+          <div className="absolute inset-0 flex items-center justify-center opacity-10">
+             <p className="text-[10px] font-black uppercase tracking-[0.8em] -rotate-90">Studio Viewport</p>
           </div>
-        </section>
-
-        {/* --- RIGHT PROPERTIES PANEL --- */}
-        <aside className="w-72 border-l border-white/5 bg-zinc-950 p-6 hidden lg:block">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-8">Object Settings</h3>
-          <div className="space-y-8">
-             <div className="p-4 bg-zinc-900 rounded-2xl border border-white/5">
-                <p className="text-[8px] text-zinc-600 font-bold uppercase mb-2">Layer Status</p>
-                <div className="flex items-center gap-2">
-                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                   <span className="text-[10px] font-black uppercase">Active Engine</span>
-                </div>
-             </div>
-             <button className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-cyan-900/20 to-zinc-900 rounded-2xl border border-cyan-500/20 group hover:border-cyan-500 transition-all">
-                <span className="text-[10px] font-black uppercase italic group-hover:text-cyan-400">Upscale to 4K</span>
-                <Wand2 size={14} className="text-cyan-400" />
-             </button>
-          </div>
-        </aside>
+        </div>
       </main>
+
+      {/* --- TIMELINE / FOOTER CONTROLS --- */}
+      <footer className="p-10 flex flex-col items-center gap-6 bg-gradient-to-t from-black to-transparent">
+        <button 
+          onClick={() => setIsPlaying(!isPlaying)}
+          className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black active:scale-90 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+        >
+          {isPlaying ? <Pause fill="currentColor" size={24} /> : <Play fill="currentColor" size={24} className="ml-1" />}
+        </button>
+        
+        {/* Playback Seek Bar */}
+        <div className="w-full max-w-sm h-1 bg-zinc-900 rounded-full relative">
+           <div className="absolute inset-y-0 left-0 w-1/4 bg-cyan-500 shadow-[0_0_10px_#00e1ff]" />
+        </div>
+      </footer>
+
+      {/* --- 🎵 FACEBOOK STYLE MUSIC DRAWER --- */}
+      {showMusic && (
+        <div className="absolute inset-0 z-50 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowMusic(false)} />
+          
+          <div className="relative bg-zinc-900 rounded-t-[50px] h-[75vh] border-t border-white/10 flex flex-col animate-in slide-in-from-bottom duration-300">
+            <div className="w-12 h-1 bg-zinc-800 rounded-full mx-auto mt-4 mb-2" />
+            
+            <div className="p-8 flex items-center justify-between">
+               <h3 className="text-sm font-black italic uppercase tracking-widest text-white">Audio Engine</h3>
+               <button onClick={() => setShowMusic(false)} className="p-2 bg-white/5 rounded-full text-zinc-400"><X size={20}/></button>
+            </div>
+
+            <div className="px-8 pb-6">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={14} />
+                <input 
+                  type="text" 
+                  placeholder="SEARCH SOUNDS..." 
+                  className="w-full bg-black border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-[9px] font-black tracking-widest outline-none focus:border-pink-500/30 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-8 space-y-4 pb-20">
+              {musicLibrary.map((song) => (
+                <div key={song.id} className="flex items-center justify-between p-5 bg-white/5 rounded-[30px] border border-transparent active:border-pink-500/40 transition-all group">
+                   <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center border border-white/5">
+                         <Volume2 size={16} className="text-zinc-600 group-active:text-pink-500" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest mb-1">{song.title}</p>
+                        <p className="text-[8px] font-bold text-zinc-600 uppercase italic">{song.artist} • {song.dur}</p>
+                      </div>
+                   </div>
+                   <button className="p-3 bg-white text-black rounded-full active:scale-75 transition-all">
+                      <Plus size={16} />
+                   </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// --- HELPER COMPONENT ---
-function ToolIcon({ icon, label, active, onClick }: any) {
+// Side Action Button Component
+function EditBtn({ icon, label, color, onClick }: any) {
   return (
-    <div onClick={onClick} className="flex flex-col items-center gap-1 group cursor-pointer">
-      <div className={`p-3.5 rounded-2xl transition-all duration-300 ${active ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'bg-transparent text-zinc-600 group-hover:bg-zinc-900 group-hover:text-zinc-200'}`}>
+    <button onClick={onClick} className="flex flex-col items-center gap-1.5 group active:scale-75 transition-all">
+      <div className={`p-4 bg-black/80 backdrop-blur-xl rounded-[22px] border border-white/5 ${color} shadow-2xl group-hover:border-white/20`}>
         {icon}
       </div>
-      <span className={`text-[8px] font-black uppercase tracking-widest ${active ? 'text-cyan-400' : 'text-zinc-700'}`}>{label}</span>
-    </div>
+      <span className="text-[7px] font-black uppercase tracking-widest text-zinc-600">{label}</span>
+    </button>
   );
 }
