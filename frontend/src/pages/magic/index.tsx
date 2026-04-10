@@ -1,61 +1,141 @@
-import { ArrowLeft, Disc, Play, SkipForward, SkipBack, Heart, Share2, ListMusic, Volume2 } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Send, Sparkles, Bot, User, Cpu, Paperclip } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
+import { databases } from "../../../lib/appwrite"; // ✅ Nexus Connection
 
-export default function MusicIndex() {
+// ✅ Nexus Configuration
+const DATABASE_ID = 'Race-X-Nexus';
+const COLLECTION_ID = 'api_configs';
+
+export default function MagicChat() {
   const [, setLocation] = useLocation();
-  const [playing, setPlaying] = useState(false);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([
+    { role: 'bot', text: 'Race-X Neural Link Active. I am Gemini, how can I assist your creative process today?' }
+  ]);
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 🛡️ 1. NEXUS ENGINE SYNC (Gemini Key Fetch)
+  useEffect(() => {
+    const fetchNexusKey = async () => {
+      try {
+        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+        const config = response.documents.find(doc => doc.service_name === 'GEMINI_AI');
+        if (config) setApiKey(config.key_value);
+      } catch (err) {
+        console.error("Nexus Key Sync Failed");
+      }
+    };
+    fetchNexusKey();
+  }, []);
+
+  // Auto Scroll to bottom
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
+
+  // 🤖 2. GEMINI API EXECUTION
+  const handleSend = async () => {
+    if (!input.trim() || !apiKey) return;
+
+    const userMsg = { role: 'user', text: input };
+    setMessages(prev => [...prev, userMsg]);
+    setInput("");
+    setIsTyping(true);
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: input }] }]
+        })
+      });
+
+      const data = await res.json();
+      
+      if (data.candidates && data.candidates[0].content.parts[0].text) {
+        const botResponse = data.candidates[0].content.parts[0].text;
+        setMessages(prev => [...prev, { role: 'bot', text: botResponse }]);
+      } else {
+        throw new Error("Invalid Response");
+      }
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'bot', text: "Neural Link Interrupted. Please check your Nexus API configuration." }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 font-sans flex flex-col">
-      <header className="flex justify-between items-center mb-10">
-        <button onClick={() => setLocation("/hub")} className="p-4 bg-zinc-900 rounded-3xl active:scale-75 transition-all"><ArrowLeft size={20}/></button>
-        <span className="text-[10px] font-black italic uppercase tracking-[0.4em] text-zinc-500">Global Player</span>
-        <button className="p-4 bg-zinc-900 rounded-3xl active:scale-75 transition-all"><ListMusic size={20}/></button>
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans">
+      {/* Header - Keeping your visual style */}
+      <header className="p-6 flex items-center justify-between border-b border-white/5 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
+        <div className="flex items-center gap-4">
+          <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900 rounded-2xl active:scale-75 transition-all">
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h2 className="text-xl font-black italic uppercase tracking-tighter flex items-center gap-2">
+              Magic Chat <Sparkles size={16} className="text-cyan-400" />
+            </h2>
+            <p className="text-[7px] font-black text-zinc-500 uppercase tracking-[0.3em]">
+              {apiKey ? "Gemini 1.5 Flash Online" : "Nexus Syncing..."}
+            </p>
+          </div>
+        </div>
+        <div className="p-3 bg-cyan-500/10 rounded-2xl border border-cyan-500/20">
+          <Cpu size={18} className={`text-cyan-400 ${isTyping ? 'animate-pulse' : ''}`} />
+        </div>
       </header>
 
-      {/* Player Core */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <div className={`relative mb-16 p-3 rounded-full border border-white/5 ${playing ? 'animate-spin-slow' : ''}`}>
-          <div className="w-72 h-72 rounded-full bg-gradient-to-br from-zinc-800 to-black p-1 shadow-[0_0_60px_rgba(255,255,255,0.05)] overflow-hidden flex items-center justify-center">
-            <Disc size={200} className="text-zinc-900 opacity-50" />
-            <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent rounded-full" />
-            <div className="absolute w-20 h-20 bg-black rounded-full border-[6px] border-zinc-900 z-10 shadow-inner" />
-          </div>
-        </div>
-
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2">Neon Nights</h2>
-          <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.3em]">Race-X Original Sound</p>
-        </div>
-
-        {/* Playback Controls */}
-        <div className="w-full max-w-sm px-4">
-          <div className="h-1.5 bg-zinc-900 rounded-full mb-10 relative overflow-hidden">
-            <div className="absolute top-0 left-0 h-full w-[60%] bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
-          </div>
-
-          <div className="flex items-center justify-between mb-8">
-            <button className="text-zinc-600 active:text-white transition-colors"><Heart size={22} /></button>
-            <div className="flex items-center gap-10">
-              <button className="active:scale-75 transition-all"><SkipBack size={32} /></button>
-              <button 
-                onClick={() => setPlaying(!playing)}
-                className="w-24 h-24 bg-white text-black rounded-full flex items-center justify-center shadow-2xl active:scale-90 transition-all"
-              >
-                {playing ? <div className="flex gap-1.5"><div className="w-2.5 h-8 bg-black rounded-full"/><div className="w-2.5 h-8 bg-black rounded-full"/></div> : <Play size={38} fill="black" />}
-              </button>
-              <button className="active:scale-75 transition-all"><SkipForward size={32} /></button>
-            </div>
-            <button className="text-zinc-600 active:text-white transition-colors"><Share2 size={22} /></button>
-          </div>
-          
-          <div className="flex justify-center gap-2 text-zinc-800">
-            <Volume2 size={12}/>
-            <div className="w-24 h-1 bg-zinc-900 rounded-full self-center">
-               <div className="w-1/2 h-full bg-zinc-700 rounded-full" />
+      {/* Chat Space - Functional scroll & messages */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
+            <div className={`max-w-[85%] p-5 rounded-[30px] flex gap-4 ${msg.role === 'user' ? 'bg-cyan-600 text-white rounded-tr-none shadow-[0_10px_30px_rgba(8,145,178,0.3)]' : 'bg-zinc-900/50 border border-white/5 rounded-tl-none'}`}>
+              <div className="flex-shrink-0 mt-1">
+                {msg.role === 'user' ? <User size={16} /> : <Bot size={16} className="text-cyan-400" />}
+              </div>
+              <p className="text-[13px] font-medium leading-relaxed whitespace-pre-wrap">{msg.text}</p>
             </div>
           </div>
+        ))}
+        
+        {isTyping && (
+          <div className="flex justify-start">
+            <div className="bg-zinc-900/50 p-5 rounded-[25px] flex gap-1.5 items-center">
+              <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce [animation-duration:0.8s]" />
+              <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce [animation-duration:0.8s] [animation-delay:0.2s]" />
+              <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce [animation-duration:0.8s] [animation-delay:0.4s]" />
+            </div>
+          </div>
+        )}
+        <div ref={scrollRef} />
+      </div>
+
+      {/* Input Field - Fully Functional */}
+      <div className="p-6 bg-gradient-to-t from-black via-black/80 to-transparent">
+        <div className="bg-zinc-900/80 backdrop-blur-2xl border border-white/10 p-2 rounded-[35px] flex items-center gap-2 shadow-2xl">
+          <button className="p-4 text-zinc-500 hover:text-white transition-colors">
+            <Paperclip size={20} />
+          </button>
+          <input 
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Describe your vision..."
+            className="flex-1 bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-wider placeholder:text-zinc-600 px-2"
+          />
+          <button 
+            onClick={handleSend}
+            disabled={isTyping}
+            className={`p-4 bg-white text-black rounded-full active:scale-90 transition-all shadow-lg ${isTyping ? 'opacity-50' : 'hover:scale-105'}`}
+          >
+            <Send size={18} />
+          </button>
         </div>
       </div>
     </div>
