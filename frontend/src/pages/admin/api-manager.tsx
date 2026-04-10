@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { 
   Key, Save, RefreshCw, Zap, ShieldCheck, 
   Plus, Eye, EyeOff, AlertCircle, X, Terminal, ChevronRight,
-  ShieldAlert, Ghost, Diamond, UserX, ArrowLeft, Music, Image as ImageIcon
+  ShieldAlert, Ghost, Diamond, UserX, ArrowLeft, Music, Image as ImageIcon, Sparkles 
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { databases, ID } from "../../lib/appwrite"; 
@@ -244,13 +244,13 @@ export default function ApiManager() {
                 <select 
                   value={newEngineData.service_name}
                   onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})}
-                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-xs font-bold uppercase outline-none focus:border-cyan-500 transition-all appearance-none"
+                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-xs font-bold uppercase outline-none focus:border-cyan-500 transition-all appearance-none text-white"
                 >
                   <option value="">Select Nexus Node...</option>
                   {NEXUS_SERVICES.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
+                    <option key={s.id} value={s.id} className="bg-zinc-900">{s.name}</option>
                   ))}
-                  <option value="CUSTOM">Custom Node...</option>
+                  <option value="CUSTOM" className="bg-zinc-900">Custom Node...</option>
                 </select>
               </div>
 
@@ -261,7 +261,7 @@ export default function ApiManager() {
                     type="text"
                     onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})}
                     placeholder="e.g. PIXEL_ENGINE"
-                    className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
+                    className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all text-white"
                   />
                 </div>
               )}
@@ -273,7 +273,7 @@ export default function ApiManager() {
                   value={newEngineData.key_value}
                   onChange={(e) => setNewEngineData({...newEngineData, key_value: e.target.value})}
                   placeholder="sk-.... or ClientID"
-                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
+                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all text-white"
                 />
               </div>
               <button 
