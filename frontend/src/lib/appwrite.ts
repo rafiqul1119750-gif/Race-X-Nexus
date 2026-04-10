@@ -4,36 +4,39 @@ import { Client, Account, Databases, Storage, Avatars, ID, Query } from 'appwrit
 const client = new Client();
 
 client
-    .setEndpoint('https://cloud.appwrite.io/v1') // Standard Appwrite Cloud Endpoint
-    .setProject('69b9929d0024fe351bc2'); // Aapki Verified Project ID
+    .setEndpoint('https://cloud.appwrite.io/v1') 
+    .setProject('69b9929d0024fe351bc2'); // Project ID ekdum sahi hai
 
-// 🟢 Exporting Core Modules for Auth, DB, and Media
+// 🟢 Exporting Core Modules
 export const account = new Account(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
 export const avatars = new Avatars(client);
 
-// 💎 Exporting Utilities for Creating Unique IDs & Searching Data
+// 💎 Exporting Utilities
 export { ID, Query };
 
 // 🛡️ --- NEXUS API ENGINE HELPER ---
-// Ye function aapki saved API keys ko databases se nikalega
+// Is function ko dhyan se dekho, yahan 'racex_db' kar diya hai
 export const getNexusKey = async (serviceName: string) => {
     try {
         const response = await databases.listDocuments(
-            'Race-X-Nexus', // Database ID
+            'racex_db',     // ✅ Updated Database ID (Console se matching)
             'api_configs',  // Collection ID
             [Query.equal('service_name', serviceName)]
         );
-        return response.documents[0]?.key_value || null;
+        
+        if (response.documents.length > 0) {
+            return response.documents[0].key_value;
+        }
+        return null;
     } catch (error) {
-        console.error(`Nexus Error [${serviceName}]:`, error);
+        console.error(`Nexus Sync Error [${serviceName}]:`, error);
         return null;
     }
 };
 
 // 🚀 --- SERVICE ENDPOINTS CONFIG ---
-// Inka use aap fetch requests mein karenge
 export const NEXUS_ENDPOINTS = {
     OPEN_ROUTER: "https://openrouter.ai/api/v1/chat/completions",
     HUGGING_FACE: "https://api-inference.huggingface.co/models/",
