@@ -1,63 +1,51 @@
-import { ArrowLeft, Play, Pause, Heart, RefreshCw, ListMusic, Music2 } from "lucide-react";
+import { ArrowLeft, Play, Pause, Heart, RefreshCw, ListMusic, Music2, Search } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 
-// ✅ Hardcoded Nexus Tracks (Ye hamesha load honge, chahe internet slow ho)
-const OFFLINE_SIGNALS = [
-  {
-    id: "rx_1",
-    name: "Cyber Drift",
-    artist_name: "Nexus Core",
-    audio: "https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a73456.mp3",
-    image: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=80"
-  },
-  {
-    id: "rx_2",
-    name: "Neon Nights",
-    artist_name: "Race-X Beats",
-    audio: "https://cdn.pixabay.com/audio/2023/05/08/audio_32c4e434f5.mp3",
-    image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80"
-  },
-  {
-    id: "rx_3",
-    name: "Digital Horizon",
-    artist_name: "Alpha Synth",
-    audio: "https://cdn.pixabay.com/audio/2021/11/23/audio_0ed20d9f4f.mp3",
-    image: "https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=80"
-  }
+// ✅ MEGA DATABASE: Inhe koi block nahi kar sakta
+const RX_MEGA_STORAGE = [
+  { id: "rx1", name: "Cyber Drift", artist: "Nexus", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+  { id: "rx2", name: "Neon Horizon", artist: "Race-X", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+  { id: "rx3", name: "Digital Pulse", artist: "Alpha", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+  { id: "rx4", name: "Midnight Bass", artist: "Core", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+  { id: "rx5", name: "Cloud Runner", artist: "Velocity", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+  { id: "rx6", name: "Synth Wave", artist: "Retro", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" },
+  { id: "rx7", name: "Binary Star", artist: "Logic", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" },
+  { id: "rx8", name: "Orbit Echo", artist: "Satellite", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3" },
+  { id: "rx9", name: "Deep Signal", artist: "Nexus", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3" },
+  { id: "rx10", name: "Final Frontier", artist: "Race-X", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3" }
 ];
 
 export default function RXMusic() {
   const [, setLocation] = useLocation();
-  const [tracks, setTracks] = useState(OFFLINE_SIGNALS); // Start with offline signals
+  const [tracks, setTracks] = useState(RX_MEGA_STORAGE);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  
+  const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
   const currentTrack = tracks[currentTrackIndex];
 
-  // Logic: Background mein Pixabay se fresh tracks mangwana
-  const syncNexus = async () => {
-    setIsLoading(true);
+  // Logic: Background mein 100 aur gaane load karna (Pixabay Bypass)
+  const loadMoreSignals = async () => {
+    setLoading(true);
     try {
-      const res = await fetch(`https://pixabay.com/api/videos/tracks/?key=43431641-59e21782298642a8b3834a362&q=lofi+electronic&per_page=20`);
+      const res = await fetch(`https://pixabay.com/api/videos/tracks/?key=43431641-59e21782298642a8b3834a362&q=electronic+techno&per_page=40`);
       const data = await res.json();
-      if (data.hits && data.hits.length > 0) {
-        const freshTracks = data.hits.map((item: any) => ({
-          id: item.id,
-          name: item.title || "Neural Signal",
-          artist_name: item.artist || "Unknown",
-          audio: item.preview_url,
-          image: OFFLINE_SIGNALS[Math.floor(Math.random() * 3)].image
+      if (data.hits) {
+        const apiTracks = data.hits.map((h: any) => ({
+          id: h.id.toString(),
+          name: h.title || "Neural Signal",
+          artist: h.artist || "Producer",
+          url: h.preview_url
         }));
-        setTracks([...OFFLINE_SIGNALS, ...freshTracks]); // Combine both
+        setTracks([...RX_MEGA_STORAGE, ...apiTracks]);
       }
-    } catch (e) { console.warn("Background Sync Failed"); }
-    finally { setIsLoading(false); }
+    } catch (e) { console.log("Nexus Link slow, using internal storage."); }
+    setLoading(false);
   };
 
-  useEffect(() => { syncNexus(); }, []);
+  useEffect(() => { loadMoreSignals(); }, []);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -67,59 +55,66 @@ export default function RXMusic() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-6 pb-44 font-sans selection:bg-green-500/30 overflow-x-hidden">
-      <audio ref={audioRef} src={currentTrack?.audio} onEnded={() => setCurrentTrackIndex(p => (p + 1) % tracks.length)} key={currentTrack?.id} />
+    <div className="min-h-screen bg-[#050505] text-white p-6 pb-44 font-sans selection:bg-green-500/30">
+      <audio ref={audioRef} src={currentTrack.url} onEnded={() => setCurrentTrackIndex(p => (p + 1) % tracks.length)} key={currentTrack.id} />
 
       <header className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900 rounded-2xl border border-white/5 active:scale-75"><ArrowLeft size={18} /></button>
-          <h1 className="text-lg font-black italic uppercase text-green-500 tracking-tighter">RX Music</h1>
+          <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900 rounded-2xl active:scale-75 border border-white/5"><ArrowLeft size={18} /></button>
+          <div>
+            <h1 className="text-lg font-black italic uppercase text-green-500 tracking-tighter">RX Music</h1>
+            <span className="text-[7px] font-black uppercase text-zinc-500 mt-1 block">{tracks.length} SIGNALS SYNCED</span>
+          </div>
         </div>
-        <button onClick={syncNexus} className={`p-3 bg-zinc-900 rounded-2xl ${isLoading ? 'animate-spin' : ''}`}>
+        <button onClick={loadMoreSignals} className={`p-3 bg-zinc-900 rounded-2xl ${loading ? 'animate-spin' : ''}`}>
           <RefreshCw size={18} className="text-green-500" />
         </button>
       </header>
 
-      {/* Hero Cover */}
-      <div className="relative h-72 rounded-[45px] overflow-hidden border border-white/10 mb-10 bg-zinc-900 shadow-2xl">
-        <img src={currentTrack?.image} className="absolute inset-0 w-full h-full object-cover opacity-40 blur-[1px]" alt="cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black" />
-        <div className="absolute bottom-10 left-10 right-10 z-10">
-          <h2 className="text-3xl font-black italic uppercase leading-tight truncate">{currentTrack?.name}</h2>
-          <p className="text-[10px] font-black text-green-500 uppercase tracking-[0.4em] mt-2">Active Signal</p>
+      {/* Hero Display */}
+      <div className="relative h-64 rounded-[40px] overflow-hidden border border-white/10 mb-8 bg-zinc-900 shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-transparent to-black" />
+        <div className="absolute inset-0 flex items-center justify-center">
+            <div className={`w-32 h-32 rounded-full border-2 border-green-500/30 flex items-center justify-center ${isPlaying ? 'animate-[spin_4s_linear_infinite]' : ''}`}>
+                <Music2 size={40} className="text-green-500" />
+            </div>
+        </div>
+        <div className="absolute bottom-8 left-8 right-8 text-center">
+          <h2 className="text-2xl font-black italic uppercase truncate">{currentTrack.name}</h2>
+          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">{currentTrack.artist}</p>
         </div>
       </div>
 
       {/* Track List */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {tracks.map((track, idx) => (
           <div 
             key={track.id + idx} 
-            onClick={() => { setCurrentTrackIndex(idx); setIsPlaying(true); setTimeout(togglePlay, 10); }}
-            className={`flex items-center justify-between p-4 rounded-[28px] border transition-all ${currentTrackIndex === idx ? 'bg-zinc-900 border-green-500' : 'bg-zinc-900/30 border-white/5'}`}
+            onClick={() => { setCurrentTrackIndex(idx); setIsPlaying(true); }}
+            className={`flex items-center justify-between p-4 rounded-[24px] border transition-all duration-300 ${currentTrackIndex === idx ? 'bg-zinc-900 border-green-500' : 'bg-zinc-900/30 border-white/5'}`}
           >
-            <div className="flex items-center gap-4 overflow-hidden text-left">
-              <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                <Music2 size={20} className={currentTrackIndex === idx ? "text-green-500" : "text-zinc-600"} />
+            <div className="flex items-center gap-4 truncate">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${currentTrackIndex === idx ? 'bg-green-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
+                <Music2 size={18} />
               </div>
-              <div className="truncate">
+              <div className="truncate text-left">
                 <p className={`text-[11px] font-black uppercase italic truncate ${currentTrackIndex === idx ? 'text-green-500' : 'text-white'}`}>{track.name}</p>
-                <p className="text-[9px] font-bold text-zinc-600 uppercase">{track.artist_name}</p>
+                <p className="text-[9px] font-bold text-zinc-600 uppercase">{track.artist}</p>
               </div>
             </div>
-            <Heart size={16} className={currentTrackIndex === idx ? "text-green-500" : "text-zinc-800"} />
+            <Heart size={14} className={currentTrackIndex === idx ? "text-green-500" : "text-zinc-800"} />
           </div>
         ))}
       </div>
 
-      {/* Floating UI Player */}
+      {/* Floating Bottom Player */}
       <div className="fixed bottom-8 left-6 right-6 z-[100] bg-zinc-900/95 backdrop-blur-3xl border border-white/10 p-5 rounded-[40px] flex items-center justify-between shadow-2xl">
         <div className="flex items-center gap-4 max-w-[45%] overflow-hidden text-left">
-           <div className={`w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center ${isPlaying ? 'animate-pulse' : ''}`}>
+           <div className={`w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center ${isPlaying ? 'animate-pulse ring-2 ring-green-500/20' : ''}`}>
              <Music2 size={24} className="text-green-500" />
            </div>
            <div className="truncate">
-              <p className="text-[10px] font-black uppercase italic truncate leading-none mb-1">{currentTrack?.name}</p>
+              <p className="text-[10px] font-black uppercase italic truncate leading-none mb-1">{currentTrack.name}</p>
               <span className="text-[8px] text-green-500 font-black uppercase">Race-X Audio</span>
            </div>
         </div>
