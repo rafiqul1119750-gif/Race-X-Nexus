@@ -46,7 +46,7 @@ export default function ApiManager() {
 
   useEffect(() => {
     fetchKeys();
-    // 🚨 Emergency Guard: 4 second baad loading screen hata do chahe jo ho
+    // 🚨 Emergency Guard: 4 second baad loading screen hata do
     const emergencyTimer = setTimeout(() => setLoading(false), 4000);
     return () => clearTimeout(emergencyTimer);
   }, []);
@@ -71,8 +71,10 @@ export default function ApiManager() {
       setIsNewEngineModalOpen(false);
       setNewEngineData({ service_name: "", key_value: "" });
       fetchKeys();
-    } catch (error) {
-      alert("Deployment Blocked!");
+      alert("Node Deployed Successfully! 🚀");
+    } catch (error: any) {
+      console.error("Creation Error:", error);
+      alert(`Deployment Blocked: ${error.message}`);
     } finally {
       setIsCreating(false);
     }
@@ -89,14 +91,15 @@ export default function ApiManager() {
       setEditModal(null);
       setNewKeyValue("");
       fetchKeys();
-    } catch (error) {
+      alert("Key Re-Injected! ⚡");
+    } catch (error: any) {
+      console.error("Update Error:", error);
       alert("Injection Blocked!");
     } finally {
       setIsUpdating(null);
     }
   };
 
-  // 1. Loading State (If stays black, something is fundamentally wrong with imports)
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-black text-cyan-400 font-sans">
       <Terminal size={40} className="mb-4 animate-bounce" />
@@ -152,7 +155,6 @@ export default function ApiManager() {
         ))}
       </div>
 
-      {/* Modals are simplified for pure stability */}
       {editModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
           <div className="bg-zinc-900 border border-white/10 w-full max-w-md rounded-[40px] p-8">
@@ -161,9 +163,12 @@ export default function ApiManager() {
               type="password" 
               placeholder="Paste Key..." 
               className="w-full bg-black border border-white/10 p-5 rounded-2xl text-white mb-6 outline-none focus:border-cyan-500"
+              value={newKeyValue}
               onChange={(e) => setNewKeyValue(e.target.value)}
             />
-            <button onClick={handleUpdateKey} className="w-full py-5 bg-cyan-500 text-black rounded-2xl font-black uppercase">Confirm</button>
+            <button onClick={handleUpdateKey} disabled={isUpdating === editModal.id} className="w-full py-5 bg-cyan-500 text-black rounded-2xl font-black uppercase">
+              {isUpdating === editModal.id ? "Syncing..." : "Confirm Injection"}
+            </button>
             <button onClick={() => setEditModal(null)} className="w-full mt-4 text-[10px] uppercase font-black text-zinc-500">Cancel</button>
           </div>
         </div>
@@ -175,6 +180,7 @@ export default function ApiManager() {
             <h2 className="text-xl font-black uppercase italic mb-6 text-cyan-400">Deploy New Node</h2>
             <div className="space-y-4">
               <select 
+                value={newEngineData.service_name}
                 onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})}
                 className="w-full bg-black border border-white/10 p-5 rounded-2xl text-white outline-none"
               >
@@ -186,16 +192,18 @@ export default function ApiManager() {
                 type="password" 
                 placeholder="API Secret Key" 
                 className="w-full bg-black border border-white/10 p-5 rounded-2xl text-white outline-none"
+                value={newEngineData.key_value}
                 onChange={(e) => setNewEngineData({...newEngineData, key_value: e.target.value})}
               />
-              <button onClick={handleCreateEngine} className="w-full py-5 bg-white text-black rounded-2xl font-black uppercase tracking-widest">Deploy</button>
+              <button onClick={handleCreateEngine} disabled={isCreating} className="w-full py-5 bg-white text-black rounded-2xl font-black uppercase tracking-widest">
+                {isCreating ? "Deploying..." : "Deploy"}
+              </button>
               <button onClick={() => setIsNewEngineModalOpen(false)} className="w-full text-[10px] uppercase font-black text-zinc-500">Close</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Footer Sync */}
       <div className="mt-12 p-10 bg-zinc-900/30 border border-white/5 rounded-[50px] flex flex-col md:flex-row justify-between items-center gap-6">
         <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Master Propagation System</p>
         <button onClick={executePropagation} className="px-10 py-5 bg-white text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all">
