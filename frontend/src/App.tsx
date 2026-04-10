@@ -84,9 +84,9 @@ export default function App() {
           <Route path="/magic/ai-chat" component={NeuralChat} />
           <Route path="/magic/image-gen" component={ImageGen} />
           
-          {/* --- NEW MODULES --- */}
-          <Route path="/music" component={MusicIndex} />
-          <Route path="/shop" component={ShopIndex} />
+          {/* --- NEW MODULES (FIXED PATHS) --- */}
+          <Route path="/music/:rest*" component={MusicIndex} /> 
+          <Route path="/shop/:rest*" component={ShopIndex} />
 
           {/* --- 🔥 ADMIN & CREATOR ROUTES --- */}
           <Route path="/admin" component={AdminDashboard} />
