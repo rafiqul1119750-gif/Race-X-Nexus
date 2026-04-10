@@ -5,19 +5,19 @@ import { useLocation } from "wouter";
 export default function MainHub() {
   const [, setLocation] = useLocation();
 
-  // Updated Cards with RX Branding & Correct Paths
+  // ✅ FIXED: Path changed from "/music" to "/music/main"
   const hubCards = [
     { title: "RX STUDIO", desc: "Cinema AI & Voice Lab", icon: <Zap className="text-black" />, color: "bg-cyan-400", path: "/studio" },
     { title: "RX MAGIC CHAT", desc: "Neural AI Assistant", icon: <Sparkles className="text-yellow-400" />, color: "bg-zinc-900", path: "/magic/ai-chat" },
     { title: "RX SOCIAL", desc: "Creator Community", icon: <Users className="text-white" />, color: "bg-purple-600", path: "/social" },
-    { title: "RX MUSIC", desc: "Spotify Engine", icon: <Music className="text-white" />, color: "bg-zinc-800", path: "/music" },
+    { title: "RX MUSIC", desc: "Spotify Engine", icon: <Music className="text-white" />, color: "bg-zinc-800", path: "/music/main" },
     { title: "RX SHOPPING", desc: "70% Off Coupons", icon: <ShoppingBag className="text-cyan-400" />, color: "bg-black", border: "border-cyan-500", path: "/shop" },
   ];
 
   return (
     <div className="min-h-screen bg-[#050505] text-white p-6 md:p-10 font-sans selection:bg-cyan-500/20">
       
-      {/* Header with RX Logo & Platform Name */}
+      {/* Header */}
       <header className="flex justify-between items-center mb-10">
         <div className="flex items-center gap-4">
           <div 
@@ -32,7 +32,6 @@ export default function MainHub() {
           </div>
         </div>
         <div className="flex gap-3">
-          {/* ✅ Fixed: Now redirects to Admin API / Injection Hub */}
           <button 
             onClick={() => setLocation("/admin/api")} 
             className="p-3 bg-zinc-900 rounded-2xl border border-white/5 active:scale-90 hover:bg-zinc-800 transition-all shadow-lg"
@@ -42,7 +41,7 @@ export default function MainHub() {
         </div>
       </header>
 
-      {/* --- DIAMOND RELATED SECTION --- */}
+      {/* Diamond Section */}
       <div className="bg-gradient-to-br from-zinc-900 to-black border-2 border-cyan-500/20 rounded-[45px] p-8 mb-10 relative overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 to-transparent opacity-30 blur-2xl" />
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -65,7 +64,7 @@ export default function MainHub() {
         </div>
       </div>
 
-      {/* --- 5 TILED CARDS (RX BRANDED) --- */}
+      {/* Cards Section */}
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6 px-1">
           <h3 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500"><Gem size={12} className="text-cyan-500"/> Platform Nodes</h3>
@@ -96,7 +95,7 @@ export default function MainHub() {
         </div>
       </section>
 
-      {/* Join Revolution Footer Bar */}
+      {/* Footer */}
       <div className="p-8 rounded-[45px] bg-white text-black flex items-center justify-between shadow-[0_20px_50px_rgba(255,255,255,0.05)] relative overflow-hidden">
         <div className="absolute right-0 top-0 w-32 h-32 bg-cyan-500/10 blur-3xl rounded-full" />
         <div className="relative z-10">
