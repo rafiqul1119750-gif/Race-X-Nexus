@@ -3,7 +3,6 @@ import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { databases } from "../../lib/appwrite"; 
 
-// ✅ Screenshot ke exact matching IDs
 const DATABASE_ID = 'RaceX_Main_DB'; 
 const COLLECTION_ID = 'api_configs';
 
@@ -22,7 +21,7 @@ export default function RXMusic() {
     const connectNexus = async () => {
       setIsLoading(true);
       try {
-        // Step 1: Fetch from Appwrite
+        // Step 1: Attempt Appwrite Connection
         const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
         const config = response.documents.find(doc => doc.service_name === 'JAMENDO_MUSIC');
         
@@ -33,11 +32,11 @@ export default function RXMusic() {
           throw new Error("Key not found");
         }
       } catch (error) {
-        console.error("Appwrite Link Failed, trying manual fallback...");
-        // Step 2: Fallback to your manual key from screenshot
+        console.warn("Using Manual Fallback Sync...");
+        // Manual Key from your screenshot
         const manualKey = "3374dacb3c471aeb8"; 
         await fetchJamendo(manualKey);
-        setStatusMsg("Manual Sync Active");
+        setStatusMsg("Nexus Ready (Manual)");
       } finally {
         setIsLoading(false);
       }
@@ -47,10 +46,11 @@ export default function RXMusic() {
 
   const fetchJamendo = async (key: string) => {
     try {
-      const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${key.trim()}&format=json&limit=30&order=popularity_week&hasimage=true`);
+      const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${key.trim()}&format=json&limit=30&order=popularity_week&hasimage=true&audioformat=mp32`);
       const data = await res.json();
       if (data.results && data.results.length > 0) {
         setTracks(data.results);
+        setCurrentTrackIndex(0); // Ensure first track is ready
       }
     } catch (err) {
       console.error("Jamendo Error:", err);
@@ -59,18 +59,30 @@ export default function RXMusic() {
 
   const togglePlay = () => {
     if (!audioRef.current || tracks.length === 0) return;
-    if (isPlaying) { audioRef.current.pause(); } 
-    else { audioRef.current.play().catch(() => {}); }
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(e => console.log("Playback failed:", e));
+    }
     setIsPlaying(!isPlaying);
   };
 
   return (
     <div className="min-h-screen bg-[#050505] text-white p-6 pb-44 font-sans selection:bg-green-500/30">
-      <audio ref={audioRef} src={currentTrack?.audio} onEnded={() => setCurrentTrackIndex(p => p + 1)} autoPlay={isPlaying} key={currentTrack?.id} />
+      <audio 
+        ref={audioRef} 
+        src={currentTrack?.audio} 
+        onEnded={() => setCurrentTrackIndex(p => (p + 1) % tracks.length)} 
+        autoPlay={isPlaying} 
+        key={currentTrack?.id} 
+      />
 
+      {/* --- HEADER --- */}
       <header className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900 rounded-2xl active:scale-75 border border-white/5"><ArrowLeft size={18} /></button>
+          <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900 rounded-2xl active:scale-75 border border-white/5">
+            <ArrowLeft size={18} />
+          </button>
           <div>
              <h1 className="text-lg font-black italic uppercase text-green-500 tracking-tighter">RX Music</h1>
              <span className={`text-[6px] font-black uppercase tracking-widest ${tracks.length > 0 ? 'text-zinc-600' : 'text-red-500'}`}>
@@ -78,24 +90,36 @@ export default function RXMusic() {
              </span>
           </div>
         </div>
-        <RefreshCw size={20} className={`text-zinc-500 ${isLoading ? 'animate-spin' : ''}`} />
+        <RefreshCw 
+          size={20} 
+          className={`text-zinc-500 cursor-pointer ${isLoading ? 'animate-spin' : ''}`} 
+          onClick={() => statusMsg.includes("Manual") ? fetchJamendo("3374dacb3c471aeb8") : null}
+        />
       </header>
 
-      {/* Featured Cover */}
+      {/* --- UPDATED FEATURED DISPLAY --- */}
       <div className="relative h-72 rounded-[45px] overflow-hidden border border-white/10 mb-10 bg-zinc-900 shadow-2xl group">
         {currentTrack?.image ? (
-          <img src={currentTrack.image} className="absolute inset-0 w-full h-full object-cover opacity-40 blur-[1px] group-hover:scale-110 transition-transform duration-700" />
+          <img 
+            src={currentTrack.image} 
+            className="absolute inset-0 w-full h-full object-cover opacity-40 blur-[1px] group-hover:scale-110 transition-transform duration-700" 
+            alt="cover"
+          />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 text-[10px] font-black uppercase text-zinc-800 tracking-[1em]">Race-X</div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
         <div className="absolute bottom-10 left-10 right-10">
-          <h2 className="text-4xl font-black italic uppercase leading-none truncate drop-shadow-2xl">{currentTrack?.name || "Initializing..."}</h2>
-          <p className="text-[10px] font-black text-green-500 uppercase tracking-[0.4em] mt-3">{currentTrack?.artist_name || "Nexus Station"}</p>
+          <h2 className="text-4xl font-black italic uppercase leading-none truncate drop-shadow-2xl">
+            {tracks.length > 0 ? (currentTrack?.name) : "Scanning Tracks..."}
+          </h2>
+          <p className="text-[10px] font-black text-green-500 uppercase tracking-[0.4em] mt-3">
+            {tracks.length > 0 ? (currentTrack?.artist_name) : "Nexus Syncing"}
+          </p>
         </div>
       </div>
 
-      {/* Track List */}
+      {/* --- TRACK LIST --- */}
       <div className="space-y-4">
         {tracks.length === 0 && !isLoading && (
           <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-[40px]">
@@ -107,29 +131,29 @@ export default function RXMusic() {
           <div 
             key={track.id} 
             onClick={() => { setCurrentTrackIndex(idx); setIsPlaying(true); }}
-            className={`flex items-center justify-between p-4 rounded-[28px] border transition-all duration-300 ${currentTrackIndex === idx ? 'bg-zinc-900 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.1)]' : 'bg-zinc-900/30 border-white/5'}`}
+            className={`flex items-center justify-between p-4 rounded-[28px] border transition-all duration-300 ${currentTrackIndex === idx ? 'bg-zinc-900 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.1)]' : 'bg-zinc-900/30 border-white/5 hover:bg-zinc-900/50'}`}
           >
-            <div className="flex items-center gap-4 overflow-hidden">
-              <img src={track.image} className="w-12 h-12 rounded-xl object-cover shadow-lg" />
-              <div className="truncate text-left">
-                <p className={`text-[11px] font-black uppercase italic truncate ${currentTrackIndex === idx ? 'text-green-500' : ''}`}>{track.name}</p>
+            <div className="flex items-center gap-4 overflow-hidden text-left">
+              <img src={track.image} className="w-12 h-12 rounded-xl object-cover shadow-lg" alt="thumb" />
+              <div className="truncate">
+                <p className={`text-[11px] font-black uppercase italic truncate ${currentTrackIndex === idx ? 'text-green-500' : 'text-white'}`}>{track.name}</p>
                 <p className="text-[9px] font-bold text-zinc-600 uppercase">{track.artist_name}</p>
               </div>
             </div>
-            <Heart size={16} className="text-zinc-800" />
+            <Heart size={16} className={currentTrackIndex === idx ? "text-green-500" : "text-zinc-800"} />
           </div>
         ))}
       </div>
 
-      {/* Floating Player */}
+      {/* --- FLOATING PLAYER --- */}
       <div className="fixed bottom-8 left-6 right-6 z-[100] bg-zinc-900/90 backdrop-blur-3xl border border-white/10 p-5 rounded-[40px] flex items-center justify-between shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
-        <div className="flex items-center gap-4 max-w-[45%] overflow-hidden">
+        <div className="flex items-center gap-4 max-w-[45%] overflow-hidden text-left">
            <div className={`w-12 h-12 bg-zinc-800 rounded-2xl overflow-hidden shadow-inner flex-shrink-0 ${isPlaying ? 'animate-pulse' : ''}`}>
-             {currentTrack?.image && <img src={currentTrack.image} className="w-full h-full object-cover" />}
+             {currentTrack?.image && <img src={currentTrack.image} className="w-full h-full object-cover" alt="mini" />}
            </div>
            <div className="truncate">
               <p className="text-[10px] font-black uppercase italic truncate leading-none">{currentTrack?.name || "Idle"}</p>
-              <span className="text-[8px] text-green-500 font-black uppercase tracking-tighter">Streaming Nexus</span>
+              <span className="text-[8px] text-green-500 font-black uppercase tracking-tighter">Live Nexus</span>
            </div>
         </div>
 
@@ -137,7 +161,9 @@ export default function RXMusic() {
           <button onClick={togglePlay} className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center active:scale-90 shadow-xl transition-all">
             {isPlaying ? <Pause size={22} fill="black" /> : <Play size={22} fill="black" className="ml-1" />}
           </button>
-          <button onClick={() => setCurrentTrackIndex(i => (i + 1) % tracks.length)} className="p-2 text-zinc-500 active:scale-75"><ListMusic size={22} /></button>
+          <button onClick={() => setLocation("/music/library")} className="p-2 text-zinc-500 active:scale-75">
+            <ListMusic size={22} />
+          </button>
         </div>
       </div>
     </div>
