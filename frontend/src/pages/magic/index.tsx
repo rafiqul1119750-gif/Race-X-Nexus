@@ -1,7 +1,9 @@
 import { ArrowLeft, Send, Sparkles, Bot, User, Cpu, Paperclip } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-import { databases } from "../../../lib/appwrite"; // ✅ Nexus Connection
+
+// ✅ BUILD FIX: Render path updated from ../../../ to ../../
+import { databases } from "../../lib/appwrite"; 
 
 // ✅ Nexus Configuration
 const DATABASE_ID = 'Race-X-Nexus';
@@ -71,7 +73,7 @@ export default function MagicChat() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans">
-      {/* Header - Keeping your visual style */}
+      {/* Header */}
       <header className="p-6 flex items-center justify-between border-b border-white/5 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900 rounded-2xl active:scale-75 transition-all">
@@ -91,7 +93,7 @@ export default function MagicChat() {
         </div>
       </header>
 
-      {/* Chat Space - Functional scroll & messages */}
+      {/* Chat Space */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
@@ -116,7 +118,7 @@ export default function MagicChat() {
         <div ref={scrollRef} />
       </div>
 
-      {/* Input Field - Fully Functional */}
+      {/* Input Field */}
       <div className="p-6 bg-gradient-to-t from-black via-black/80 to-transparent">
         <div className="bg-zinc-900/80 backdrop-blur-2xl border border-white/10 p-2 rounded-[35px] flex items-center gap-2 shadow-2xl">
           <button className="p-4 text-zinc-500 hover:text-white transition-colors">
