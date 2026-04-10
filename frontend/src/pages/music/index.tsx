@@ -16,7 +16,6 @@ export default function RXMusic() {
   const [likedTracks, setLikedTracks] = useState<string[]>([]);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
   const currentTrack = tracks[currentTrackIndex];
 
   // 🛡️ API Injection & Data Fetching
@@ -42,7 +41,6 @@ export default function RXMusic() {
   const fetchJamendoTracks = async (key: string) => {
     setIsLoading(true);
     try {
-      // Random/Trending tracks for discovery
       const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${key}&format=jsonpost&limit=15&order=popularity_week&hasimage=true`);
       const data = await res.json();
       if (data.results) setTracks(data.results);
@@ -53,10 +51,37 @@ export default function RXMusic() {
     }
   };
 
-  // 🎵 Control Logic
+  // 🔊 BACKGROUND & LOCKSCREEN LOGIC (Media Session)
+  useEffect(() => {
+    if ('mediaSession' in navigator && currentTrack) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentTrack.name,
+        artist: currentTrack.artist_name,
+        album: 'Race-X Nexus',
+        artwork: [
+          { src: currentTrack.image, sizes: '512x512', type: 'image/jpeg' }
+        ]
+      });
+
+      navigator.mediaSession.setActionHandler('play', togglePlay);
+      navigator.mediaSession.setActionHandler('pause', togglePlay);
+      navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
+      navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
+    }
+  }, [currentTrack, isPlaying]);
+
+  // 🎮 Control Logic
   const togglePlay = () => {
     if (!audioRef.current) return;
-    isPlaying ? audioRef.current.pause() : audioRef.current.play();
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(e => console.log("Playback failed:", e));
+      // Wake lock logic to keep CPU active if supported
+      if ('wakeLock' in navigator) {
+        (navigator as any).wakeLock.request('screen').catch(() => {});
+      }
+    }
     setIsPlaying(!isPlaying);
   };
 
@@ -86,6 +111,7 @@ export default function RXMusic() {
         src={currentTrack?.audio} 
         onEnded={nextTrack} 
         autoPlay={isPlaying}
+        preload="auto"
       />
 
       {/* --- HEADER --- */}
@@ -173,7 +199,7 @@ export default function RXMusic() {
              </div>
              <div className="hidden sm:block truncate">
                 <p className="text-[10px] font-black uppercase italic truncate">{currentTrack?.name || "Station Idle"}</p>
-                <span className="text-[8px] text-green-500 font-bold uppercase tracking-widest animate-pulse">Live</span>
+                <span className="text-[8px] text-green-500 font-bold uppercase tracking-widest animate-pulse">Live Now</span>
              </div>
           </div>
 
