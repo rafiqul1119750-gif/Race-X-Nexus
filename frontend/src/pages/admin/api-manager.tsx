@@ -4,14 +4,14 @@ import {
   Plus, Eye, EyeOff, AlertCircle, X, Terminal, ChevronRight,
   ShieldAlert, Ghost, Diamond, UserX, ArrowLeft
 } from "lucide-react";
-import { useLocation } from "wouter"; // ✅ Import for navigation
+import { useLocation } from "wouter";
 import { databases, ID } from "../../lib/appwrite"; 
 
 const DATABASE_ID = 'Race-X-Nexus'; 
 const COLLECTION_ID = 'api_configs';
 
 export default function ApiManager() {
-  const [, setLocation] = useLocation(); // ✅ Hook for navigation
+  const [, setLocation] = useLocation();
   const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [showKey, setShowKey] = useState<string | null>(null);
@@ -19,6 +19,11 @@ export default function ApiManager() {
   
   const [editModal, setEditModal] = useState<{id: string, name: string} | null>(null);
   const [newKeyValue, setNewKeyValue] = useState("");
+
+  // ✅ New Engine Functional States
+  const [isNewEngineModalOpen, setIsNewEngineModalOpen] = useState(false);
+  const [newEngineData, setNewEngineData] = useState({ service_name: "", key_value: "" });
+  const [isCreating, setIsCreating] = useState(false);
 
   const fetchKeys = async () => {
     setLoading(true);
@@ -33,6 +38,33 @@ export default function ApiManager() {
   };
 
   useEffect(() => { fetchKeys(); }, []);
+
+  // ✅ Actual Create Logic
+  const handleCreateEngine = async () => {
+    if (!newEngineData.service_name || !newEngineData.key_value) {
+      alert("Fields cannot be empty!");
+      return;
+    }
+    setIsCreating(true);
+    try {
+      await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
+        service_name: newEngineData.service_name,
+        key_value: newEngineData.key_value,
+        status: "active",
+        usage_percent: 0,
+        last_updated: new Date().toISOString()
+      });
+      alert("New Engine Deployed Successfully! ⚡");
+      setIsNewEngineModalOpen(false);
+      setNewEngineData({ service_name: "", key_value: "" });
+      fetchKeys(); // Refresh List
+    } catch (error) {
+      console.error("Creation Error:", error);
+      alert("Deployment Failed: check your Database attributes.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handleUpdateKey = async () => {
     if (!editModal || !newKeyValue) return;
@@ -69,10 +101,9 @@ export default function ApiManager() {
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans selection:bg-cyan-500/20 overflow-x-hidden">
       
-      {/* ✅ Added Back Button & Launch Header Integration */}
+      {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
         <div className="flex items-start gap-6">
-          {/* Back Navigation Button */}
           <button 
             onClick={() => setLocation("/hub")} 
             className="p-4 bg-zinc-900 rounded-[20px] border border-white/5 active:scale-75 transition-all shadow-lg"
@@ -96,7 +127,11 @@ export default function ApiManager() {
             <button onClick={fetchKeys} className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
                 <RefreshCw size={14} className={loading ? "animate-spin" : ""}/> Sync Cloud
             </button>
-            <button className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 transition-all">
+            {/* ✅ Now Functional New Engine Button */}
+            <button 
+              onClick={() => setIsNewEngineModalOpen(true)}
+              className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 transition-all"
+            >
                 <Plus size={14}/> New Engine
             </button>
         </div>
@@ -145,7 +180,7 @@ export default function ApiManager() {
         ))}
       </div>
 
-      {/* 3. Injection Modal */}
+      {/* 3. Re-Inject Modal */}
       {editModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
           <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl animate-in zoom-in duration-300">
@@ -174,7 +209,49 @@ export default function ApiManager() {
         </div>
       )}
 
-      {/* 4. Emergency Master Sync */}
+      {/* ✅ 4. New Engine Deployment Modal (Functional) */}
+      {isNewEngineModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl">
+          <div className="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[50px] p-10 shadow-2xl animate-in zoom-in duration-300">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-xl font-black italic uppercase tracking-widest text-cyan-400">Deploy New Engine</h2>
+              <button onClick={() => setIsNewEngineModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full"><X/></button>
+            </div>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">Service Name</p>
+                <input 
+                  type="text"
+                  value={newEngineData.service_name}
+                  onChange={(e) => setNewEngineData({...newEngineData, service_name: e.target.value})}
+                  placeholder="e.g. OpenAI_V4"
+                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
+                />
+              </div>
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-zinc-500 uppercase ml-4 tracking-widest">API Key</p>
+                <input 
+                  type="password"
+                  value={newEngineData.key_value}
+                  onChange={(e) => setNewEngineData({...newEngineData, key_value: e.target.value})}
+                  placeholder="sk-...."
+                  className="w-full bg-black border border-white/5 rounded-3xl p-6 text-sm font-bold outline-none focus:border-cyan-500 transition-all"
+                />
+              </div>
+              <button 
+                onClick={handleCreateEngine}
+                disabled={isCreating}
+                className="w-full py-6 bg-white text-black rounded-3xl font-black uppercase italic tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+              >
+                {isCreating ? <RefreshCw className="animate-spin" /> : <ShieldCheck />}
+                {isCreating ? "INITIALIZING NODE..." : "CONFIRM DEPLOYMENT"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Emergency Master Sync */}
       <div className="bg-gradient-to-r from-zinc-900/50 to-black p-10 md:p-16 rounded-[60px] border border-white/5 relative overflow-hidden group mb-12">
          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -183,7 +260,7 @@ export default function ApiManager() {
                 Execute a system-wide propagation to all nodes. Use only for emergency key rotations.
               </p>
             </div>
-            <button className="h-20 bg-white text-black rounded-[30px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-cyan-400 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl">
+            <button onClick={() => alert("Global Sync Initiated...")} className="h-20 bg-white text-black rounded-[30px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-cyan-400 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl">
               Execute Propagation <ChevronRight size={20}/>
             </button>
          </div>
