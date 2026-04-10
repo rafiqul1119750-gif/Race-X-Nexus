@@ -1,4 +1,4 @@
-import { ArrowLeft, Play, Pause, SkipBack, SkipForward, Heart, RefreshCw, ListMusic } from "lucide-react";
+import { ArrowLeft, Play, Pause, SkipBack, SkipForward, Heart, RefreshCw, ListMusic, WifiOff } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { databases } from "../../lib/appwrite"; 
@@ -11,63 +11,50 @@ export default function RXMusic() {
   const [tracks, setTracks] = useState<any[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [statusMsg, setStatusMsg] = useState("Initializing...");
+  const [isLoading, setIsLoading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState("Checking Nexus...");
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentTrack = tracks[currentTrackIndex];
 
-  useEffect(() => {
-    const connectNexus = async () => {
-      setIsLoading(true);
-      try {
-        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-        const config = response.documents.find(doc => doc.service_name === 'JAMENDO_MUSIC');
-        
-        if (config && config.key_value) {
-          await fetchJamendo(config.key_value.trim());
-          setStatusMsg("Neural Sync Active");
-        } else {
-          throw new Error("Key not found");
-        }
-      } catch (error) {
-        // Direct Fallback with your specific key
-        const manualKey = "3374dacb3c471aeb8"; 
-        await fetchJamendo(manualKey);
-        setStatusMsg("Nexus Ready (Manual)");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    connectNexus();
-  }, []);
-
-  const fetchJamendo = async (key: string) => {
+  // Logic to fetch music
+  const fetchJamendo = async (manualKey?: string) => {
+    setIsLoading(true);
+    setStatusMsg("Connecting...");
+    
+    // Aapki screenshot wali key direct use kar rahe hain backup ke liye
+    const key = manualKey || "3374dacb3c471aeb8"; 
+    
     try {
-      // ✅ Clean URL with fewer filters to ensure results
+      console.log("RX Music: Fetching with key", key);
       const url = `https://api.jamendo.com/v3.0/tracks/?client_id=${key}&format=json&limit=50&order=popularity_week&hasimage=true`;
-      console.log("Fetching from Nexus...");
       
       const res = await fetch(url);
       const data = await res.json();
       
       if (data.results && data.results.length > 0) {
         setTracks(data.results);
+        setStatusMsg("Neural Sync Active");
       } else {
-        console.error("No results from Jamendo API");
+        setStatusMsg("No Tracks in Database");
+        console.error("Jamendo returned 0 results. API Key issue?");
       }
     } catch (err) {
-      console.error("Nexus Fetch Error:", err);
+      setStatusMsg("Nexus Blocked");
+      console.error("Network Error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchJamendo(); // Start on load
+  }, []);
+
   const togglePlay = () => {
     if (!audioRef.current || tracks.length === 0) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(e => console.log("Playback failed"));
-    }
+    if (isPlaying) { audioRef.current.pause(); } 
+    else { audioRef.current.play().catch(() => {}); }
     setIsPlaying(!isPlaying);
   };
 
@@ -83,42 +70,39 @@ export default function RXMusic() {
 
       <header className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900 rounded-2xl active:scale-75 border border-white/5">
+          <button onClick={() => setLocation("/hub")} className="p-3 bg-zinc-900 rounded-2xl border border-white/5">
             <ArrowLeft size={18} />
           </button>
           <div>
              <h1 className="text-lg font-black italic uppercase text-green-500 tracking-tighter leading-none">RX Music</h1>
-             <span className="text-[6px] font-black uppercase tracking-widest text-zinc-600 block mt-1">
-               {isLoading ? "Connecting..." : statusMsg}
-             </span>
+             <span className="text-[6px] font-black uppercase tracking-widest text-zinc-600 block mt-1">{statusMsg}</span>
           </div>
         </div>
-        <RefreshCw 
-          size={20} 
-          className={`text-zinc-500 ${isLoading ? 'animate-spin' : 'active:rotate-180 transition-all'}`} 
-          onClick={() => fetchJamendo("3374dacb3c471aeb8")}
-        />
+        <button 
+          onClick={() => fetchJamendo()} 
+          className={`p-3 bg-zinc-900 rounded-2xl ${isLoading ? 'animate-spin' : ''}`}
+        >
+          <RefreshCw size={18} className="text-green-500" />
+        </button>
       </header>
 
-      {/* Featured Display */}
+      {/* Featured Banner */}
       <div className="relative h-72 rounded-[45px] overflow-hidden border border-white/10 mb-10 bg-zinc-900 shadow-2xl">
-        {currentTrack?.image ? (
+        {currentTrack?.image && (
           <img src={currentTrack.image} className="absolute inset-0 w-full h-full object-cover opacity-40 blur-[1px]" />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/50 text-[8px] font-black uppercase text-zinc-800 tracking-[1.5em]">Race-X</div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black" />
         <div className="absolute bottom-10 left-10 right-10 z-10">
           <h2 className="text-3xl font-black italic uppercase leading-tight truncate">
             {tracks.length > 0 ? currentTrack?.name : "Scanning..."}
           </h2>
           <p className="text-[9px] font-black text-green-500 uppercase tracking-[0.4em] mt-2">
-            {tracks.length > 0 ? currentTrack?.artist_name : "Nexus Syncing"}
+            {tracks.length > 0 ? currentTrack?.artist_name : "Nexus Offline"}
           </p>
         </div>
       </div>
 
-      {/* Track List */}
+      {/* Music List */}
       <div className="space-y-4">
         {tracks.length > 0 ? (
           tracks.map((track, idx) => (
@@ -137,23 +121,29 @@ export default function RXMusic() {
               <Heart size={16} className={currentTrackIndex === idx ? "text-green-500" : "text-zinc-800"} />
             </div>
           ))
-        ) : !isLoading && (
-          <div className="py-20 text-center opacity-40 border-2 border-dashed border-white/5 rounded-[40px]">
-            <p className="text-[10px] font-black uppercase tracking-widest">No Signals Found</p>
+        ) : (
+          <div className="py-20 text-center flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[40px]">
+             <WifiOff size={30} className="text-zinc-800 mb-4" />
+             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4">No Signals Detected</p>
+             <button 
+              onClick={() => fetchJamendo()} 
+              className="px-6 py-2 bg-green-500 text-black text-[9px] font-black uppercase rounded-full active:scale-95"
+             >
+               Force Re-Sync
+             </button>
           </div>
         )}
       </div>
 
-      {/* Footer Player */}
+      {/* Floating Player */}
       <div className="fixed bottom-8 left-6 right-6 z-[100] bg-zinc-900/95 backdrop-blur-3xl border border-white/10 p-5 rounded-[40px] flex items-center justify-between shadow-2xl">
         <div className="flex items-center gap-4 max-w-[45%] overflow-hidden text-left">
            <img src={currentTrack?.image} className={`w-12 h-12 rounded-2xl object-cover ${isPlaying ? 'animate-[spin_10s_linear_infinite]' : ''}`} />
            <div className="truncate">
               <p className="text-[10px] font-black uppercase italic truncate">{currentTrack?.name || "Idle"}</p>
-              <span className="text-[8px] text-green-500 font-black uppercase">Live Nexus</span>
+              <span className="text-[8px] text-green-500 font-black uppercase">Race-X Radio</span>
            </div>
         </div>
-
         <div className="flex items-center gap-7">
           <button onClick={togglePlay} className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center active:scale-90 shadow-xl">
             {isPlaying ? <Pause size={22} fill="black" /> : <Play size={22} fill="black" className="ml-1" />}
