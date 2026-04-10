@@ -1,4 +1,4 @@
-import { ArrowLeft, Sparkles, Box, History, RefreshCw, Video } from "lucide-react";
+import { ArrowLeft, Sparkles, Box, History, RefreshCw, Video, SendHorizontal, ShieldCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { databases } from "../../lib/appwrite"; 
@@ -12,6 +12,7 @@ export default function VideoGen() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [videoApiKey, setVideoApiKey] = useState<string | null>(null);
+  const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
 
   // 🛡️ 1. DYNAMIC API INJECTION (Nexus Link)
   useEffect(() => {
@@ -31,20 +32,27 @@ export default function VideoGen() {
     if (!prompt) return;
     
     if (!videoApiKey) {
-      alert("⚠️ Engine Error: Injection Hub mein VIDEO_GEN key nahi mili!");
+      alert("⚠️ Engine Error: Nexus VIDEO_GEN key missing!");
       return;
     }
 
     setIsGenerating(true);
-    
-    // 🚀 Yahan aapka Actual API call (Replicate/Runway/Pika) jayega
-    // Headers mein 'videoApiKey' use hoga.
+    setGeneratedVideo(null); // Reset previous render
 
-    // Simulation for UI feedback
+    // 🚀 Simulation of AI Generation
     setTimeout(() => {
       setIsGenerating(false);
-      // alert("Video Rendered (Simulated)");
+      // Simulated Video Result (In real: This would be the URL from Replicate/Runway)
+      setGeneratedVideo("https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4");
     }, 6000);
+  };
+
+  const syncToStudio = () => {
+    if (generatedVideo) {
+      // 🚀 Video URL ko Studio Editor ke liye cache mein bhej rahe hain
+      localStorage.setItem("rx_studio_buffer", generatedVideo);
+      setLocation("/studio/editor");
+    }
   };
 
   return (
@@ -84,6 +92,19 @@ export default function VideoGen() {
                Generating<br/>Neural Frames
              </p>
           </div>
+        ) : generatedVideo ? (
+          <div className="absolute inset-0 flex items-center justify-center z-20">
+             <video src={generatedVideo} autoPlay loop muted className="w-full h-full object-cover" />
+             <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
+                <button 
+                  onClick={syncToStudio}
+                  className="flex items-center gap-3 bg-white text-black px-6 py-4 rounded-3xl font-black uppercase text-[10px] tracking-widest shadow-2xl active:scale-90 transition-all"
+                >
+                  <SendHorizontal size={14}/> Send to Studio
+                </button>
+                <p className="text-[8px] font-bold mt-4 text-white uppercase tracking-tighter italic">Ready for Music Sync</p>
+             </div>
+          </div>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20 z-20">
             <Box size={60} className="mb-6 text-zinc-700" />
@@ -95,7 +116,7 @@ export default function VideoGen() {
         <div className="absolute bottom-10 left-0 right-0 px-8 z-20">
            <div className="h-[1px] w-full bg-white/10 mb-4" />
            <div className="flex justify-between items-center text-[7px] font-black uppercase tracking-widest text-zinc-500">
-              <span>Aspect: 9:16</span>
+              <span className="flex items-center gap-1"><ShieldCheck size={8}/> Nexus Validated</span>
               <span>Codec: H.265</span>
            </div>
         </div>
@@ -109,26 +130,26 @@ export default function VideoGen() {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="A futuristic Indian street with neon lights, cinematic rain, 8k..."
-            className="relative w-full bg-zinc-900/60 border border-white/10 rounded-[35px] p-8 text-sm focus:border-cyan-500/40 outline-none h-44 resize-none transition-all placeholder:text-zinc-800 placeholder:text-[9px] placeholder:font-black placeholder:uppercase placeholder:tracking-widest"
+            className="relative w-full bg-zinc-900/60 border border-white/10 rounded-[35px] p-8 text-sm focus:border-cyan-500/40 outline-none h-40 resize-none transition-all placeholder:text-zinc-800 placeholder:text-[9px] placeholder:font-black placeholder:uppercase placeholder:tracking-widest"
           />
         </div>
 
         <button 
           onClick={handleStartGeneration}
           disabled={isGenerating || !prompt}
-          className={`w-full py-8 rounded-[35px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-2xl ${
+          className={`w-full py-7 rounded-[35px] font-black uppercase italic tracking-[0.3em] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-2xl ${
             isGenerating 
             ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed' 
             : 'bg-white text-black hover:bg-cyan-500 hover:shadow-cyan-500/20'
           }`}
         >
           {isGenerating ? <RefreshCw className="animate-spin" size={20}/> : <Sparkles size={20} fill={!isGenerating ? "black" : "none"} />}
-          {isGenerating ? "Processing Node" : "Launch Engine"}
+          {isGenerating ? "Engaging Node" : "Launch Engine"}
         </button>
       </div>
 
       <p className="text-center text-[7px] font-black text-zinc-800 uppercase tracking-[0.5em] mt-10">
-        Race-X Visual Lab | All Renders Encrypted
+        Race-X Visual Lab | v4.0 Active
       </p>
     </div>
   );
