@@ -20,7 +20,6 @@ export default function NexusLibrary() {
   const [playing, setPlaying] = useState(false);
   const [liked, setLiked] = useState<string[]>([]);
 
-  // ================= INDIAN MUSIC ENGINE =================
   useEffect(() => {
     const load = async () => {
       try {
@@ -33,65 +32,63 @@ export default function NexusLibrary() {
           (d) => d.service_name === "JAMENDO_MUSIC"
         );
 
+        // ================= JAMENDO FULL FETCH =================
         const api = await fetch(
-          `https://api.jamendo.com/v3.0/tracks/?client_id=${config.key_value}&format=json&limit=30`
+          `https://api.jamendo.com/v3.0/tracks/?client_id=${config.key_value}&format=json&limit=50&order=popularity_total`
         );
 
         const data = await api.json();
 
-        // 🎧 RAW TRACKS
-        const raw = (data.results || []).map((t: any) => ({
-          id: t.id,
+        const jamendoTracks = (data.results || []).map((t: any) => ({
+          id: "j_" + t.id,
           name: t.name,
           artist_name: t.artist_name,
           audio: t.audio || t.audiodownload,
           image: t.album_image || t.image,
         }));
 
-        // 🇮🇳 INDIAN VIBE FILTER (REAL JUGAAD)
-        const indianTracks = raw.filter((t: any) => {
-          const text = (t.name + " " + t.artist_name).toLowerCase();
+        // ================= SAFE FALLBACK TRACKS =================
+        const fallbackTracks = jamendoTracks.map((t: any, i: number) => ({
+          ...t,
+          name:
+            t.name ||
+            `Indian Vibe Track ${i + 1}`,
+          artist_name: t.artist_name || "RX Music Artist",
+        }));
 
-          return (
-            text.includes("love") ||
-            text.includes("indian") ||
-            text.includes("folk") ||
-            text.includes("bollywood") ||
-            text.includes("acoustic") ||
-            text.includes("desi") ||
-            text.includes("sad") ||
-            text.includes("romantic")
-          );
-        });
+        // ================= FINAL MERGE =================
+        let finalTracks = fallbackTracks;
 
-        // 🔥 IF EMPTY → fallback to full list
-        const finalTracks =
-          indianTracks.length > 0 ? indianTracks : raw;
+        // ensure minimum 15 tracks
+        if (finalTracks.length < 15) {
+          finalTracks = [
+            ...finalTracks,
+            ...fallbackTracks,
+            ...fallbackTracks,
+          ].slice(0, 25);
+        }
 
         setTracks(finalTracks);
       } catch (err) {
-        console.error(err);
+        console.error("Music Load Error:", err);
       }
     };
 
     load();
   }, []);
 
-  // ================= PLAY =================
   const play = (t: any) => {
     setCurrent(t);
     setPlaying(true);
   };
 
-  // ================= LIKE =================
   const toggleLike = (id: string) => {
     setLiked((p) =>
       p.includes(id) ? p.filter((x) => x !== id) : [...p, id]
     );
   };
 
-  // ================= AI MIX =================
-  const mix = () => {
+  const shuffle = () => {
     setTracks((p) => [...p].sort(() => Math.random() - 0.5));
   };
 
@@ -108,7 +105,7 @@ export default function NexusLibrary() {
         </button>
 
         <button
-          onClick={mix}
+          onClick={shuffle}
           className="p-3 bg-green-600 rounded-2xl"
         >
           <Wand2 />
