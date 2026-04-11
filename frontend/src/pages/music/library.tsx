@@ -1,63 +1,190 @@
-import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, Download, Clock, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  Play,
+  Pause,
+  Heart,
+  Download,
+  ListMusic,
+  Wand2,
+} from "lucide-react";
 import { useLocation } from "wouter";
 import { databases } from "../../lib/appwrite";
 
-const DATABASE_ID = 'racex_db';
-const COLLECTION_ID = 'api_configs';
+const DATABASE_ID = "racex_db";
+const COLLECTION_ID = "api_configs";
 
 export default function NexusLibrary() {
   const [, setLocation] = useLocation();
-  const [recentTracks, setRecentTracks] = useState<any[]>([]);
 
+  const [tracks, setTracks] = useState<any[]>([]);
+  const [current, setCurrent] = useState<any>(null);
+  const [playing, setPlaying] = useState(false);
+  const [liked, setLiked] = useState<string[]>([]);
+  const [playlist, setPlaylist] = useState<any[]>([]);
+
+  // ================= LOAD JAMENDO =================
   useEffect(() => {
-    const fetchLibrary = async () => {
+    const load = async () => {
       try {
-        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-        const config = response.documents.find(doc => doc.service_name === 'JAMENDO_MUSIC');
-        if (config) {
-          const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${config.key_value}&format=json&limit=6&order=releasedate_desc`);
-          const data = await res.json();
-          setRecentTracks(data.results);
+        const res = await databases.listDocuments(
+          DATABASE_ID,
+          COLLECTION_ID
+        );
+
+        const config = res.documents.find(
+          (d) => d.service_name === "JAMENDO_MUSIC"
+        );
+
+        if (!config) {
+          console.log("No Jamendo config found");
+          return;
         }
-      } catch (err) { console.error(err); }
+
+        const api = await fetch(
+          `https://api.jamendo.com/v3.0/tracks/?client_id=${config.key_value}&format=json&limit=20`
+        );
+
+        const data = await api.json();
+
+        setTracks(data.results || []);
+      } catch (err) {
+        console.error("Load error:", err);
+      }
     };
-    fetchLibrary();
+
+    load();
   }, []);
 
+  // ================= PLAY =================
+  const playTrack = (t: any) => {
+    setCurrent(t);
+    setPlaying(true);
+  };
+
+  // ================= LIKE =================
+  const toggleLike = (id: string) => {
+    setLiked((p) =>
+      p.includes(id) ? p.filter((x) => x !== id) : [...p, id]
+    );
+  };
+
+  // ================= DOWNLOAD =================
+  const downloadTrack = async (url: string, name: string) => {
+    if (!url) return;
+
+    const res = await fetch(url);
+    const blob = await res.blob();
+
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name + ".mp3";
+    a.click();
+  };
+
+  // ================= AI MIX =================
+  const aiMix = () => {
+    const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+    setTracks(shuffled);
+    setPlaylist(shuffled);
+  };
+
   return (
-    <div className="min-h-screen bg-black text-white p-6 pb-24">
-      <div className="flex items-center justify-between mb-10">
-        <div className="flex items-center gap-4">
-          <button onClick={() => setLocation("/music/main")} className="p-3 bg-zinc-900 rounded-2xl"><ArrowLeft size={20} /></button>
-          <h1 className="text-3xl font-black italic uppercase">My Nexus</h1>
-        </div>
-        <button className="p-3 bg-green-500 text-black rounded-2xl"><Plus size={20} /></button>
+    <div className="min-h-screen bg-black text-white p-6 pb-32">
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-8">
+        <button
+          onClick={() => setLocation("/music/main")}
+          className="p-3 bg-zinc-900 rounded-2xl"
+        >
+          <ArrowLeft />
+        </button>
+
+        <button
+          onClick={aiMix}
+          className="p-3 bg-purple-600 rounded-2xl"
+        >
+          <Wand2 />
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-12">
-        <div className="aspect-square bg-zinc-900 rounded-[35px] flex flex-col items-center justify-center border border-white/5">
-          <Zap className="text-green-500 mb-2" />
-          <span className="text-[10px] font-black uppercase">AI Mix</span>
-        </div>
-        <div className="aspect-square bg-zinc-900 rounded-[35px] flex flex-col items-center justify-center border border-white/5">
-          <Download className="text-zinc-500 mb-2" />
-          <span className="text-[10px] font-black uppercase">Offline</span>
-        </div>
-      </div>
-
-      <h3 className="text-[10px] font-black uppercase text-zinc-500 mb-6 flex items-center gap-2"><Clock size={12}/> Recent Syncs</h3>
+      {/* TRACK LIST */}
       <div className="space-y-4">
-        {recentTracks.map(track => (
-          <div key={track.id} className="flex items-center gap-4 p-3 bg-zinc-900/30 rounded-2xl border border-white/5">
-            <img src={track.image} className="w-10 h-10 rounded-lg" />
-            <div className="flex-1 overflow-hidden">
-              <h4 className="text-[11px] font-black uppercase truncate">{track.name}</h4>
-              <p className="text-[9px] text-zinc-600 font-bold uppercase">{track.artist_name}</p>
+        {tracks.map((t) => (
+          <div
+            key={t.id}
+            className="p-3 bg-zinc-900/40 rounded-2xl border border-white/5"
+          >
+            <div className="flex items-center gap-4">
+
+              <img
+                src={t.album_image || t.image || ""}
+                className="w-10 h-10 rounded-lg object-cover"
+              />
+
+              <div className="flex-1">
+                <p className="text-xs font-black truncate">
+                  {t.name}
+                </p>
+                <p className="text-[10px] text-zinc-500">
+                  {t.artist_name}
+                </p>
+              </div>
+
+              <button onClick={() => playTrack(t)}>
+                {current?.id === t.id && playing ? <Pause /> : <Play />}
+              </button>
+
+              <button onClick={() => toggleLike(t.id)}>
+                <Heart
+                  className={
+                    liked.includes(t.id)
+                      ? "text-red-500 fill-red-500"
+                      : ""
+                  }
+                />
+              </button>
+
+              <button onClick={() => downloadTrack(t.audio, t.name)}>
+                <Download />
+              </button>
+
+              <button onClick={() => setPlaylist([...playlist, t])}>
+                <ListMusic />
+              </button>
+
             </div>
           </div>
         ))}
       </div>
+
+      {/* ================= MINI PLAYER ================= */}
+      {current && (
+        <div className="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-white/10 p-3 flex items-center gap-3">
+
+          <img
+            src={current.album_image || ""}
+            className="w-10 h-10 rounded-lg object-cover"
+          />
+
+          <div className="flex-1">
+            <p className="text-xs font-black truncate">
+              {current.name}
+            </p>
+            <p className="text-[10px] text-zinc-500">
+              {current.artist_name}
+            </p>
+          </div>
+
+          <audio
+            src={current.audio}
+            controls
+            autoPlay={playing}
+            className="w-32"
+          />
+        </div>
+      )}
     </div>
   );
 }
