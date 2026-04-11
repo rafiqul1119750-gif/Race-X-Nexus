@@ -30,10 +30,6 @@ export default function RXMusic() {
           RX <span className="text-green-500">Music</span>
         </h1>
 
-        <p className="text-zinc-500 text-[10px] mt-2">
-          AI Music Streaming Engine
-        </p>
-
         <button
           onClick={() => setLocation("/music/library")}
           className="mt-10 bg-green-500 text-black px-6 py-3 rounded-2xl font-black"
