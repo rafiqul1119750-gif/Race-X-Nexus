@@ -36,10 +36,7 @@ export default function NexusLibrary() {
           (d) => d.service_name === "JAMENDO_MUSIC"
         );
 
-        if (!config) {
-          console.log("No Jamendo config found");
-          return;
-        }
+        if (!config) return;
 
         const api = await fetch(
           `https://api.jamendo.com/v3.0/tracks/?client_id=${config.key_value}&format=json&limit=20`
@@ -47,9 +44,18 @@ export default function NexusLibrary() {
 
         const data = await api.json();
 
-        setTracks(data.results || []);
+        // ✅ FIXED MAPPING (IMPORTANT)
+        const safeTracks = (data.results || []).map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          artist_name: t.artist_name,
+          audio: t.audio || t.audiodownload || "",
+          image: t.album_image || t.image || "",
+        }));
+
+        setTracks(safeTracks);
       } catch (err) {
-        console.error("Load error:", err);
+        console.error("LOAD ERROR:", err);
       }
     };
 
@@ -109,62 +115,57 @@ export default function NexusLibrary() {
         </button>
       </div>
 
-      {/* TRACK LIST */}
+      {/* TRACKS */}
       <div className="space-y-4">
         {tracks.map((t) => (
           <div
             key={t.id}
-            className="p-3 bg-zinc-900/40 rounded-2xl border border-white/5"
+            className="p-3 bg-zinc-900/40 rounded-2xl border border-white/5 flex items-center gap-4"
           >
-            <div className="flex items-center gap-4">
+            {/* IMAGE FIXED */}
+            <img
+              src={t.image}
+              className="w-10 h-10 rounded-lg object-cover"
+            />
 
-              <img
-                src={t.album_image || t.image || ""}
-                className="w-10 h-10 rounded-lg object-cover"
-              />
-
-              <div className="flex-1">
-                <p className="text-xs font-black truncate">
-                  {t.name}
-                </p>
-                <p className="text-[10px] text-zinc-500">
-                  {t.artist_name}
-                </p>
-              </div>
-
-              <button onClick={() => playTrack(t)}>
-                {current?.id === t.id && playing ? <Pause /> : <Play />}
-              </button>
-
-              <button onClick={() => toggleLike(t.id)}>
-                <Heart
-                  className={
-                    liked.includes(t.id)
-                      ? "text-red-500 fill-red-500"
-                      : ""
-                  }
-                />
-              </button>
-
-              <button onClick={() => downloadTrack(t.audio, t.name)}>
-                <Download />
-              </button>
-
-              <button onClick={() => setPlaylist([...playlist, t])}>
-                <ListMusic />
-              </button>
-
+            <div className="flex-1">
+              <p className="text-xs font-black truncate">{t.name}</p>
+              <p className="text-[10px] text-zinc-500">
+                {t.artist_name}
+              </p>
             </div>
+
+            <button onClick={() => playTrack(t)}>
+              {current?.id === t.id && playing ? <Pause /> : <Play />}
+            </button>
+
+            <button onClick={() => toggleLike(t.id)}>
+              <Heart
+                className={
+                  liked.includes(t.id)
+                    ? "text-red-500 fill-red-500"
+                    : ""
+                }
+              />
+            </button>
+
+            <button onClick={() => downloadTrack(t.audio, t.name)}>
+              <Download />
+            </button>
+
+            <button onClick={() => setPlaylist([...playlist, t])}>
+              <ListMusic />
+            </button>
           </div>
         ))}
       </div>
 
-      {/* ================= MINI PLAYER ================= */}
+      {/* MINI PLAYER */}
       {current && (
         <div className="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-white/10 p-3 flex items-center gap-3">
 
           <img
-            src={current.album_image || ""}
+            src={current.image}
             className="w-10 h-10 rounded-lg object-cover"
           />
 
@@ -177,6 +178,7 @@ export default function NexusLibrary() {
             </p>
           </div>
 
+          {/* AUDIO FIXED */}
           <audio
             src={current.audio}
             controls
