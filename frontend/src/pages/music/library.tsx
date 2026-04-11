@@ -4,8 +4,6 @@ import {
   Play,
   Pause,
   Heart,
-  Download,
-  ListMusic,
   Wand2,
 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -21,9 +19,8 @@ export default function NexusLibrary() {
   const [current, setCurrent] = useState<any>(null);
   const [playing, setPlaying] = useState(false);
   const [liked, setLiked] = useState<string[]>([]);
-  const [playlist, setPlaylist] = useState<any[]>([]);
 
-  // ================= LOAD JAMENDO =================
+  // ================= INDIAN MUSIC ENGINE =================
   useEffect(() => {
     const load = async () => {
       try {
@@ -36,26 +33,44 @@ export default function NexusLibrary() {
           (d) => d.service_name === "JAMENDO_MUSIC"
         );
 
-        if (!config) return;
-
         const api = await fetch(
-          `https://api.jamendo.com/v3.0/tracks/?client_id=${config.key_value}&format=json&limit=20`
+          `https://api.jamendo.com/v3.0/tracks/?client_id=${config.key_value}&format=json&limit=30`
         );
 
         const data = await api.json();
 
-        // ✅ FIXED MAPPING (IMPORTANT)
-        const safeTracks = (data.results || []).map((t: any) => ({
+        // 🎧 RAW TRACKS
+        const raw = (data.results || []).map((t: any) => ({
           id: t.id,
           name: t.name,
           artist_name: t.artist_name,
-          audio: t.audio || t.audiodownload || "",
-          image: t.album_image || t.image || "",
+          audio: t.audio || t.audiodownload,
+          image: t.album_image || t.image,
         }));
 
-        setTracks(safeTracks);
+        // 🇮🇳 INDIAN VIBE FILTER (REAL JUGAAD)
+        const indianTracks = raw.filter((t: any) => {
+          const text = (t.name + " " + t.artist_name).toLowerCase();
+
+          return (
+            text.includes("love") ||
+            text.includes("indian") ||
+            text.includes("folk") ||
+            text.includes("bollywood") ||
+            text.includes("acoustic") ||
+            text.includes("desi") ||
+            text.includes("sad") ||
+            text.includes("romantic")
+          );
+        });
+
+        // 🔥 IF EMPTY → fallback to full list
+        const finalTracks =
+          indianTracks.length > 0 ? indianTracks : raw;
+
+        setTracks(finalTracks);
       } catch (err) {
-        console.error("LOAD ERROR:", err);
+        console.error(err);
       }
     };
 
@@ -63,7 +78,7 @@ export default function NexusLibrary() {
   }, []);
 
   // ================= PLAY =================
-  const playTrack = (t: any) => {
+  const play = (t: any) => {
     setCurrent(t);
     setPlaying(true);
   };
@@ -75,31 +90,16 @@ export default function NexusLibrary() {
     );
   };
 
-  // ================= DOWNLOAD =================
-  const downloadTrack = async (url: string, name: string) => {
-    if (!url) return;
-
-    const res = await fetch(url);
-    const blob = await res.blob();
-
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = name + ".mp3";
-    a.click();
-  };
-
   // ================= AI MIX =================
-  const aiMix = () => {
-    const shuffled = [...tracks].sort(() => Math.random() - 0.5);
-    setTracks(shuffled);
-    setPlaylist(shuffled);
+  const mix = () => {
+    setTracks((p) => [...p].sort(() => Math.random() - 0.5));
   };
 
   return (
     <div className="min-h-screen bg-black text-white p-6 pb-32">
 
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between mb-6">
         <button
           onClick={() => setLocation("/music/main")}
           className="p-3 bg-zinc-900 rounded-2xl"
@@ -108,34 +108,33 @@ export default function NexusLibrary() {
         </button>
 
         <button
-          onClick={aiMix}
-          className="p-3 bg-purple-600 rounded-2xl"
+          onClick={mix}
+          className="p-3 bg-green-600 rounded-2xl"
         >
           <Wand2 />
         </button>
       </div>
 
-      {/* TRACKS */}
+      {/* TRACK LIST */}
       <div className="space-y-4">
         {tracks.map((t) => (
           <div
             key={t.id}
-            className="p-3 bg-zinc-900/40 rounded-2xl border border-white/5 flex items-center gap-4"
+            className="flex items-center gap-3 p-3 bg-zinc-900/40 rounded-2xl"
           >
-            {/* IMAGE FIXED */}
             <img
               src={t.image}
               className="w-10 h-10 rounded-lg object-cover"
             />
 
             <div className="flex-1">
-              <p className="text-xs font-black truncate">{t.name}</p>
+              <p className="text-xs font-black">{t.name}</p>
               <p className="text-[10px] text-zinc-500">
                 {t.artist_name}
               </p>
             </div>
 
-            <button onClick={() => playTrack(t)}>
+            <button onClick={() => play(t)}>
               {current?.id === t.id && playing ? <Pause /> : <Play />}
             </button>
 
@@ -148,42 +147,30 @@ export default function NexusLibrary() {
                 }
               />
             </button>
-
-            <button onClick={() => downloadTrack(t.audio, t.name)}>
-              <Download />
-            </button>
-
-            <button onClick={() => setPlaylist([...playlist, t])}>
-              <ListMusic />
-            </button>
           </div>
         ))}
       </div>
 
       {/* MINI PLAYER */}
       {current && (
-        <div className="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-white/10 p-3 flex items-center gap-3">
+        <div className="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t p-3 flex items-center gap-3">
 
           <img
             src={current.image}
-            className="w-10 h-10 rounded-lg object-cover"
+            className="w-10 h-10 rounded-lg"
           />
 
           <div className="flex-1">
-            <p className="text-xs font-black truncate">
-              {current.name}
-            </p>
+            <p className="text-xs font-black">{current.name}</p>
             <p className="text-[10px] text-zinc-500">
               {current.artist_name}
             </p>
           </div>
 
-          {/* AUDIO FIXED */}
           <audio
             src={current.audio}
             controls
             autoPlay={playing}
-            className="w-32"
           />
         </div>
       )}
