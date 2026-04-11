@@ -18,15 +18,15 @@ export default function RXMusic() {
         <div className="flex items-center gap-2 bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
           <ShieldCheck size={10} className="text-green-500" />
           <span className="text-[8px] font-black text-green-500 uppercase">
-            Nexus Verified
+            INDIAN MUSIC MODE
           </span>
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <Music size={70} className="text-green-500 mb-6 animate-bounce" />
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <Music size={80} className="text-green-500 animate-bounce" />
 
-        <h1 className="text-4xl font-black italic">
+        <h1 className="text-4xl font-black italic mt-6">
           RX <span className="text-green-500">Music</span>
         </h1>
 
@@ -34,7 +34,7 @@ export default function RXMusic() {
           onClick={() => setLocation("/music/library")}
           className="mt-10 bg-green-500 text-black px-6 py-3 rounded-2xl font-black"
         >
-          Enter Library
+          Enter Indian Collection
         </button>
       </div>
     </div>
