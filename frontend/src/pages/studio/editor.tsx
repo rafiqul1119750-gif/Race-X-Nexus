@@ -1,176 +1,202 @@
-// GOD LEVEL ENGINE (Optimized & Fixed)
-import express from "express";
-import { Queue, Worker } from "bullmq";
-import IORedis from "ioredis";
-import { exec } from "child_process";
-import fs from "fs";
-import OpenAI from "openai";
-import { Client, Storage, Databases, InputFile } from "appwrite";
+import React, { useEffect, useRef, useState } from "react";
 
-const app = express();
-app.use(express.json());
+export default function RXStudioUltimate() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [fabric, setFabric] = useState<any>(null);
+  const [canvas, setCanvas] = useState<any>(null);
 
-// Redis Connection
-const connection = new IORedis(process.env.REDIS_URL || "redis://localhost:6379");
-const queue = new Queue("render", { connection });
-
-// Appwrite Setup
-const client = new Client()
-  .setEndpoint(process.env.APPWRITE_ENDPOINT)
-  .setProject(process.env.APPWRITE_PROJECT)
-  .setKey(process.env.APPWRITE_KEY);
-
-const db = new Databases(client);
-const storage = new Storage(client);
-
-// AI Setup
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-// ===== API ENDPOINTS =====
-
-app.post("/render", async (req, res) => {
-  const { projectId, prompt } = req.body;
-  // Job add karte waqt hum unique ID dete hain taaki track ho sake
-  const job = await queue.add("render-job", { projectId, prompt }, { removeOnComplete: true });
-  res.json({ jobId: job.id });
-});
-
-app.get("/status/:id", async (req, res) => {
-  const job = await queue.getJob(req.params.id);
-  if (!job) return res.status(404).json({ error: "Job not found" });
+  const [time, setTime] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [tracks, setTracks] = useState<any[]>([]);
+  const [waveform, setWaveform] = useState<number[]>([]);
   
-  res.json({
-    state: await job.getState(),
-    progress: job.progress,
-    result: job.returnvalue
-  });
-});
+  // Ref for hidden file inputs
+  const videoFileRef = useRef<HTMLInputElement>(null);
 
-app.listen(3000, () => console.log("🚀 GOD ENGINE RUNNING ON PORT 3000"));
+  const FPS = 30;
 
-// ===== WORKER LOGIC (The Brain) =====
+  // ================= 1. SAFE INIT =================
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js";
+    script.async = true;
 
-const worker = new Worker("render", async (job) => {
-    const { projectId, prompt } = job.data;
-    const tempFileName = `output_${job.id}.mp4`;
+    script.onload = () => {
+      if (!canvasRef.current) return;
+      // @ts-ignore
+      const f = window.fabric;
+      setFabric(f);
 
-    try {
-        let project = await getProject(projectId);
-        
-        job.updateProgress(10);
-
-        // 🤖 AI Generation if prompt exists
-        if (prompt) {
-          const script = await generateScript(prompt);
-          project = buildAIProject(script);
-        }
-
-        job.updateProgress(30);
-
-        // 🎬 Render Process
-        await renderPipeline(project, tempFileName);
-        
-        job.updateProgress(80);
-
-        // ☁️ Upload to Appwrite
-        const fileId = await uploadToAppwrite(tempFileName);
-
-        // 🧹 Cleanup
-        if (fs.existsSync(tempFileName)) fs.unlinkSync(tempFileName);
-
-        job.updateProgress(100);
-        return { fileId };
-
-    } catch (error) {
-        console.error("Worker Error:", error);
-        if (fs.existsSync(tempFileName)) fs.unlinkSync(tempFileName);
-        throw error;
-    }
-}, { connection });
-
-// ===== CORE FUNCTIONS =====
-
-async function getProject(id) {
-  try {
-    // Appwrite returns the document directly
-    const doc = await db.getDocument("YOUR_DB_ID", "projects", id);
-    return doc; 
-  } catch (e) {
-    return { duration: 5, tracks: [] };
-  }
-}
-
-async function generateScript(prompt) {
-  const res = await openai.chat.completions.create({
-    model: "gpt-4", // Updated to stable gpt-4
-    messages: [{ role: "user", content: `Create a short video script for: ${prompt}. Return only lines of text.` }],
-  });
-  return res.choices[0].message.content;
-}
-
-function buildAIProject(text) {
-  const lines = text.split("\n").filter(l => l.trim() !== "");
-  return {
-    duration: lines.length * 3, // Har line ko 3 second diye
-    tracks: [{
-        type: "text",
-        clips: lines.map((line, i) => ({
-          text: line.replace(/'/g, ""), // Remove single quotes to prevent FFmpeg crash
-          start: i * 3,
-          end: (i + 1) * 3
-        }))
-    }]
-  };
-}
-
-async function renderPipeline(project, outputFile) {
-  return new Promise((resolve, reject) => {
-    let inputs = [`-f lavfi -i color=c=black:s=360x640:d=${project.duration}`];
-    let filters = [];
-    let lastOutput = "[0:v]";
-
-    let clipCount = 0;
-    project.tracks.forEach((track) => {
-      track.clips.forEach((clip) => {
-        let nextOutput = `[v${clipCount}]`;
-        
-        if (track.type === "text") {
-          filters.push(`${lastOutput}drawtext=text='${clip.text}':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,${clip.start},${clip.end})'${nextOutput}`);
-        } 
-        
-        else if (track.type === "image") {
-          inputs.push(`-i ${clip.src}`);
-          let imgIdx = inputs.length - 1;
-          filters.push(`[${imgIdx}:v]scale=300:-1[img${clipCount}]; ${lastOutput}[img${clipCount}]overlay=x=(W-w)/2:y=(H-h)/2:enable='between(t,${clip.start},${clip.end})'${nextOutput}`);
-        }
-
-        lastOutput = nextOutput;
-        clipCount++;
+      const c = new f.Canvas(canvasRef.current, {
+        width: 360,
+        height: 600,
+        backgroundColor: "#0a0a0a",
+        preserveObjectStacking: true,
       });
-    });
 
-    // Agar koi track nahi hai toh seedha output do
-    const filterComplex = filters.length > 0 ? `-filter_complex "${filters.join(";")}" -map "${lastOutput}"` : "";
+      setCanvas(c);
 
-    const cmd = `ffmpeg -y ${inputs.join(" ")} ${filterComplex} -pix_fmt yuv420p -c:v libx264 -preset superfast ${outputFile}`;
+      f.util.requestAnimFrame(function render() {
+        c.renderAll();
+        f.util.requestAnimFrame(render);
+      });
+    };
+    document.body.appendChild(script);
+    return () => { if(document.body.contains(script)) document.body.removeChild(script); };
+  }, []);
 
-    console.log("Executing FFmpeg...");
-    exec(cmd, (err, stdout, stderr) => {
-      if (err) {
-        console.error("FFmpeg Stderr:", stderr);
-        reject(err);
-      } else {
-        resolve();
+  // ================= 2. PLAYBACK ENGINE =================
+  useEffect(() => {
+    let interval: any;
+    if (playing) {
+      interval = setInterval(() => {
+        setTime((t) => t + 1 / FPS);
+      }, 1000 / FPS);
+    }
+    return () => clearInterval(interval);
+  }, [playing]);
+
+  // Sync Video Layers with Timeline Time
+  useEffect(() => {
+    if (!canvas) return;
+    canvas.getObjects().forEach((obj: any) => {
+      // Visibility Toggle
+      obj.visible = time >= (obj.start || 0) && time <= (obj.end || 100);
+      
+      // Video Frame Sync
+      if (obj.getElement && obj.getElement() instanceof HTMLVideoElement) {
+        const vid = obj.getElement();
+        if (obj.visible && playing) {
+           if(vid.paused) vid.play();
+        } else {
+           vid.pause();
+        }
       }
     });
-  });
-}
+    canvas.renderAll();
+  }, [time, canvas, playing]);
 
-async function uploadToAppwrite(filePath) {
-  const file = await storage.createFile(
-    "YOUR_BUCKET_ID", // Bucket ID daalein
-    "unique()",
-    InputFile.fromPath(filePath, "render_output.mp4")
+  // ================= 3. POWER ACTIONS =================
+
+  const addText = () => {
+    if(!fabric || !canvas) return;
+    const t = new fabric.Textbox("NEW TEXT", {
+      left: 100, top: 100, fill: "#fff", fontSize: 30,
+      fontFamily: 'Impact', textAlign: 'center'
+    });
+    t.start = time;
+    t.end = time + 3;
+    canvas.add(t).setActiveObject(t);
+    syncTracks();
+  };
+
+  const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !canvas) return;
+    const url = URL.createObjectURL(file);
+    addVideoLayer(url);
+  };
+
+  const addVideoLayer = (url: string) => {
+    const video = document.createElement("video");
+    video.src = url;
+    video.muted = true;
+    video.loop = true;
+    video.crossOrigin = "anonymous";
+    video.playsInline = true;
+
+    video.onloadeddata = () => {
+      video.play();
+      // @ts-ignore
+      const el = new fabric.Image(video, { left: 50, top: 50, objectCaching: false });
+      el.scaleToWidth(250);
+      el.start = time;
+      el.end = time + 5;
+      canvas.add(el).setActiveObject(el);
+      syncTracks();
+    };
+  };
+
+  const syncTracks = () => {
+    const objs = canvas.getObjects();
+    setTracks([{
+      id: "master-track",
+      items: objs.map((obj: any, i: number) => ({
+        id: `item-${i}`,
+        ref: obj,
+        start: obj.start || 0,
+        end: obj.end || 5,
+        type: obj.type
+      })),
+    }]);
+  };
+
+  // ================= 4. EFFECTS =================
+  const applyEffect = (type: string) => {
+    const obj = canvas.getActiveObject();
+    if (!obj || !fabric) return;
+
+    const f = fabric.Image.filters;
+    obj.filters = [];
+    if (type === "blur") obj.filters.push(new f.Blur({ blur: 0.5 }));
+    if (type === "bw") obj.filters.push(new f.Grayscale());
+    if (type === "sepia") obj.filters.push(new f.Sepia());
+
+    obj.applyFilters();
+    canvas.renderAll();
+  };
+
+  // ================= UI SETUP =================
+  return (
+    <div className="h-screen w-screen bg-black text-white flex flex-col font-sans overflow-hidden">
+      
+      {/* Top Bar */}
+      <div className="p-4 bg-zinc-900 flex gap-4 overflow-x-auto border-b border-white/10">
+        <button onClick={addText} className="px-4 py-2 bg-zinc-800 rounded-lg hover:bg-white hover:text-black transition-all font-bold text-xs uppercase">+ Text</button>
+        <button onClick={() => videoFileRef.current?.click()} className="px-4 py-2 bg-zinc-800 rounded-lg hover:bg-white hover:text-black transition-all font-bold text-xs uppercase">+ Video</button>
+        <button onClick={() => applyEffect("blur")} className="px-4 py-2 bg-cyan-900/30 text-cyan-400 border border-cyan-500/20 rounded-lg text-xs font-bold uppercase">Blur</button>
+        <button onClick={() => applyEffect("bw")} className="px-4 py-2 bg-zinc-800 rounded-lg text-xs font-bold uppercase">B/W</button>
+        <button onClick={() => setPlaying(!playing)} className={`px-6 py-2 rounded-full font-black text-xs uppercase transition-all ${playing ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}>
+          {playing ? "Stop" : "Play"}
+        </button>
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center p-4 bg-[#050505]">
+         <div className="rounded-xl overflow-hidden shadow-2xl border border-white/5">
+            <canvas ref={canvasRef} />
+         </div>
+         <div className="mt-2 text-[10px] font-mono text-zinc-500">TIME: {time.toFixed(2)}s</div>
+      </div>
+
+      {/* 🎞️ ADVANCED TIMELINE */}
+      <div className="h-48 bg-zinc-950 border-t border-white/10 p-4 overflow-y-auto">
+        <div className="relative h-full bg-zinc-900/30 rounded-lg border border-white/5 p-2">
+          {tracks.map((track) => (
+            <div key={track.id} className="relative h-10 w-full bg-black/20 rounded flex items-center">
+              {track.items.map((item: any) => (
+                <div
+                  key={item.id}
+                  style={{
+                    left: item.start * 40,
+                    width: (item.end - item.start) * 40,
+                    position: 'absolute'
+                  }}
+                  className="h-8 bg-cyan-600/40 border border-cyan-400 rounded-md flex items-center justify-center text-[8px] font-bold overflow-hidden"
+                >
+                  {item.type.toUpperCase()}
+                </div>
+              ))}
+            </div>
+          ))}
+          {/* Playhead */}
+          <div 
+            style={{ left: time * 40 }}
+            className="absolute top-0 bottom-0 w-0.5 bg-white z-10 shadow-[0_0_10px_white]"
+          />
+        </div>
+      </div>
+
+      <input type="file" ref={videoFileRef} hidden accept="video/*" onChange={handleVideoSelect} />
+    </div>
   );
-  return file.$id;
 }
