@@ -32,7 +32,7 @@ import ShopIndex from "./pages/shop/index";
 
 // 4. STUDIO & CREATIVE (MODIFIED)
 import RXStudio from "./pages/studio/index";
-import ProEditor from "./pages/studio/editor"; // ✅ New Pro Editor Added
+import ProEditor from "./pages/studio/editor"; 
 import VoiceLab from "./pages/studio/voice-lab"; 
 import CinemaAI from "./pages/studio/video-gen"; 
 
@@ -75,17 +75,20 @@ export default function App() {
           <Route path="/profile" component={UserProfile} />
           <Route path="/social/edit-profile" component={EditProfile} /> 
           
-          {/* --- AI & CREATIVE MODULES --- */}
+          {/* --- AI & CREATIVE MODULES (SYNCHRONIZED PATHS) --- */}
           <Route path="/studio" component={RXStudio} />
-          <Route path="/studio/editor" component={ProEditor} /> {/* ✅ Direct Editor Access */}
-          <Route path="/studio/voice-lab" component={VoiceLab} /> 
-          <Route path="/studio/video-gen" component={CinemaAI} />  
+          <Route path="/studio/editor" component={ProEditor} /> 
+          
+          {/* Dashboard buttons ke exact path yahan mapped hain */}
+          <Route path="/studio/video" component={CinemaAI} />  
+          <Route path="/studio/voice" component={VoiceLab} /> 
+          <Route path="/studio/analytics" component={Analytics} />
           
           {/* --- MAGIC SYSTEM --- */}
           <Route path="/magic" component={MagicMain} />
           <Route path="/magic/ai-chat" component={NeuralChat} />
           <Route path="/magic/image-gen" component={ImageGen} />
-          <Route path="/magic/video-gen" component={CinemaAI} /> {/* Secondary Mapping */}
+          <Route path="/magic/video-gen" component={CinemaAI} /> 
           
           {/* --- NEW MODULES --- */}
           <Route path="/music/:rest*" component={MusicIndex} /> 
