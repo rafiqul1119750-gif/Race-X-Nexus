@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { 
   Sparkles, Zap, Ghost, Eye, Layers, 
-  ChevronRight, Mic, Video, Trash2, Maximize2 
+  ChevronRight, Mic, Video, Trash2, ArrowLeft, Type 
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -11,24 +11,21 @@ export default function GodModeStudio() {
   const [, setLocation] = useLocation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isMagicActive, setIsMagicActive] = useState(false);
-  const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
+  const [activeObject, setActiveObject] = useState<any>(null);
 
   useEffect(() => {
-    if (rxCanvas) return;
     const init = () => {
       // @ts-ignore
       const f = window.fabric;
+      if (!f || rxCanvas) return;
+
       rxCanvas = new f.Canvas(canvasRef.current, {
         width: 340, height: 560, backgroundColor: "transparent",
-        preserveObjectStacking: true, selectionColor: 'rgba(6, 182, 212, 0.3)',
-        selectionLineWidth: 2
+        preserveObjectStacking: true,
       });
 
-      // Cinematic Glow Effect on Objects
-      rxCanvas.on("after:render", () => {
-        rxCanvas.contextContainer.shadowBlur = 20;
-        rxCanvas.contextContainer.shadowColor = "rgba(6, 182, 212, 0.5)";
-      });
+      rxCanvas.on("selection:created", (e: any) => setActiveObject(e.selected[0]));
+      rxCanvas.on("selection:cleared", () => setActiveObject(null));
     };
 
     if (!(window as any).fabric) {
@@ -41,99 +38,111 @@ export default function GodModeStudio() {
     return () => { if(rxCanvas) { rxCanvas.dispose(); rxCanvas = null; } };
   }, []);
 
+  // --- 🛠️ FUNCTIONS FOR BUTTONS ---
+
+  const addAiText = () => {
+    // @ts-ignore
+    const text = new window.fabric.Textbox("NEURAL TEXT", {
+      left: 70, top: 200, width: 200, fontSize: 32,
+      fill: "#00D1FF", fontFamily: "Impact", fontWeight: "bold",
+      textAlign: "center", shadow: "0px 0px 15px rgba(0,209,255,0.8)"
+    });
+    rxCanvas.add(text).setActiveObject(text);
+  };
+
+  const deleteSelected = () => {
+    if (activeObject) {
+      rxCanvas.remove(activeObject);
+      rxCanvas.discardActiveObject();
+      setActiveObject(null);
+    }
+  };
+
+  const masterRender = () => {
+    const dataURL = rxCanvas.toDataURL({ format: 'png', quality: 1 });
+    const link = document.createElement('a');
+    link.download = 'RX-Nexus-Master-Render.png';
+    link.href = dataURL;
+    link.click();
+    alert("🚀 Master Rendering Complete! File Saved.");
+  };
+
+  const applyMagicFx = () => {
+    setIsMagicActive(!isMagicActive);
+    if (!isMagicActive) {
+      rxCanvas.setBackgroundColor('rgba(6, 182, 212, 0.1)', rxCanvas.renderAll.bind(rxCanvas));
+    } else {
+      rxCanvas.setBackgroundColor('transparent', rxCanvas.renderAll.bind(rxCanvas));
+    }
+  };
+
   return (
-    <div className="h-screen w-screen bg-[#020202] text-white flex flex-col font-sans overflow-hidden">
+    <div className="h-screen w-screen bg-[#020202] text-white flex flex-col overflow-hidden">
       
-      {/* 🔮 NEURAL HEADER */}
-      <header className="p-5 flex justify-between items-center bg-gradient-to-b from-zinc-900/50 to-transparent backdrop-blur-xl border-b border-white/5 z-50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center animate-pulse shadow-[0_0_20px_rgba(6,182,212,0.6)]">
-            <Zap size={18} fill="black" />
-          </div>
-          <div className="flex flex-col leading-none">
-            <span className="text-sm font-black tracking-widest text-white italic">NEURAL ENGINE v3</span>
-            <span className="text-[7px] text-cyan-400 font-bold uppercase tracking-[0.3em]">Status: God Mode</span>
-          </div>
+      {/* 🔮 HEADER */}
+      <header className="p-5 flex justify-between items-center bg-zinc-950/50 backdrop-blur-xl border-b border-white/5 z-50">
+        <button onClick={() => setLocation("/studio")} className="p-2 bg-zinc-900 rounded-full active:scale-90">
+          <ArrowLeft size={20} />
+        </button>
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-black tracking-[0.3em] text-cyan-400">NEURAL ENGINE</span>
         </div>
-        <button className="flex items-center gap-2 bg-zinc-900 border border-white/10 px-4 py-2 rounded-2xl text-[10px] font-black group hover:bg-white hover:text-black transition-all">
+        <button 
+          onClick={masterRender}
+          className="bg-white text-black px-4 py-1.5 rounded-full text-[10px] font-black flex items-center gap-2 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+        >
           MASTER RENDER <ChevronRight size={14} />
         </button>
       </header>
 
-      {/* 📽️ THE CINEMATIC VOID */}
-      <main className="flex-1 flex items-center justify-center p-6 relative">
-        {/* Background Ambient Glow */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-20 blur-[120px] pointer-events-none">
-          <div className="w-80 h-80 bg-cyan-600 rounded-full" />
-        </div>
-
-        {/* The Main Screen */}
-        <div className="relative z-10 rounded-[40px] border-[6px] border-zinc-900 shadow-[0_0_100px_rgba(0,0,0,1)] overflow-hidden bg-black ring-1 ring-white/10 group">
+      {/* 📽️ CANVAS AREA */}
+      <main className="flex-1 flex items-center justify-center relative bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+        <div className="relative rounded-[32px] overflow-hidden border border-white/10 shadow-2xl bg-black">
           <canvas ref={canvasRef} />
-          
-          {/* AI Helper Overlay */}
-          <div className="absolute bottom-4 left-4 right-4 p-4 bg-black/60 backdrop-blur-md rounded-2xl border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <p className="text-[8px] font-mono text-cyan-500 mb-1 tracking-widest">NEURAL FEEDBACK:</p>
-            <p className="text-[9px] text-zinc-300 italic">"Lighting looks flat. Add AI Rim Light?"</p>
-          </div>
         </div>
 
-        {/* Side Floating Icons (The "Impossible" Controls) */}
-        <div className="absolute right-6 flex flex-col gap-4">
-          <ControlIcon icon={<Ghost />} label="Spirit" color="text-purple-400" />
-          <ControlIcon icon={<Eye />} label="Focus" color="text-yellow-400" />
-          <ControlIcon icon={<Layers />} label="Nodes" color="text-cyan-400" />
-        </div>
+        {/* Floating Delete Button */}
+        {activeObject && (
+          <button 
+            onClick={deleteSelected}
+            className="absolute top-10 right-10 p-4 bg-red-600 rounded-full shadow-lg active:scale-75 transition-all"
+          >
+            <Trash2 size={20} />
+          </button>
+        )}
       </main>
 
-      {/* 🕹️ THE MAGIC DOCK */}
-      <div className="relative bg-zinc-950/80 backdrop-blur-2xl p-8 rounded-t-[50px] border-t border-white/10 shadow-[0_-30px_60px_rgba(0,0,0,0.8)]">
+      {/* 🕹️ DOCK CONTROLS */}
+      <div className="bg-zinc-950 p-8 rounded-t-[40px] border-t border-white/10">
         
-        {/* Central Neural Trigger */}
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2">
+        {/* Magic Trigger */}
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2">
           <button 
-            onClick={() => setIsMagicActive(!isMagicActive)}
-            className={`w-24 h-24 rounded-full flex flex-col items-center justify-center border-4 border-black shadow-2xl transition-all duration-700 ${isMagicActive ? 'bg-white text-black rotate-180' : 'bg-cyan-500 text-black'}`}
+            onClick={applyMagicFx}
+            className={`w-20 h-20 rounded-full flex items-center justify-center border-4 border-black shadow-2xl transition-all duration-500 ${isMagicActive ? 'bg-white text-black scale-110' : 'bg-cyan-500 text-black'}`}
           >
-            <Sparkles size={28} className={isMagicActive ? 'animate-bounce' : 'animate-pulse'} />
-            <span className="text-[8px] font-black mt-1">MAGIC</span>
+            <Sparkles size={24} className={isMagicActive ? 'animate-spin' : ''} />
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-4 mt-8">
-           <ToolItem icon={<Video />} label="Cinema" onClick={() => {}} />
-           <ToolItem icon={<Mic />} label="Vocal" onClick={() => {}} />
-           <ToolItem icon={<Zap />} label="FX" onClick={() => {}} />
-           <ToolItem icon={<Trash2 />} label="Purge" onClick={() => {}} />
-        </div>
-
-        {/* The Impossible Scroller (Timeline replacement) */}
-        <div className="mt-8 overflow-hidden relative">
-          <div className="flex gap-2 animate-scroll-text whitespace-nowrap opacity-20 font-mono text-[10px] tracking-[0.5em] uppercase italic">
-            Frame Syncing ... Neural Mapping ... Emotion Detection ... RTX Rendering ...
-          </div>
+        <div className="grid grid-cols-4 gap-4 mt-6">
+           <ToolItem icon={<Type />} label="AI Text" onClick={addAiText} />
+           <ToolItem icon={<Video />} label="Cinema" onClick={() => alert("AI Cinema Node: Upload Video Source")} />
+           <ToolItem icon={<Mic />} label="Vocal" onClick={() => setLocation("/studio/voice")} />
+           <ToolItem icon={<Zap />} label="Neural FX" onClick={() => alert("Neural Effects Ready")} />
         </div>
       </div>
     </div>
   );
 }
 
-function ControlIcon({ icon, label, color }: any) {
-  return (
-    <button className={`w-12 h-12 bg-black/50 backdrop-blur-lg border border-white/5 rounded-2xl flex flex-col items-center justify-center transition-all hover:border-cyan-500/50 hover:scale-110 active:scale-90 shadow-2xl ${color}`}>
-      {icon}
-      <span className="text-[6px] font-black mt-1 uppercase tracking-tighter opacity-50">{label}</span>
-    </button>
-  );
-}
-
 function ToolItem({ icon, label, onClick }: any) {
   return (
-    <button onClick={onClick} className="flex flex-col items-center group">
-      <div className="p-4 bg-zinc-900/50 rounded-[28px] text-zinc-500 border border-white/5 group-hover:bg-white group-hover:text-black group-hover:rounded-2xl transition-all duration-500">
-        {React.cloneElement(icon, { size: 20 })}
+    <button onClick={onClick} className="flex flex-col items-center group active:scale-90 transition-all">
+      <div className="p-4 bg-zinc-900 rounded-[24px] text-zinc-400 group-hover:bg-cyan-500 group-hover:text-black">
+        {icon}
       </div>
-      <span className="text-[8px] font-black text-zinc-600 mt-3 uppercase tracking-widest group-hover:text-white transition-colors">{label}</span>
+      <span className="text-[7px] font-black mt-2 tracking-widest uppercase">{label}</span>
     </button>
   );
 }
