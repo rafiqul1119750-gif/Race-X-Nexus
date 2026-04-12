@@ -1,34 +1,34 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Play, Pause, Type, Video, Trash2, Wand2, ArrowLeft } from "lucide-react";
+import { 
+  Sparkles, Zap, Ghost, Eye, Layers, 
+  ChevronRight, Mic, Video, Trash2, Maximize2 
+} from "lucide-react";
 import { useLocation } from "wouter";
 
-let canvasPtr: any = null; // Global pointer to avoid re-init hangs
+let rxCanvas: any = null;
 
-export default function Editor() {
+export default function GodModeStudio() {
   const [, setLocation] = useLocation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [playing, setPlaying] = useState(false);
-  const [active, setActive] = useState<any>(null);
+  const [isMagicActive, setIsMagicActive] = useState(false);
+  const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
 
   useEffect(() => {
-    let animId: number;
+    if (rxCanvas) return;
     const init = () => {
-      if (!canvasRef.current || canvasPtr) return;
       // @ts-ignore
       const f = window.fabric;
-      canvasPtr = new f.Canvas(canvasRef.current, {
-        width: 360, height: 600, backgroundColor: "#000",
-        preserveObjectStacking: true, renderOnAddRemove: false
+      rxCanvas = new f.Canvas(canvasRef.current, {
+        width: 340, height: 560, backgroundColor: "transparent",
+        preserveObjectStacking: true, selectionColor: 'rgba(6, 182, 212, 0.3)',
+        selectionLineWidth: 2
       });
 
-      const loop = () => {
-        canvasPtr?.renderAll();
-        animId = f.util.requestAnimFrame(loop);
-      };
-      loop();
-
-      canvasPtr.on("selection:created", (e: any) => setActive(e.selected[0]));
-      canvasPtr.on("selection:cleared", () => setActive(null));
+      // Cinematic Glow Effect on Objects
+      rxCanvas.on("after:render", () => {
+        rxCanvas.contextContainer.shadowBlur = 20;
+        rxCanvas.contextContainer.shadowColor = "rgba(6, 182, 212, 0.5)";
+      });
     };
 
     if (!(window as any).fabric) {
@@ -38,56 +38,102 @@ export default function Editor() {
       document.body.appendChild(s);
     } else { init(); }
 
-    return () => {
-      if (canvasPtr) {
-        // @ts-ignore
-        window.fabric.util.cancelAnimFrame(animId);
-        canvasPtr.dispose();
-        canvasPtr = null;
-      }
-    };
+    return () => { if(rxCanvas) { rxCanvas.dispose(); rxCanvas = null; } };
   }, []);
 
-  const addText = () => {
-    // @ts-ignore
-    const t = new window.fabric.Textbox("RX TEXT", {
-      left: 100, top: 100, fill: "#fff", fontSize: 30, fontFamily: 'Impact'
-    });
-    canvasPtr?.add(t).setActiveObject(t);
-  };
-
   return (
-    <div className="h-screen bg-black text-white flex flex-col">
-      <header className="p-4 bg-zinc-950 flex justify-between items-center border-b border-white/5">
-        <button onClick={() => setLocation("/studio")}><ArrowLeft size={20}/></button>
-        <span className="text-xs font-black text-cyan-500 italic">RX STUDIO PRO</span>
-        <button className="bg-white text-black text-[10px] px-4 py-1 rounded-full font-bold">EXPORT</button>
+    <div className="h-screen w-screen bg-[#020202] text-white flex flex-col font-sans overflow-hidden">
+      
+      {/* 🔮 NEURAL HEADER */}
+      <header className="p-5 flex justify-between items-center bg-gradient-to-b from-zinc-900/50 to-transparent backdrop-blur-xl border-b border-white/5 z-50">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center animate-pulse shadow-[0_0_20px_rgba(6,182,212,0.6)]">
+            <Zap size={18} fill="black" />
+          </div>
+          <div className="flex flex-col leading-none">
+            <span className="text-sm font-black tracking-widest text-white italic">NEURAL ENGINE v3</span>
+            <span className="text-[7px] text-cyan-400 font-bold uppercase tracking-[0.3em]">Status: God Mode</span>
+          </div>
+        </div>
+        <button className="flex items-center gap-2 bg-zinc-900 border border-white/10 px-4 py-2 rounded-2xl text-[10px] font-black group hover:bg-white hover:text-black transition-all">
+          MASTER RENDER <ChevronRight size={14} />
+        </button>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-4 relative">
-        <div className="rounded-[24px] overflow-hidden border border-white/10 shadow-2xl">
-          <canvas ref={canvasRef} />
+      {/* 📽️ THE CINEMATIC VOID */}
+      <main className="flex-1 flex items-center justify-center p-6 relative">
+        {/* Background Ambient Glow */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-20 blur-[120px] pointer-events-none">
+          <div className="w-80 h-80 bg-cyan-600 rounded-full" />
         </div>
-        {active && (
-          <button onClick={() => { canvasPtr.remove(active); canvasPtr.discardActiveObject(); }} 
-            className="absolute top-10 p-3 bg-red-600 rounded-full shadow-lg">
-            <Trash2 size={18}/>
-          </button>
-        )}
+
+        {/* The Main Screen */}
+        <div className="relative z-10 rounded-[40px] border-[6px] border-zinc-900 shadow-[0_0_100px_rgba(0,0,0,1)] overflow-hidden bg-black ring-1 ring-white/10 group">
+          <canvas ref={canvasRef} />
+          
+          {/* AI Helper Overlay */}
+          <div className="absolute bottom-4 left-4 right-4 p-4 bg-black/60 backdrop-blur-md rounded-2xl border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <p className="text-[8px] font-mono text-cyan-500 mb-1 tracking-widest">NEURAL FEEDBACK:</p>
+            <p className="text-[9px] text-zinc-300 italic">"Lighting looks flat. Add AI Rim Light?"</p>
+          </div>
+        </div>
+
+        {/* Side Floating Icons (The "Impossible" Controls) */}
+        <div className="absolute right-6 flex flex-col gap-4">
+          <ControlIcon icon={<Ghost />} label="Spirit" color="text-purple-400" />
+          <ControlIcon icon={<Eye />} label="Focus" color="text-yellow-400" />
+          <ControlIcon icon={<Layers />} label="Nodes" color="text-cyan-400" />
+        </div>
       </main>
 
-      <div className="bg-zinc-950 p-6 rounded-t-[40px] border-t border-white/5">
-        <div className="flex justify-center -mt-14 mb-6">
-          <button onClick={() => setPlaying(!playing)} className="w-14 h-14 bg-cyan-500 text-black rounded-full flex items-center justify-center shadow-xl active:scale-90">
-            {playing ? <Pause size={24}/> : <Play size={24} className="ml-1"/>}
+      {/* 🕹️ THE MAGIC DOCK */}
+      <div className="relative bg-zinc-950/80 backdrop-blur-2xl p-8 rounded-t-[50px] border-t border-white/10 shadow-[0_-30px_60px_rgba(0,0,0,0.8)]">
+        
+        {/* Central Neural Trigger */}
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2">
+          <button 
+            onClick={() => setIsMagicActive(!isMagicActive)}
+            className={`w-24 h-24 rounded-full flex flex-col items-center justify-center border-4 border-black shadow-2xl transition-all duration-700 ${isMagicActive ? 'bg-white text-black rotate-180' : 'bg-cyan-500 text-black'}`}
+          >
+            <Sparkles size={28} className={isMagicActive ? 'animate-bounce' : 'animate-pulse'} />
+            <span className="text-[8px] font-black mt-1">MAGIC</span>
           </button>
         </div>
-        <div className="flex justify-around items-center max-w-sm mx-auto">
-          <button onClick={addText} className="flex flex-col items-center gap-1 opacity-80"><Type size={20}/><span className="text-[8px]">TEXT</span></button>
-          <button className="flex flex-col items-center gap-1 opacity-80"><Video size={20}/><span className="text-[8px]">VIDEO</span></button>
-          <button className="flex flex-col items-center gap-1 opacity-80"><Wand2 size={20}/><span className="text-[8px]">AI FX</span></button>
+
+        <div className="grid grid-cols-4 gap-4 mt-8">
+           <ToolItem icon={<Video />} label="Cinema" onClick={() => {}} />
+           <ToolItem icon={<Mic />} label="Vocal" onClick={() => {}} />
+           <ToolItem icon={<Zap />} label="FX" onClick={() => {}} />
+           <ToolItem icon={<Trash2 />} label="Purge" onClick={() => {}} />
+        </div>
+
+        {/* The Impossible Scroller (Timeline replacement) */}
+        <div className="mt-8 overflow-hidden relative">
+          <div className="flex gap-2 animate-scroll-text whitespace-nowrap opacity-20 font-mono text-[10px] tracking-[0.5em] uppercase italic">
+            Frame Syncing ... Neural Mapping ... Emotion Detection ... RTX Rendering ...
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function ControlIcon({ icon, label, color }: any) {
+  return (
+    <button className={`w-12 h-12 bg-black/50 backdrop-blur-lg border border-white/5 rounded-2xl flex flex-col items-center justify-center transition-all hover:border-cyan-500/50 hover:scale-110 active:scale-90 shadow-2xl ${color}`}>
+      {icon}
+      <span className="text-[6px] font-black mt-1 uppercase tracking-tighter opacity-50">{label}</span>
+    </button>
+  );
+}
+
+function ToolItem({ icon, label, onClick }: any) {
+  return (
+    <button onClick={onClick} className="flex flex-col items-center group">
+      <div className="p-4 bg-zinc-900/50 rounded-[28px] text-zinc-500 border border-white/5 group-hover:bg-white group-hover:text-black group-hover:rounded-2xl transition-all duration-500">
+        {React.cloneElement(icon, { size: 20 })}
+      </div>
+      <span className="text-[8px] font-black text-zinc-600 mt-3 uppercase tracking-widest group-hover:text-white transition-colors">{label}</span>
+    </button>
   );
 }
