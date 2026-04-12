@@ -1,110 +1,248 @@
-import React, { useEffect, useState } from "react";
-import { account } from "@/lib/appwrite"; 
-import { useLocation } from "wouter";
-import { 
-  Image as ImageIcon, Mic, Music, PlaySquare, Guitar, Piano, User 
-} from "lucide-react";
+import React, { useEffect, useState, useRef } from "react";
+import { account } from "@/lib/appwrite";
 
 export default function Dashboard() {
-  const [, setLocation] = useLocation();
+
   const [userData, setUserData] = useState<any>(null);
+  const [cinemaData, setCinemaData] = useState<any>(null);
+  const [finalVideo, setFinalVideo] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const [clonedVoiceId, setClonedVoiceId] = useState<string | null>(null);
+  const [language, setLanguage] = useState("en");
+  const [liveExpression, setLiveExpression] = useState("neutral");
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const characters = [
+    { name: "Hero" },
+    { name: "Villain" },
+    { name: "Friend" }
+  ];
 
   useEffect(() => {
-    account.get().then(setUserData).catch(() => console.log("Nexus Core Offline"));
+    account.get().then(setUserData);
   }, []);
 
+  // ================= EMOTION =================
+  function detectEmotion(text: string) {
+    if (text.includes("fight")) return "angry";
+    if (text.includes("love")) return "happy";
+    if (text.includes("cry")) return "sad";
+    return "neutral";
+  }
+
+  function expressionMap(e: string) {
+    return {
+      happy: "smile",
+      sad: "cry",
+      angry: "angry",
+      neutral: "default"
+    }[e];
+  }
+
+  // ================= CAMERA =================
+  function getCameraAngle(scene: string, i: number) {
+    if (scene.includes("fight")) return "dramatic_zoom";
+    return ["wide", "close", "medium"][i % 3];
+  }
+
+  // ================= ENV =================
+  function getEnvironment(scene: string) {
+    if (scene.includes("fight")) return "bg-red-900";
+    if (scene.includes("love")) return "bg-pink-700";
+    if (scene.includes("cry")) return "bg-blue-900";
+    return "bg-zinc-900";
+  }
+
+  // ================= TRANSITION =================
+  function getTransition(scene: string) {
+    if (scene.includes("fight")) return "cut";
+    return "fade";
+  }
+
+  function getTransitionClass(t: string) {
+    return t === "fade"
+      ? "transition-opacity duration-700 opacity-90"
+      : "";
+  }
+
+  // ================= SFX =================
+  function getSFX(scene: string) {
+    if (scene.includes("gun")) return "/sfx/gun.mp3";
+    if (scene.includes("fight")) return "/sfx/hit.mp3";
+    return null;
+  }
+
+  function playSFX(url: string) {
+    const a = new Audio(url);
+    a.play();
+  }
+
+  // ================= MUSIC =================
+  function getMusic(emotion: string) {
+    return `/music/${emotion}.mp3`;
+  }
+
+  function playMusic(url: string) {
+    const a = new Audio(url);
+    a.loop = true;
+    a.volume = 0.5;
+    a.play();
+    return a;
+  }
+
+  // ================= TRANSLATE =================
+  async function translate(text: string) {
+    const res = await fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${language}&dt=t&q=${text}`
+    );
+    const data = await res.json();
+    return data[0][0][0];
+  }
+
+  // ================= VOICE =================
+  async function generateVoice(text: string, emotion: string) {
+    const translated = await translate(text);
+
+    const res = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${clonedVoiceId}`,
+      {
+        method: "POST",
+        headers: {
+          "xi-api-key": "YOUR_ELEVENLABS_KEY",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          text: translated
+        })
+      }
+    );
+
+    return await res.blob();
+  }
+
+  // ================= AVATAR =================
+  async function generateAvatar(audioUrl: string, emotion: string, camera: string) {
+    const res = await fetch("https://api.heygen.com/v2/video/generate", {
+      method: "POST",
+      headers: {
+        "X-Api-Key": "YOUR_HEYGEN_KEY",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        avatar_id: "default",
+        voice: { type: "audio", audio_url: audioUrl },
+        expression: expressionMap(liveExpression || emotion),
+        camera
+      })
+    });
+
+    return await res.json();
+  }
+
+  // ================= SCRIPT =================
+  async function generateScript(prompt: string) {
+    return [
+      "Hero fights villain",
+      "Villain laughs",
+      "Friend cries",
+      "Hero wins"
+    ];
+  }
+
+  // ================= MOVIE =================
+  async function generateMovie() {
+    const script = await generateScript("");
+
+    const scenes: any[] = [];
+
+    for (let i = 0; i < script.length; i++) {
+      const text = script[i];
+
+      const emotion = detectEmotion(text);
+      const camera = getCameraAngle(text, i);
+      const env = getEnvironment(text);
+      const transition = getTransition(text);
+      const sfx = getSFX(text);
+
+      const voiceBlob = await generateVoice(text, emotion);
+      const voiceUrl = URL.createObjectURL(voiceBlob);
+
+      const avatar = await generateAvatar(voiceUrl, emotion, camera);
+
+      scenes.push({
+        text,
+        emotion,
+        camera,
+        env,
+        transition,
+        sfx,
+        avatar
+      });
+    }
+
+    setCinemaData({ scenes });
+  }
+
+  // ================= UI =================
   return (
-    <div className="fixed inset-0 bg-black text-white flex flex-col font-sans overflow-hidden">
-      
-      {/* 🌌 Background Elements for Depth */}
-      <div className="absolute top-[-20%] left-[-10%] w-[100%] h-[60%] bg-blue-600/10 blur-[150px] rounded-full" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[80%] h-[50%] bg-purple-900/10 blur-[150px] rounded-full" />
+    <div className="bg-black text-white p-6">
 
-      {/* 🔮 Header Section */}
-      <header className="relative z-20 flex justify-between items-center p-8 pt-10 shrink-0">
-        <div className="flex flex-col">
-          <span className="text-[10px] font-black tracking-[0.4em] text-cyan-500 uppercase italic">Neural Core Active</span>
-          <h1 className="text-3xl font-black tracking-tighter mt-1 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
-            Hi {userData?.name?.split(' ')[0] || 'Explorer'},
-          </h1>
-        </div>
-        <div className="w-16 h-16 rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-md flex items-center justify-center shadow-2xl overflow-hidden">
-           <User size={28} className="text-zinc-500" />
-        </div>
-      </header>
+      <h1 className="text-xl mb-4">
+        Hi {userData?.name || "User"}
+      </h1>
 
-      {/* 🚀 Central Command Grid (Matches Image Layout) */}
-      <main className="relative z-20 flex-1 flex flex-col items-center justify-center px-6 pb-12">
-        <p className="text-zinc-500 text-[11px] font-black tracking-[0.4em] uppercase mb-10 opacity-60">System Ready: Select Protocol</p>
-        
-        <div className="grid grid-cols-2 gap-6 w-full max-w-lg mx-auto">
-          <StudioButton 
-            icon={<ImageIcon size={28}/>} label="Create Image" sub="STABLE DIFFUSION" 
-            onClick={() => setLocation("/studio/editor")}
-          />
-          <StudioButton 
-            icon={<Mic size={28}/>} label="Create Voice" sub="VOICE CLONE" 
-            onClick={() => setLocation("/studio/voice")}
-          />
-          <StudioButton 
-            icon={<Piano size={28}/>} label="Create Melody" sub="NEURAL SYNTH" 
-          />
-          <StudioButton 
-            icon={<Guitar size={28}/>} label="Create Music" sub="DRUM KIT" 
-          />
-          <StudioButton 
-            icon={<PlaySquare size={28}/>} label="Create Video" sub="CINEMA AI" 
-          />
-          
-          {/* 🌟 The Highlighted Blue Button from Image */}
-          <StudioButton 
-            icon={<Music size={28}/>} label="Create Song" sub="FULL PRODUCTION" 
-            highlight={true}
-          />
-        </div>
-      </main>
+      <button
+        onClick={generateMovie}
+        className="bg-purple-600 px-4 py-2 rounded"
+      >
+        🎬 Generate AI Movie
+      </button>
 
-      {/* 📉 Visualizer Footer */}
-      <footer className="relative z-20 h-20 flex items-center justify-center px-8 opacity-20">
-         <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
-      </footer>
+      {/* CONTROLS */}
+      <div className="mt-3 flex gap-2">
+        {["happy","sad","angry","neutral"].map(e => (
+          <button
+            key={e}
+            onClick={() => setLiveExpression(e)}
+            className="bg-zinc-800 px-2 py-1 text-xs rounded"
+          >
+            {e}
+          </button>
+        ))}
+      </div>
+
+      <select
+        onChange={(e)=>setLanguage(e.target.value)}
+        className="mt-3 bg-black border"
+      >
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="bn">Bengali</option>
+      </select>
+
+      {/* SCENES */}
+      {cinemaData?.scenes?.map((s:any,i:number)=>(
+        <div key={i} className={`mt-4 p-3 rounded ${s.env}`}>
+
+          <p className="text-xs">
+            🎭 {characters[i%3].name} | 🎥 {s.camera}
+          </p>
+
+          <div className={getTransitionClass(s.transition)}>
+
+            <video
+              src={s.avatar?.video_url}
+              controls
+              onPlay={()=> s.sfx && playSFX(s.sfx)}
+            />
+
+          </div>
+
+        </div>
+      ))}
+
     </div>
-  );
-}
-
-// 🎨 HIGH-END BUTTON COMPONENT
-function StudioButton({ icon, label, sub, onClick, highlight = false }: any) {
-  return (
-    <button 
-      onClick={onClick}
-      className={`relative flex flex-col items-center justify-center p-8 rounded-[40px] border transition-all duration-500 active:scale-90 group
-        ${highlight 
-          ? "bg-[#2563eb] border-white/30 shadow-[0_25px_60px_rgba(37,99,235,0.4)]" 
-          : "bg-zinc-900/40 border-white/5 backdrop-blur-xl hover:border-cyan-500/30 shadow-2xl"}`}
-    >
-      {/* Bezel Light Effect */}
-      <div className={`absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent ${highlight ? 'via-white/40' : 'via-white/10'} to-transparent`} />
-      
-      {/* Icon Area */}
-      <div className={`mb-4 p-4 rounded-3xl transition-transform duration-500 group-hover:scale-110
-        ${highlight ? "bg-white/15 shadow-inner" : "bg-white/5 shadow-inner"}`}>
-        {React.cloneElement(icon, { 
-          className: highlight ? "text-white" : "text-zinc-400 group-hover:text-cyan-400",
-          strokeWidth: 1.5
-        })}
-      </div>
-      
-      <div className="text-center">
-        <p className={`text-[12px] font-black uppercase tracking-[0.1em] ${highlight ? "text-white" : "text-zinc-200"}`}>
-          {label}
-        </p>
-        <p className={`text-[8px] font-bold mt-1 tracking-widest uppercase ${highlight ? "text-blue-100/60" : "text-zinc-600 group-hover:text-cyan-800"}`}>
-          {sub}
-        </p>
-      </div>
-
-      {/* Decorative Dot */}
-      <div className={`absolute bottom-5 w-1 h-1 rounded-full ${highlight ? 'bg-white/50' : 'bg-transparent group-hover:bg-cyan-500'}`} />
-    </button>
   );
 }
