@@ -1,18 +1,18 @@
-import { useEffect } from "react";
-import { useLocation } from "wouter";
+import { Switch, Route } from "wouter";
+import Dashboard from "./dashboard";
+import Editor from "./editor";
+import VideoGen from "./video-gen";
+import VoiceLab from "./voice-lab";
+import Analytics from "./analytics";
 
-export default function RXStudio() {
-  const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    // Studio khulte hi seedha Editor page par shift
-    setLocation("/studio/editor");
-  }, [setLocation]);
-
+export default function StudioIndex() {
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center">
-      <div className="w-10 h-10 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
-      <p className="text-[8px] font-black uppercase tracking-[0.4em] text-cyan-500">Connecting Studio Node...</p>
-    </div>
+    <Switch>
+      <Route path="/studio" component={Dashboard} />
+      <Route path="/studio/editor" component={Editor} />
+      <Route path="/studio/video" component={VideoGen} />
+      <Route path="/studio/voice" component={VoiceLab} />
+      <Route path="/studio/analytics" component={Analytics} />
+    </Switch>
   );
 }
