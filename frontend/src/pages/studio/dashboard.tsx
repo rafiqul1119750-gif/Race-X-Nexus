@@ -13,28 +13,31 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="p-6 bg-black min-h-screen text-white flex flex-col items-center">
-      <div className="w-full flex flex-col items-center mb-12">
+    <div className="p-6 bg-black min-h-screen text-white flex flex-col items-center overflow-x-hidden">
+      <div className="w-full flex flex-col items-center mb-12 mt-4">
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-10 h-10 bg-[#00D1FF] rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-[#00D1FF] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(0,209,255,0.4)]">
             <Zap size={24} fill="black" />
           </div>
-          <h1 className="text-3xl font-black italic tracking-tighter">RX <span className="text-[#00D1FF]">NEXUS</span></h1>
+          <h1 className="text-3xl font-black italic tracking-tighter uppercase">RX <span className="text-[#00D1FF]">Nexus</span></h1>
         </div>
-        <p className="text-[9px] text-zinc-500 tracking-[0.4em] uppercase font-bold">The Production Hub</p>
+        <p className="text-[9px] text-zinc-600 tracking-[0.4em] uppercase font-bold">The Production Hub</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 w-full max-w-sm">
+      <div className="grid grid-cols-2 gap-6 w-full max-w-sm px-2">
         {menu.map((item) => (
           <button
             key={item.path}
-            onClick={() => setLocation(item.path)}
-            className="aspect-square bg-zinc-900/40 border border-white/5 rounded-[40px] flex flex-col items-center justify-center gap-4 active:scale-90 transition-all"
+            onClick={() => {
+              console.log("Navigating to:", item.path);
+              setLocation(item.path);
+            }}
+            className="aspect-square bg-zinc-900/40 border border-white/5 rounded-[45px] flex flex-col items-center justify-center gap-4 active:scale-90 transition-all group"
           >
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${item.color} text-black shadow-lg`}>
+            <div className={`w-16 h-16 rounded-[24px] flex items-center justify-center ${item.color} text-black shadow-lg`}>
               {React.cloneElement(item.icon, { size: 28 })}
             </div>
-            <span className="text-[10px] font-black uppercase tracking-tight text-zinc-500">
+            <span className="text-[10px] font-black uppercase tracking-tight text-zinc-500 group-hover:text-white">
               {item.title}
             </span>
           </button>
