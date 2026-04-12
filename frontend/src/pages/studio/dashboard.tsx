@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { account } from "@/lib/appwrite";
 import {
   ImageIcon, Mic, Music, PlaySquare, Guitar, Piano, User
@@ -14,101 +14,86 @@ export default function Dashboard() {
     account.get().then(setUser);
   }, []);
 
-  // ================= REAL BACKEND CALL =================
+  const API = "http://localhost:5000";
 
-  async function generateCinema() {
+  const call = async (url: string) => {
+    const res = await fetch(`${API}${url}`, { method: "POST" });
+    return await res.json();
+  };
+
+  // ===== REAL FUNCTIONS =====
+  const createImage = async () => window.open((await call("/create-image")).url);
+  const createVoice = async () => new Audio((await call("/create-voice")).url).play();
+  const createMelody = async () => new Audio((await call("/create-melody")).url).play();
+  const createMusic = async () => new Audio((await call("/create-music")).url).play();
+  const createSong = async () => new Audio((await call("/create-song")).url).play();
+
+  const createVideo = async () => {
     setLoading(true);
-
-    const res = await fetch("http://localhost:5000/generate-movie", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        prompt: "Hero fights villain and wins"
-      })
-    });
-
-    const data = await res.json();
-
-    setResultVideo(data.video); // REAL merged video
+    const d = await call("/generate-movie");
+    setResultVideo(d.video);
     setLoading(false);
-  }
-
-  // ================= UI =================
+  };
 
   return (
     <div className="h-screen w-screen bg-black text-white flex flex-col relative overflow-hidden">
 
-      {/* 🌌 Background */}
+      {/* 🌐 HOLOGRAM GRID */}
       <div className="absolute inset-0 opacity-20"
         style={{
-          backgroundImage: `radial-gradient(#0ff 1px, transparent 0)`,
-          backgroundSize: "20px 20px"
+          backgroundImage: `
+            linear-gradient(rgba(0,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,255,255,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: "40px 40px"
         }}
       />
 
       {/* HEADER */}
-      <header className="flex justify-between p-6 z-10">
+      <header className="flex justify-between items-center p-6 z-10">
         <div>
-          <p className="text-cyan-400 text-xs tracking-widest">
+          <p className="text-cyan-400 text-xs tracking-widest animate-pulse">
             NEURAL CORE ACTIVE
           </p>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-cyan-400 bg-clip-text text-transparent">
             Hi {user?.name || "User"}
           </h1>
         </div>
 
-        <div className="w-12 h-12 rounded-full border border-cyan-400 flex items-center justify-center">
+        <div className="w-14 h-14 rounded-full border border-cyan-400 flex items-center justify-center shadow-[0_0_20px_cyan]">
           <User />
         </div>
       </header>
 
-      {/* MAIN PANEL */}
-      <div className="flex-1 flex flex-col items-center justify-center z-10">
+      {/* MAIN */}
+      <main className="flex-1 flex flex-col items-center justify-center z-10">
 
-        <p className="text-zinc-500 mb-6 text-xs tracking-widest">
+        <p className="text-zinc-500 text-xs mb-8 tracking-widest">
           WHERE SHOULD WE START?
         </p>
 
-        <div className="grid grid-cols-2 gap-4 w-full max-w-md">
+        <div className="grid grid-cols-2 gap-6 w-full max-w-md">
 
-          <Button icon={<ImageIcon />} label="Create Image" sub="Stable Diffusion" />
-          <Button icon={<Mic />} label="Create Voice" sub="Real TTS" />
-          <Button icon={<Piano />} label="Create Melody" sub="Synth Core" />
-          <Button icon={<Guitar />} label="Create Music" sub="AI Music" />
-
-          <Button
-            icon={<PlaySquare />}
-            label="Create Video"
-            sub="Cinema AI"
-            onClick={generateCinema}
-          />
-
-          <Button
-            icon={<Music />}
-            label="Create Song"
-            sub="Voice + Visual"
-            primary
-          />
+          <HoloButton icon={<ImageIcon />} label="IMAGE" onClick={createImage}/>
+          <HoloButton icon={<Mic />} label="VOICE" onClick={createVoice}/>
+          <HoloButton icon={<Piano />} label="MELODY" onClick={createMelody}/>
+          <HoloButton icon={<Guitar />} label="MUSIC" onClick={createMusic}/>
+          <HoloButton icon={<PlaySquare />} label="VIDEO" onClick={createVideo}/>
+          <HoloButton icon={<Music />} label="SONG" onClick={createSong} primary/>
 
         </div>
 
         {/* LOADING */}
         {loading && (
           <p className="mt-6 text-cyan-400 animate-pulse">
-            🎬 Generating Real Movie...
+            ⚡ Rendering Cinematic Output...
           </p>
         )}
 
-        {/* RESULT VIDEO */}
+        {/* VIDEO OUTPUT */}
         {resultVideo && (
           <div className="mt-6 w-full max-w-md">
-            <video
-              src={resultVideo}
-              controls
-              className="rounded-lg w-full"
-            />
+            <video src={resultVideo} controls className="w-full rounded-xl shadow-lg" />
 
             <button
               onClick={() => {
@@ -117,48 +102,74 @@ export default function Dashboard() {
                 a.download = "movie.mp4";
                 a.click();
               }}
-              className="mt-2 w-full bg-green-500 py-2 rounded"
+              className="mt-3 w-full bg-green-500 py-2 rounded-xl"
             >
               📥 Download Movie
             </button>
           </div>
         )}
 
-      </div>
-
-      {/* WAVE */}
-      <div className="absolute bottom-6 w-full flex justify-center gap-1 opacity-30">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="w-1 bg-cyan-400 animate-bounce"
-            style={{
-              height: `${Math.random() * 40 + 10}px`,
-              animationDelay: `${i * 0.1}s`
-            }}
-          />
-        ))}
-      </div>
+      </main>
 
     </div>
   );
 }
 
-// ================= BUTTON =================
+// ===== 3D HOLOGRAM BUTTON =====
 
-function Button({ icon, label, sub, onClick, primary }: any) {
+function HoloButton({ icon, label, onClick, primary }: any) {
+  const ref = useRef<any>(null);
+
+  const handleMove = (e: any) => {
+    const rect = ref.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const rotateX = -(y - rect.height / 2) / 8;
+    const rotateY = (x - rect.width / 2) / 8;
+
+    ref.current.style.transform = `
+      perspective(900px)
+      rotateX(${rotateX}deg)
+      rotateY(${rotateY}deg)
+      scale(1.05)
+    `;
+
+    ref.current.style.boxShadow = `
+      ${x/8}px ${y/8}px 40px rgba(0,255,255,0.35),
+      0 0 25px rgba(0,255,255,0.2)
+    `;
+  };
+
+  const reset = () => {
+    ref.current.style.transform = "perspective(900px) rotateX(0) rotateY(0)";
+    ref.current.style.boxShadow = "0 0 20px rgba(0,255,255,0.2)";
+  };
+
   return (
     <button
+      ref={ref}
+      onMouseMove={handleMove}
+      onMouseLeave={reset}
       onClick={onClick}
-      className={`p-4 rounded-2xl border transition-all
+      className={`relative p-6 rounded-2xl border backdrop-blur-xl transition-all duration-300 active:scale-95 overflow-hidden
       ${primary
-        ? "bg-blue-600 border-blue-400"
-        : "bg-[#111] border-zinc-700 hover:border-cyan-400"
+        ? "bg-blue-500/20 border-blue-400 shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+        : "bg-cyan-500/5 border-cyan-400/20"
       }`}
     >
-      <div className="mb-2">{icon}</div>
-      <p className="text-xs font-bold">{label}</p>
-      <p className="text-[10px] text-zinc-500">{sub}</p>
+
+      {/* moving light */}
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/10 to-transparent opacity-0 hover:opacity-100 transition duration-300"/>
+
+      <div className="mb-2 flex justify-center text-cyan-400">
+        {icon}
+      </div>
+
+      <p className="text-xs font-bold text-center tracking-widest">
+        {label}
+      </p>
+
     </button>
   );
 }
