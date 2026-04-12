@@ -4,8 +4,8 @@ import {
   Video, Wand2, Music, Trash2, Download, RefreshCcw 
 } from "lucide-react";
 
-// @ts-ignore
-const fabric = window.fabric;
+// --- GLOBAL INSTANCE TO PREVENT MEMORY LEAKS ---
+let globalCanvas: any = null;
 
 export default function RXStudioFullPower() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -15,43 +15,63 @@ export default function RXStudioFullPower() {
   const [loading, setLoading] = useState(false);
   const [activeObj, setActiveObj] = useState<any>(null);
 
-  // 1. 🔥 REAL ENGINE INIT
   useEffect(() => {
+    let animationId: number;
+
     const initCanvas = () => {
-      if (!canvasRef.current) return;
+      if (!canvasRef.current || globalCanvas) return;
+
+      // @ts-ignore
+      const f = window.fabric;
       
-      const c = new fabric.Canvas(canvasRef.current, {
+      globalCanvas = new f.Canvas(canvasRef.current, {
         width: 360,
         height: 640,
         backgroundColor: "#000",
         preserveObjectStacking: true,
+        renderOnAddRemove: false, // Performance Boost
+        selection: true
       });
 
-      // Frame-by-frame rendering loop for Video/Animations
-      fabric.util.requestAnimFrame(function render() {
-        c.renderAll();
-        fabric.util.requestAnimFrame(render);
-      });
+      // Optimized Animation Loop
+      const renderLoop = () => {
+        globalCanvas.renderAll();
+        animationId = f.util.requestAnimFrame(renderLoop);
+      };
+      renderLoop();
 
-      setCanvas(c);
-      
-      // Events for UI Updates
-      c.on("selection:created", (e: any) => setActiveObj(e.selected[0]));
-      c.on("selection:cleared", () => setActiveObj(null));
+      setCanvas(globalCanvas);
+
+      // Events
+      globalCanvas.on("selection:created", (e: any) => setActiveObj(e.selected[0]));
+      globalCanvas.on("selection:cleared", () => setActiveObj(null));
     };
 
-    // Script load check
+    // Lazy Load Fabric
+    // @ts-ignore
     if (!window.fabric) {
       const script = document.createElement("script");
       script.src = "https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js";
+      script.async = true;
       script.onload = initCanvas;
       document.body.appendChild(script);
     } else {
       initCanvas();
     }
+
+    // 🔥 THE FIX: Cleanup on Unmount (Hanging prevent karne ke liye)
+    return () => {
+      if (globalCanvas) {
+        // @ts-ignore
+        window.fabric.util.cancelAnimFrame(animationId);
+        globalCanvas.dispose();
+        globalCanvas = null;
+        setCanvas(null);
+      }
+    };
   }, []);
 
-  // 2. 🎬 REAL VIDEO UPLOAD & RENDER
+  // --- ACTIONS ---
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !canvas) return;
@@ -66,132 +86,83 @@ export default function RXStudioFullPower() {
 
     videoEl.onloadeddata = () => {
       videoEl.play();
-      const fabVideo = new fabric.Image(videoEl, {
-        left: 180,
-        top: 320,
-        originX: 'center',
-        originY: 'center',
-        objectCaching: false,
+      // @ts-ignore
+      const fabVideo = new window.fabric.Image(videoEl, {
+        left: 180, top: 320, originX: 'center', originY: 'center', objectCaching: false,
       });
-
       fabVideo.scaleToWidth(360);
       canvas.add(fabVideo);
-      canvas.setActiveObject(fabVideo);
       setLoading(false);
     };
   };
 
-  // 3. ✍️ REAL TEXT ADDITION
   const addText = () => {
     if (!canvas) return;
-    const text = new fabric.Textbox("EDIT ME", {
-      left: 100,
-      top: 100,
-      fontFamily: 'Impact',
-      fill: '#ffffff',
-      fontSize: 40,
-      textAlign: 'center',
-      width: 200
+    // @ts-ignore
+    const text = new window.fabric.Textbox("RX SUPERSTAR", {
+      left: 100, top: 100, fontFamily: 'Impact', fill: '#ffffff', fontSize: 40, width: 200
     });
     canvas.add(text).setActiveObject(text);
   };
 
-  // 4. 💾 REAL EXPORT (Blob Generation)
-  const exportVideo = () => {
-    if (!canvas) return;
-    setLoading(true);
-    // Real export logic: yahan hum canvas data ko backend engine pe bhejenge
-    const data = canvas.toJSON();
-    console.log("Exporting Scene Data:", data);
-    
-    // Simulate Render
-    setTimeout(() => {
-      alert("Project sent to RX God Engine for 4K Rendering!");
-      setLoading(false);
-    }, 2000);
-  };
-
   return (
-    <div className="h-screen w-screen bg-[#050505] text-white flex flex-col overflow-hidden font-sans">
-      
+    <div className="h-screen w-screen bg-black text-white flex flex-col overflow-hidden font-sans">
       {/* HEADER */}
-      <header className="p-4 flex justify-between items-center bg-black/80 backdrop-blur-xl border-b border-white/5 z-50">
-        <div className="flex flex-col">
-          <span className="text-sm font-black text-cyan-500 italic tracking-tighter">RX NEXUS PRO</span>
-          <span className="text-[7px] text-zinc-500 uppercase tracking-[0.4em]">Cinematic Production Suite</span>
+      <header className="p-4 flex justify-between items-center bg-zinc-950 border-b border-white/5 z-50">
+        <div className="flex flex-col leading-tight">
+          <span className="text-sm font-black text-cyan-500 italic">RX STUDIO</span>
+          <span className="text-[7px] text-zinc-500 uppercase tracking-widest">Live Engine</span>
         </div>
-        <button 
-          onClick={exportVideo}
-          className="bg-white text-black px-6 py-2 rounded-full text-[10px] font-black hover:bg-cyan-400 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-        >
-          {loading ? "PROCESSING..." : "FINALIZE & POST"}
+        <button onClick={() => alert("Rendering 4K Cinema...")} className="bg-white text-black px-6 py-1.5 rounded-full text-[10px] font-black uppercase shadow-lg active:scale-90 transition-all">
+          FINALIZE
         </button>
       </header>
 
-      {/* VIEWPORT */}
-      <main className="flex-1 flex items-center justify-center p-4 relative bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-black to-black">
-        {loading && (
-          <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
-            <RefreshCcw className="text-cyan-500 animate-spin mb-2" size={32} />
-            <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">RX Engine Working...</p>
-          </div>
-        )}
-
-        <div className="relative rounded-[32px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)] border-4 border-white/5 group">
+      {/* CANVAS AREA */}
+      <main className="flex-1 flex items-center justify-center p-4 bg-[#080808] relative">
+        <div className="relative rounded-[32px] overflow-hidden border-2 border-white/5 shadow-2xl">
           <canvas ref={canvasRef} />
         </div>
 
-        {/* Floating Context Bar */}
         {activeObj && (
-          <div className="absolute top-10 flex gap-3 bg-zinc-900/90 p-3 rounded-2xl border border-white/10 shadow-2xl animate-in fade-in zoom-in">
-            <button onClick={() => { canvas.remove(activeObj); canvas.discardActiveObject(); }} className="text-red-500 hover:scale-110 transition-transform"><Trash2 size={20}/></button>
-            <button className="text-white hover:text-cyan-400"><Wand2 size={20}/></button>
+          <div className="absolute top-8 bg-zinc-900/90 p-2 rounded-xl border border-white/10 flex gap-4 animate-in fade-in slide-in-from-top-2">
+            <button onClick={() => { canvas.remove(activeObj); canvas.discardActiveObject(); }} className="text-red-500"><Trash2 size={20}/></button>
           </div>
         )}
       </main>
 
-      {/* BOTTOM CONTROL HUB */}
-      <div className="bg-zinc-950 rounded-t-[48px] p-8 border-t border-white/5 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-        
-        {/* Playhead */}
-        <div className="flex justify-center -mt-16 mb-8">
+      {/* CONTROLS */}
+      <div className="bg-zinc-950 rounded-t-[40px] p-6 pb-10 border-t border-white/5">
+        <div className="flex justify-center -mt-14 mb-6">
           <button 
-            onClick={() => {
-              setPlaying(!playing);
-              const videos = canvas.getObjects('image');
-              videos.forEach((v: any) => {
-                const el = v.getElement();
-                playing ? el.pause() : el.play();
-              });
-            }}
-            className="w-16 h-16 bg-gradient-to-tr from-cyan-600 to-cyan-400 text-black rounded-full flex items-center justify-center shadow-xl hover:scale-105 active:scale-90 transition-all"
+            onClick={() => setPlaying(!playing)}
+            className="w-16 h-16 bg-cyan-500 text-black rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.3)]"
           >
-            {playing ? <Pause fill="black" size={28} /> : <Play fill="black" size={28} className="ml-1" />}
+            {playing ? <Pause fill="black" size={28}/> : <Play fill="black" size={28} className="ml-1"/>}
           </button>
         </div>
 
-        {/* Features Menu */}
-        <div className="grid grid-cols-4 gap-6 max-w-md mx-auto">
-          <ActionBtn icon={<Video />} label="Import" onClick={() => videoInputRef.current?.click()} />
-          <ActionBtn icon={<Type />} label="Text" onClick={addText} />
-          <ActionBtn icon={<Music />} label="Music" onClick={() => {}} />
-          <ActionBtn icon={<Wand2 />} label="AI FX" onClick={() => {}} />
+        <div className="grid grid-cols-4 gap-4 max-w-sm mx-auto">
+          <button onClick={() => videoInputRef.current?.click()} className="flex flex-col items-center gap-2">
+            <div className="p-4 bg-zinc-900 rounded-2xl text-zinc-400"><Video size={20}/></div>
+            <span className="text-[8px] font-bold text-zinc-500">IMPORT</span>
+          </button>
+          <button onClick={addText} className="flex flex-col items-center gap-2">
+            <div className="p-4 bg-zinc-900 rounded-2xl text-zinc-400"><Type size={20}/></div>
+            <span className="text-[8px] font-bold text-zinc-500">TEXT</span>
+          </button>
+          <button className="flex flex-col items-center gap-2">
+            <div className="p-4 bg-zinc-900 rounded-2xl text-zinc-400"><Music size={20}/></div>
+            <span className="text-[8px] font-bold text-zinc-500">AUDIO</span>
+          </button>
+          <button className="flex flex-col items-center gap-2">
+            <div className="p-4 bg-zinc-900 rounded-2xl text-zinc-400"><Wand2 size={20}/></div>
+            <span className="text-[8px] font-bold text-zinc-500">AI FX</span>
+          </button>
         </div>
       </div>
 
-      {/* Hidden Inputs */}
       <input type="file" ref={videoInputRef} hidden accept="video/*" onChange={handleVideoUpload} />
     </div>
-  );
-}
-
-function ActionBtn({ icon, label, onClick }: any) {
-  return (
-    <button onClick={onClick} className="flex flex-col items-center gap-3 group">
-      <div className="p-5 bg-zinc-900 rounded-[24px] text-zinc-400 group-hover:bg-cyan-500/10 group-hover:text-cyan-400 border border-transparent group-hover:border-cyan-500/20 transition-all shadow-inner">
-        {React.cloneElement(icon, { size: 24 })}
-      </div>
-      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{label}</span>
-    </button>
   );
 }
