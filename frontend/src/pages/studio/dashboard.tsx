@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { account } from "@/lib/appwrite"; 
 import { useLocation } from "wouter";
 import { 
-  ImageIcon, Mic, Music, PlaySquare, Guitar, Piano, User, ChevronRight 
+  Image as ImageIcon, Mic, Music, PlaySquare, Guitar, Piano, User 
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -10,95 +10,101 @@ export default function Dashboard() {
   const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
-    account.get().then(setUserData).catch(() => console.log("Offline"));
+    account.get().then(setUserData).catch(() => console.log("Nexus Core Offline"));
   }, []);
 
   return (
-    <div className="h-screen w-screen bg-[#000000] text-white flex flex-col font-sans overflow-hidden relative">
+    <div className="fixed inset-0 bg-black text-white flex flex-col font-sans overflow-hidden">
       
-      {/* 🌌 Background Glows (Image ki tarah subtle light) */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[120px] rounded-full" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[120px] rounded-full" />
+      {/* 🌌 Background Elements for Depth */}
+      <div className="absolute top-[-20%] left-[-10%] w-[100%] h-[60%] bg-blue-600/10 blur-[150px] rounded-full" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[80%] h-[50%] bg-purple-900/10 blur-[150px] rounded-full" />
 
-      {/* Header */}
-      <header className="relative p-8 flex justify-between items-center z-10">
-        <div>
-          <p className="text-[10px] font-black tracking-[0.5em] text-blue-400 uppercase opacity-80">Neural System v1.0</p>
-          <h1 className="text-3xl font-bold tracking-tight mt-1">
-            Hi <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400">
-              {userData?.name?.split(' ')[0] || 'User'}
-            </span>
+      {/* 🔮 Header Section */}
+      <header className="relative z-20 flex justify-between items-center p-8 pt-10 shrink-0">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-black tracking-[0.4em] text-cyan-500 uppercase italic">Neural Core Active</span>
+          <h1 className="text-3xl font-black tracking-tighter mt-1 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
+            Hi {userData?.name?.split(' ')[0] || 'Explorer'},
           </h1>
         </div>
-        <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center shadow-2xl">
-          <User size={24} className="text-zinc-400" />
+        <div className="w-16 h-16 rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-md flex items-center justify-center shadow-2xl overflow-hidden">
+           <User size={28} className="text-zinc-500" />
         </div>
       </header>
 
-      {/* 🛠️ MAIN GRID (99% Image Match) */}
-      <main className="relative flex-1 px-6 flex flex-col justify-center z-10 mb-10">
-        <p className="text-zinc-500 text-[11px] font-black tracking-[0.3em] uppercase mb-10 text-center">Execute Command</p>
+      {/* 🚀 Central Command Grid (Matches Image Layout) */}
+      <main className="relative z-20 flex-1 flex flex-col items-center justify-center px-6 pb-12">
+        <p className="text-zinc-500 text-[11px] font-black tracking-[0.4em] uppercase mb-10 opacity-60">System Ready: Select Protocol</p>
         
         <div className="grid grid-cols-2 gap-6 w-full max-w-lg mx-auto">
-          <NexusButton 
-            icon={<ImageIcon size={26}/>} label="Create Image" sub="Diffusion" 
+          <StudioButton 
+            icon={<ImageIcon size={28}/>} label="Create Image" sub="STABLE DIFFUSION" 
             onClick={() => setLocation("/studio/editor")}
           />
-          <NexusButton 
-            icon={<Mic size={26}/>} label="Create Voice" sub="VoiceLab" 
+          <StudioButton 
+            icon={<Mic size={28}/>} label="Create Voice" sub="VOICE CLONE" 
+            onClick={() => setLocation("/studio/voice")}
           />
-          <NexusButton 
-            icon={<Piano size={26}/>} label="Create Melody" sub="Synth" 
+          <StudioButton 
+            icon={<Piano size={28}/>} label="Create Melody" sub="NEURAL SYNTH" 
           />
-          <NexusButton 
-            icon={<Guitar size={26}/>} label="Create Music" sub="Drums" 
+          <StudioButton 
+            icon={<Guitar size={28}/>} label="Create Music" sub="DRUM KIT" 
           />
-          <NexusButton 
-            icon={<PlaySquare size={26}/>} label="Create Video" sub="Cinema" 
+          <StudioButton 
+            icon={<PlaySquare size={28}/>} label="Create Video" sub="CINEMA AI" 
           />
           
-          {/* 🌟 The Primary Blue Button */}
-          <NexusButton 
-            icon={<Music size={26}/>} label="Create Song" sub="Vocalist" 
-            primary={true}
+          {/* 🌟 The Highlighted Blue Button from Image */}
+          <StudioButton 
+            icon={<Music size={28}/>} label="Create Song" sub="FULL PRODUCTION" 
+            highlight={true}
           />
         </div>
       </main>
+
+      {/* 📉 Visualizer Footer */}
+      <footer className="relative z-20 h-20 flex items-center justify-center px-8 opacity-20">
+         <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+      </footer>
     </div>
   );
 }
 
 // 🎨 HIGH-END BUTTON COMPONENT
-function NexusButton({ icon, label, sub, onClick, primary = false }: any) {
+function StudioButton({ icon, label, sub, onClick, highlight = false }: any) {
   return (
     <button 
       onClick={onClick}
-      className={`group relative flex flex-col items-center justify-center p-8 rounded-[35px] transition-all duration-300 active:scale-90
-        ${primary 
-          ? "bg-[#2563eb] shadow-[0_20px_50px_rgba(37,99,235,0.3)] border-t border-white/30" 
-          : "bg-[#121214] border border-white/5 shadow-2xl hover:bg-[#1a1a1c] hover:border-white/10"}`}
+      className={`relative flex flex-col items-center justify-center p-8 rounded-[40px] border transition-all duration-500 active:scale-90 group
+        ${highlight 
+          ? "bg-[#2563eb] border-white/30 shadow-[0_25px_60px_rgba(37,99,235,0.4)]" 
+          : "bg-zinc-900/40 border-white/5 backdrop-blur-xl hover:border-cyan-500/30 shadow-2xl"}`}
     >
-      {/* Gloss Effect (Upper Highlight) */}
-      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+      {/* Bezel Light Effect */}
+      <div className={`absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent ${highlight ? 'via-white/40' : 'via-white/10'} to-transparent`} />
       
-      <div className={`mb-4 p-4 rounded-[22px] ${primary ? "bg-white/10" : "bg-white/5 group-hover:scale-110 transition-transform"}`}>
+      {/* Icon Area */}
+      <div className={`mb-4 p-4 rounded-3xl transition-transform duration-500 group-hover:scale-110
+        ${highlight ? "bg-white/15 shadow-inner" : "bg-white/5 shadow-inner"}`}>
         {React.cloneElement(icon, { 
-          className: primary ? "text-white" : "text-zinc-400 group-hover:text-blue-400",
+          className: highlight ? "text-white" : "text-zinc-400 group-hover:text-cyan-400",
           strokeWidth: 1.5
         })}
       </div>
       
       <div className="text-center">
-        <span className={`block text-[12px] font-black uppercase tracking-widest ${primary ? "text-white" : "text-zinc-300"}`}>
+        <p className={`text-[12px] font-black uppercase tracking-[0.1em] ${highlight ? "text-white" : "text-zinc-200"}`}>
           {label}
-        </span>
-        <span className={`block text-[8px] font-bold mt-1 tracking-widest uppercase ${primary ? "text-blue-100/50" : "text-zinc-600"}`}>
+        </p>
+        <p className={`text-[8px] font-bold mt-1 tracking-widest uppercase ${highlight ? "text-blue-100/60" : "text-zinc-600 group-hover:text-cyan-800"}`}>
           {sub}
-        </span>
+        </p>
       </div>
 
-      {/* Subtle Dot (Jaisa image mein hai) */}
-      <div className={`absolute bottom-4 w-1 h-1 rounded-full ${primary ? "bg-white/40" : "bg-transparent group-hover:bg-blue-500/50"}`} />
+      {/* Decorative Dot */}
+      <div className={`absolute bottom-5 w-1 h-1 rounded-full ${highlight ? 'bg-white/50' : 'bg-transparent group-hover:bg-cyan-500'}`} />
     </button>
   );
 }
