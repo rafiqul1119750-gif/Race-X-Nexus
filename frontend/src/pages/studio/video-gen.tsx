@@ -1,30 +1,20 @@
-import { useState } from "react";
+import React from "react";
+import { ArrowLeft, Wand2 } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function VideoGen() {
-  const [images, setImages] = useState<File[]>([]);
-  const [video, setVideo] = useState<string | null>(null);
-
-  const generateVideo = () => {
-    setVideo("/demo-video.mp4");
-  };
-
+  const [, setLocation] = useLocation();
   return (
-    <div className="p-4 text-white bg-black min-h-screen">
-      <input
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={(e) => setImages([...e.target.files!])}
-        className="mb-4"
-      />
-
-      <button onClick={generateVideo} className="w-full bg-blue-500 p-3 rounded-xl">
-        🎬 Create Cinematic Video
-      </button>
-
-      {video && (
-        <video controls src={video} className="w-full mt-4 rounded-xl" />
-      )}
+    <div className="min-h-screen bg-black text-white p-6 flex flex-col">
+      <header className="flex justify-between items-center mb-10">
+        <button onClick={() => setLocation("/studio")}><ArrowLeft /></button>
+        <span className="text-xs font-bold tracking-widest text-purple-500">AI CINEMA</span>
+        <div className="w-6" />
+      </header>
+      <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-[40px]">
+        <Wand2 size={48} className="text-purple-500 mb-4 animate-pulse" />
+        <p className="text-zinc-500 text-sm font-bold uppercase tracking-tighter">Engine Loading...</p>
+      </div>
     </div>
   );
 }
