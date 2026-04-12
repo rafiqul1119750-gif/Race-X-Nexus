@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { account, databases } from "@/lib/appwrite"; 
+import { account } from "@/lib/appwrite"; 
 import { useLocation } from "wouter";
 import { 
-  Image as ImageIcon, Mic, Music, PlaySquare, Guitar, Piano, User 
+  ImageIcon, Mic, Music, PlaySquare, Guitar, Piano, User, Sparkles 
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -10,85 +10,108 @@ export default function Dashboard() {
   const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
-    account.get().then(setUserData).catch(() => console.log("Nexus Core Offline"));
+    account.get().then(setUserData).catch(() => console.log("Nexus Offline"));
   }, []);
 
   return (
-    <div className="h-screen w-screen bg-[#050505] text-white flex flex-col p-6 font-sans overflow-hidden">
-      {/* 🔮 Top Bar - User Profile */}
-      <header className="flex justify-between items-center mb-10 shrink-0">
+    <div className="h-screen w-screen bg-black text-white flex flex-col font-sans overflow-hidden relative">
+      
+      {/* 🌌 Background Texture (Carbon Fiber Effect) */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none" 
+           style={{ backgroundImage: `radial-gradient(#111 1px, transparent 0)`, backgroundSize: '20px 20px' }} />
+      
+      <header className="relative p-6 flex justify-between items-start z-10 shrink-0">
         <div className="flex flex-col">
-          <span className="text-[10px] font-black tracking-[0.4em] text-cyan-500 uppercase italic">Neural Core Active</span>
-          <h1 className="text-xl font-black tracking-tight">Hi {userData?.name || 'Explorer'},</h1>
+          <span className="text-[10px] font-black tracking-[0.5em] text-cyan-400 uppercase italic animate-pulse">
+            Neural Core Active
+          </span>
+          <h1 className="text-3xl font-black tracking-tighter mt-1 bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">
+            Hi {userData?.name?.split(' ')[0] || 'Explorer'},
+          </h1>
         </div>
-        <div className="w-14 h-14 rounded-full border-2 border-cyan-500/50 p-1 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-           <div className="w-full h-full rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden">
-              <User size={24} className="text-cyan-500" />
-           </div>
+        
+        {/* Profile Ring (Jaisa image mein hai) */}
+        <div className="relative group">
+          <div className="w-14 h-14 rounded-full border-[3px] border-cyan-500/40 p-1 shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all group-hover:shadow-cyan-500/60">
+             <div className="w-full h-full rounded-full bg-zinc-900 flex items-center justify-center overflow-hidden border border-white/10">
+                <User size={26} className="text-cyan-400" />
+             </div>
+          </div>
         </div>
       </header>
 
-      {/* 🌌 Central Menu Grid (Jaisa Image Mein Hai) */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-6 max-w-xl mx-auto w-full">
-        <p className="text-zinc-500 text-[11px] font-bold tracking-widest uppercase mb-4">Where should we start?</p>
+      <main className="relative flex-1 flex flex-col items-center justify-center p-6 z-10">
+        <p className="text-zinc-500 text-[11px] font-black tracking-[0.3em] uppercase mb-8 opacity-60">
+          Where should we start?
+        </p>
         
-        <div className="grid grid-cols-2 gap-4 w-full">
+        {/* 🛠️ GRID START */}
+        <div className="grid grid-cols-2 gap-5 w-full max-w-md">
           <StudioButton 
-            icon={<ImageIcon size={20}/>} label="Create Image" sub="STABLE DIFFUSION HD" 
-            onClick={() => setLocation("/studio/video")} // Map to your path
+            icon={<ImageIcon size={22}/>} label="Create Image" sub="STABLE DIFFUSION HD" 
+            glowColor="group-hover:shadow-[0_0_25px_rgba(34,211,238,0.3)]"
+            onClick={() => setLocation("/studio/video")} 
           />
           <StudioButton 
-            icon={<Mic size={20}/>} label="Create Voice" sub="VOICELAB 3.0" 
-            onClick={() => setLocation("/studio/voice")}
+            icon={<Mic size={22}/>} label="Create Voice" sub="VOICELAB 3.0" 
+            glowColor="group-hover:shadow-[0_0_25px_rgba(34,211,238,0.3)]"
           />
           <StudioButton 
-            icon={<Piano size={20}/>} label="Create Melody" sub="SYNTH CORE" 
+            icon={<Piano size={22}/>} label="Create Melody" sub="SYNTH CORE" 
           />
           <StudioButton 
-            icon={<Guitar size={20}/>} label="Create Music" sub="DRUM MACHINE" 
+            icon={<Guitar size={22}/>} label="Create Music" sub="DRUM MACHINE" 
           />
           <StudioButton 
-            icon={<PlaySquare size={20}/>} label="Create Video" sub="CINEMA AI" 
-            onClick={() => setLocation("/studio/video")}
+            icon={<PlaySquare size={22}/>} label="Create Video" sub="CINEMA AI" 
           />
+          
+          {/* 🌟 Special Highlighted Button (The "Blue One" from image) */}
           <StudioButton 
-            icon={<Music size={20}/>} label="Create Song" sub="VOCALS + VISUALS" 
-            highlight={true}
+            icon={<Music size={22}/>} label="Create Song" sub="VOCALS + VISUALS" 
+            isPrimary={true}
           />
         </div>
-      </div>
 
-      {/* 📈 Waveform Visualizer (Fake) */}
-      <div className="h-12 w-full flex items-center justify-center mt-10 opacity-40">
-        <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent relative">
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-6 bg-cyan-500/20 blur-xl rounded-full" />
+        {/* 📉 Neural Waveform Footer */}
+        <div className="mt-12 w-full max-w-xs h-10 flex items-center justify-center gap-1 opacity-40">
+           {[...Array(20)].map((_, i) => (
+             <div key={i} className="w-1 bg-cyan-500 rounded-full animate-bounce" 
+                  style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.1}s` }} />
+           ))}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
 
-// 🎨 Styled Button Component
-function StudioButton({ icon, label, sub, onClick, highlight = false }: any) {
+function StudioButton({ icon, label, sub, onClick, isPrimary = false, glowColor }: any) {
   return (
     <button 
       onClick={onClick}
-      className={`relative p-5 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-2 group overflow-hidden
-        ${highlight 
-          ? "bg-blue-600/20 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]" 
-          : "bg-zinc-900/40 border-white/5 hover:border-cyan-500/50 hover:bg-zinc-800/60"}`}
+      className={`group relative flex flex-col items-center justify-center p-6 rounded-[28px] border-2 transition-all duration-500 active:scale-95 overflow-hidden
+        ${isPrimary 
+          ? "bg-blue-600 border-blue-400 shadow-[0_0_30px_rgba(37,99,235,0.4)]" 
+          : "bg-[#111]/80 border-white/5 hover:border-cyan-500/50 " + glowColor}`}
     >
-      {/* Glossy Overlay */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+      {/* Glossy Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
       
-      <div className={`p-3 rounded-xl ${highlight ? "bg-blue-500" : "bg-white/5 group-hover:bg-cyan-500/20"} transition-colors`}>
-        {React.cloneElement(icon, { className: highlight ? "text-white" : "text-zinc-400 group-hover:text-cyan-400" })}
+      {/* Icon Wrapper */}
+      <div className={`mb-3 p-3 rounded-2xl transition-all duration-300 
+        ${isPrimary ? "bg-white/20" : "bg-white/5 group-hover:bg-cyan-500/20 group-hover:scale-110"}`}>
+        {React.cloneElement(icon, { 
+          className: isPrimary ? "text-white" : "text-zinc-400 group-hover:text-cyan-400",
+          strokeWidth: 2.5 
+        })}
       </div>
       
-      <div className="text-center">
-        <p className="text-[10px] font-black uppercase tracking-widest">{label}</p>
-        <p className={`text-[7px] font-bold mt-1 tracking-tighter ${highlight ? "text-blue-300" : "text-zinc-600"}`}>{sub}</p>
-      </div>
+      <span className={`text-[11px] font-black uppercase tracking-widest ${isPrimary ? "text-white" : "text-zinc-300 group-hover:text-white"}`}>
+        {label}
+      </span>
+      <span className={`text-[7px] font-bold mt-1 tracking-tighter ${isPrimary ? "text-blue-100/60" : "text-zinc-600 group-hover:text-cyan-700"}`}>
+        {sub}
+      </span>
     </button>
   );
 }
