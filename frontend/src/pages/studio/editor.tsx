@@ -1,129 +1,185 @@
 import React, { useEffect, useRef, useState } from "react";
 import { 
-  Sparkles, Zap, ArrowLeft, Send, Loader2, ChevronRight, Type, Video, Mic, Layers, Plus
+  Sparkles, Zap, ArrowLeft, Send, Loader2, Video, Mic
 } from "lucide-react";
 import { useLocation } from "wouter";
 
-// --- IMPORTANT: Adding 'export default' to fix Render Build Error ---
-export default function Editor() {
+// Real AI Generation require API Key (Replace with your own)
+const HF_API_KEY = "hf_xxxxxxxxxxxxxxxxxxxxxxxx"; // HuggingFace Key
+
+export default function AutoAiEditor() {
   const [, setLocation] = useLocation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<any>(null);
   const [prompt, setPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const loadFabric = () => {
-      // @ts-ignore
-      if (window.fabric && canvasRef.current && !fabricRef.current) {
+    // Dynamic Fabric.js Load
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js";
+    script.async = true;
+    script.onload = () => {
+      if (canvasRef.current && !fabricRef.current) {
         // @ts-ignore
         fabricRef.current = new window.fabric.Canvas(canvasRef.current, {
-          width: 340,
-          height: 420, // Adjusted for Gemini layout
-          backgroundColor: "transparent",
+          width: 340, height: 480, backgroundColor: "transparent",
         });
       }
     };
+    document.body.appendChild(script);
 
-    if (!(window as any).fabric) {
-      const script = document.createElement("script");
-      script.src = "https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js";
-      script.async = true;
-      script.onload = loadFabric;
-      document.body.appendChild(script);
-    } else {
-      loadFabric();
-    }
-
-    return () => {
-      if (fabricRef.current) {
-        fabricRef.current.dispose();
-        fabricRef.current = null;
-      }
-    };
+    return () => { if (fabricRef.current) fabricRef.current.dispose(); fabricRef.current = null; };
   }, []);
 
-  const handleCommand = () => {
-    if (!prompt.trim() || !fabricRef.current) return;
-    setIsProcessing(true);
+  // --- 🧠 REAL AI API CALL FUNCTIONS ---
+
+  // 1. Scene Generation (Real Function)
+  const generateScene = async (p: string) => {
+    setProgress(20);
+    // Real API Call to HuggingFace (Example: SDXL for image, can be changed to video model)
+    const response = await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${HF_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ inputs: p }),
+    });
     
-    // Neural Logic Simulation
-    setTimeout(() => {
+    if (!response.ok) throw new Error("Scene generation failed");
+    
+    const blob = await response.blob();
+    const objectURL = URL.createObjectURL(blob);
+    
+    return new Promise((resolve) => {
+        // @ts-ignore
+        window.fabric.Image.fromURL(objectURL, (img: any) => {
+            img.set({ left: 0, top: 0, selectable: false });
+            img.scaleToWidth(340);
+            resolve(img);
+        });
+    });
+  };
+
+  // 2. Audio Generation (Simplified for demo)
+  const generateAudio = async (p: string) => {
+    setProgress(60);
+    // In real scenario, connect to an audio gen API like Suno or Bark
+    return new Promise((resolve) => {
+      setTimeout(() => resolve("audio_url_placeholder"), 2000); 
+    });
+  };
+
+  // --- 🔥 CORE: AUTO-GENERATION PIPELINE ---
+  const processNeuralCommand = async () => {
+    if (!prompt.trim() || !fabricRef.current || !HF_API_KEY.includes("hf_")) {
+      return alert("Pehle valid API Key daalo aur prompt likho!");
+    }
+    
+    setIsProcessing(true);
+    setProgress(10);
+    
+    try {
+      // Step 1: CLEAR Canvas for new creation
+      fabricRef.current.clear(); 
+      
+      // Step 2 & 3: Run Visual & Audio APIs in Parallel (Simulated)
+      const [visualLayer] = await Promise.all([
+          generateScene(prompt),
+          generateAudio(prompt)
+      ]);
+      
+      setProgress(90);
+      
+      // Step 4: Add Visual Layer to back
+      fabricRef.current.add(visualLayer);
+      fabricRef.current.sendToBack(visualLayer);
+      
+      // Step 5: (Optional) Add Title Overlay based on prompt
       // @ts-ignore
-      const fabric = window.fabric;
-      const layer = new fabric.Textbox(prompt.toUpperCase(), {
-        left: 50, top: 150, width: 240, fontSize: 20,
-        fill: "#fff", fontFamily: "sans-serif", textAlign: "center",
-        backgroundColor: "rgba(0,209,255,0.1)", padding: 10
+      const textLayer = new window.fabric.Textbox(prompt.substring(0,20).toUpperCase(), {
+        left: 20, top: 400, width: 300, fontSize: 16,
+        fill: "#fff", fontFamily: "Impact", textAlign: "center",
+        shadow: "0px 0px 10px rgba(0, 209, 255, 1)",
+        backgroundColor: "rgba(0,0,0,0.5)"
       });
-      fabricRef.current.add(layer).setActiveObject(layer);
-      setIsProcessing(false);
-      setPrompt("");
-    }, 1500);
+      
+      fabricRef.current.add(textLayer);
+      fabricRef.current.setActiveObject(textLayer); // Set as selected for user edit
+      fabricRef.current.renderAll();
+      
+      setProgress(100);
+      setPrompt(""); // Clear input
+      
+    } catch (error) {
+      console.error(error);
+      alert("AI Neural Core error, check API Key/Quota.");
+    } finally {
+      setTimeout(() => setIsProcessing(false), 500); 
+    }
   };
 
   return (
-    <div className="h-screen w-screen bg-[#0E0E0E] text-[#E3E3E3] flex flex-col font-sans">
+    <div className="h-screen w-screen bg-[#050505] text-[#E3E3E3] flex flex-col overflow-hidden font-sans">
       
-      {/* 💎 TOP NAV: Minimal Gemini Style */}
-      <header className="p-4 flex justify-between items-center">
-        <button onClick={() => setLocation("/studio")} className="p-2 hover:bg-zinc-800 rounded-full transition-all">
-          <ArrowLeft size={22} />
+      {/* 🔮 HEADER: Gemini Minimal Style */}
+      <header className="p-4 flex justify-between items-center bg-black/60 backdrop-blur-xl border-b border-white/5 z-50">
+        <button onClick={() => setLocation("/studio")} className="p-2.5 bg-zinc-900 rounded-full active:scale-75 transition-all">
+          <ArrowLeft size={20} />
         </button>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-          <span className="text-xs font-medium tracking-widest uppercase opacity-70">Nexus AI Studio</span>
+        <div className="text-center flex items-center gap-2">
+          <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${isProcessing ? 'bg-yellow-500' : 'bg-cyan-500'}`} />
+          <h2 className="text-[11px] font-black tracking-[0.4em] text-white uppercase">Neural Production</h2>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-full text-[11px] font-bold transition-all shadow-lg shadow-blue-900/20">
-          EXPORT
+        <button className="bg-white text-black px-5 py-2 rounded-full text-[11px] font-black transition-all shadow-lg active:scale-95">
+          {isProcessing ? `Rendering...` : `EXPORT`}
         </button>
       </header>
 
-      {/* 📽️ PREVIEW AREA (The Canvas) */}
-      <main className="flex-1 flex flex-col items-center justify-center p-6">
-        <div className="relative w-full max-w-[340px] aspect-[3/4] rounded-3xl overflow-hidden bg-[#131314] border border-white/5 shadow-2xl">
+      {/* 📽️ PREVIEW AREA: DEVICE FRAME */}
+      <main className="flex-1 flex flex-col items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/black-linen.png')] relative">
+        <div className="relative rounded-[40px] overflow-hidden bg-[#131314] border border-white/5 shadow-2xl aspect-[3/4.2]">
           <canvas ref={canvasRef} />
+          
+          {/* AI Processing Overlay */}
           {isProcessing && (
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-              <Loader2 className="animate-spin text-blue-400" size={32} />
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center z-50 p-10">
+              <Loader2 className="animate-spin text-cyan-400 mb-6" size={40} />
+              <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-full bg-cyan-500 transition-all duration-300" style={{width: `${progress}%`}} />
+              </div>
+              <span className="text-[9px] font-black tracking-widest text-cyan-500 mt-3 animate-pulse">GENERATING NEURAL SCENE...</span>
             </div>
           )}
         </div>
       </main>
 
-      {/* ⌨️ THE PROMPT INTERFACE: Gemini-Inspired */}
-      <div className="px-6 pb-8 pt-2">
-        <div className="max-w-[360px] mx-auto space-y-4">
+      {/* ⌨️ GEMINI PROMPT INPUT */}
+      <div className="px-6 pb-8 pt-2 z-50">
+        <div className="max-w-[360px] mx-auto space-y-4 relative">
           
-          {/* Action Chips (Separate Buttons) */}
-          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-            <Chip icon={<Video size={14}/>} label="Generate Video" />
-            <Chip icon={<Mic size={14}/>} label="Voiceover" />
-            <Chip icon={<Plus size={14}/>} label="Add Image" />
+          {/* Floating Action Chips (Optional usage) */}
+          <div className="absolute -top-12 left-0 flex gap-2 overflow-x-auto pb-2 no-scrollbar pointer-events-none opacity-40">
+            <Chip icon={<Video size={14}/>} label="Auto-Video" active />
+            <Chip icon={<Mic size={14}/>} label="Add Voiceover" />
           </div>
 
-          {/* Floating Input Bar */}
-          <div className="relative flex flex-col bg-[#1E1F20] rounded-[28px] p-2 border border-white/5 focus-within:border-blue-500/50 transition-all shadow-xl">
-            <textarea 
-              rows={1}
+          {/* Input Bar */}
+          <div className={`relative flex items-center rounded-[28px] p-2 border transition-all shadow-xl ${isProcessing ? 'bg-zinc-900 border-white/5' : 'bg-[#1E1F20] border-white/10 focus-within:border-cyan-500/50'}`}>
+            <input 
+              disabled={isProcessing}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Enter a prompt here..." 
-              className="bg-transparent px-4 py-3 text-sm outline-none resize-none placeholder:text-zinc-500"
+              onKeyDown={(e) => e.key === 'Enter' && processNeuralCommand()}
+              placeholder={isProcessing ? "AI Engine is active..." : "Describe your fighting scene..."} 
+              className="bg-transparent flex-1 px-4 py-3 text-sm outline-none resize-none placeholder:text-zinc-600 tracking-wider"
             />
-            <div className="flex justify-between items-center px-2 pb-1">
-              <div className="flex gap-1">
-                <button className="p-2 text-zinc-400 hover:text-blue-400"><Layers size={18}/></button>
-                <button className="p-2 text-zinc-400 hover:text-blue-400"><Zap size={18}/></button>
-              </div>
-              <button 
-                onClick={handleCommand}
-                disabled={!prompt.trim() || isProcessing}
-                className={`p-3 rounded-2xl transition-all ${prompt.trim() ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-600'}`}
-              >
-                <Send size={18} />
-              </button>
-            </div>
+            <button 
+              onClick={processNeuralCommand}
+              disabled={!prompt.trim() || isProcessing}
+              className={`p-3.5 rounded-2xl transition-all ${prompt.trim() && !isProcessing ? 'bg-cyan-500 text-black active:scale-90 hover:rotate-3' : 'bg-zinc-800 text-zinc-600'}`}
+            >
+              {isProcessing ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+            </button>
           </div>
         </div>
       </div>
@@ -131,12 +187,12 @@ export default function Editor() {
   );
 }
 
-// Sub-component for Gemini Style Chips
-function Chip({ icon, label }: { icon: any, label: string }) {
+// Minimal Chip Component
+function Chip({ icon, label, active }: { icon: any, label: string, active?: boolean }) {
   return (
-    <button className="flex items-center gap-2 px-4 py-2 bg-[#1E1F20] border border-white/5 rounded-full whitespace-nowrap hover:bg-zinc-800 transition-all">
-      <span className="text-blue-400">{icon}</span>
-      <span className="text-[10px] font-medium text-zinc-300">{label}</span>
-    </button>
+    <div className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap border ${active ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-[#1E1F20] border-white/5 text-zinc-300'}`}>
+      {icon}
+      <span className="text-[10px] font-medium">{label}</span>
+    </div>
   );
 }
