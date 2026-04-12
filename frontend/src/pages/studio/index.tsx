@@ -1,4 +1,5 @@
 import { Switch, Route, Redirect } from "wouter";
+// Direct Imports
 import Dashboard from "./dashboard";
 import Editor from "./editor";
 import VideoGen from "./video-gen";
@@ -9,18 +10,16 @@ export default function StudioIndex() {
   return (
     <div className="w-full h-full bg-black">
       <Switch>
-        {/* /studio pe Dashboard load hoga */}
-        <Route path="/studio">
-          <Dashboard />
-        </Route>
-
-        {/* Individual Routes - Inhe alag se define karo bina /studio base ke confusion ke */}
+        {/* Sabse pehle static routes check honge */}
         <Route path="/studio/editor" component={Editor} />
         <Route path="/studio/video" component={VideoGen} />
         <Route path="/studio/voice" component={VoiceLab} />
         <Route path="/studio/analytics" component={Analytics} />
+        
+        {/* Dashboard hamesha niche rahega fallback se pehle */}
+        <Route path="/studio" component={Dashboard} />
 
-        {/* Default fallback: Agar kuch match na kare toh seedha /studio */}
+        {/* Catch-all: Agar upar kuch match na ho */}
         <Route>
           <Redirect to="/studio" />
         </Route>
