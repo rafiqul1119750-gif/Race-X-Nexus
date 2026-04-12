@@ -8,16 +8,16 @@ import Analytics from "./analytics";
 export default function StudioIndex() {
   return (
     <Switch>
-      {/* Base Path */}
+      {/* Dashboard - The Hub */}
       <Route path="/studio" component={Dashboard} />
       
-      {/* Sub-paths (Yahan se click hoke jayega) */}
+      {/* Ye paths Dashboard ke handleNav se match karne chahiye */}
       <Route path="/studio/editor" component={Editor} />
       <Route path="/studio/video" component={VideoGen} />
       <Route path="/studio/voice" component={VoiceLab} />
       <Route path="/studio/analytics" component={Analytics} />
 
-      {/* Agar kuch galat ho toh wapas Dashboard */}
+      {/* Agar path galat ho toh redirect back to /studio */}
       <Route>
         <Redirect to="/studio" />
       </Route>
