@@ -1,25 +1,24 @@
-import app from "./app";
-import { logger } from "./lib/logger";
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import studioRouter from "./routes/studio";
 
-const rawPort = process.env["PORT"];
+dotenv.config();
+const app = express();
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
+// ✅ CORS Fix: Frontend URL ko backend mein allow karna
+app.use(cors({
+  origin: "https://race-x-nexus-1.onrender.com",
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 
-const port = Number(rawPort);
+app.use(express.json());
 
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
+// Routes
+app.use("/api/studio", studioRouter);
 
-app.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
-  }
-
-  logger.info({ port }, "Server listening");
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log(`🚀 Nexus Backend Live on Port ${PORT}`);
 });
