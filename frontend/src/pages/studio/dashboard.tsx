@@ -1,6 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { account } from "@/lib/appwrite";
-import { ImageIcon, Mic, Music, PlaySquare, Guitar, Piano, User } from "lucide-react";
+import {
+  ImageIcon,
+  Mic,
+  Music,
+  PlaySquare,
+  Guitar,
+  Piano,
+  User
+} from "lucide-react";
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
@@ -10,7 +18,7 @@ export default function Dashboard() {
 
   const API_BASE = "https://race-x-nexus.onrender.com";
 
-  // 🔥 AUTO WAKE
+  // 🔥 AUTO INIT
   useEffect(() => {
     account.get().then(setUser).catch(() => {});
 
@@ -19,44 +27,63 @@ export default function Dashboard() {
       .catch(() => console.log("Waking server..."));
   }, []);
 
-  // 🚀 MAIN FUNCTION (AUTO RETRY + NO ALERT)
-  async function executeNexusProtocol(endpoint: string, type: 'video' | 'audio' | 'image') {
+  // 🚀 CORE EXECUTION ENGINE
+  async function executeNexusProtocol(
+    endpoint: string,
+    type: "video" | "audio" | "image"
+  ) {
+    if (loading) return;
+
     try {
       setLoading(true);
+      setStatus("⚡ Initializing AI Core...");
 
-      const call = async () => {
+      const callAPI = async () => {
         const res = await fetch(`${API_BASE}${endpoint}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" }
         });
 
-        if (!res.ok) throw new Error("sleep");
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(errText || "API Error");
+        }
+
         return res.json();
       };
 
-      setStatus("⚡ Initializing AI...");
       let data;
 
       try {
-        data = await call();
-      } catch {
-        setStatus("🧠 Waking Neural Core...");
-        await new Promise(r => setTimeout(r, 20000));
-        data = await call();
+        data = await callAPI();
+      } catch (err) {
+        console.log("Retrying...");
+        setStatus("🧠 Waking AI Engine...");
+        await new Promise((r) => setTimeout(r, 3000));
+        data = await callAPI();
       }
 
       setStatus("🎬 Rendering Output...");
 
-      // ===== OUTPUT =====
-      if (type === 'image' && data.url) window.open(data.url);
-      if (type === 'audio' && data.url) new Audio(data.url).play();
-      if (type === 'video' && data.video) setResultVideo(data.video);
+      // OUTPUT HANDLING
+      if (type === "image" && data?.url) {
+        window.open(data.url, "_blank");
+      }
 
-      setStatus("✅ Done");
+      if (type === "audio" && data?.url) {
+        const audio = new Audio(data.url);
+        audio.play().catch(() => console.log("Autoplay blocked"));
+      }
 
-    } catch (err) {
+      if (type === "video" && data?.video) {
+        setResultVideo(data.video);
+      }
+
+      setStatus("✅ Completed");
+
+    } catch (err: any) {
       console.error(err);
-      setStatus("❌ Connection Failed");
+      setStatus("❌ Failed to process request");
     } finally {
       setLoading(false);
       setTimeout(() => setStatus(""), 3000);
@@ -66,96 +93,127 @@ export default function Dashboard() {
   return (
     <div className="h-screen w-screen bg-black text-white flex flex-col relative overflow-hidden font-sans">
 
-      {/* 🌐 GRID */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none"
+      {/* GRID BACKGROUND */}
+      <div
+        className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,255,255,0.1) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(0,255,255,0.1) 1px, transparent 1px)`,
+          backgroundImage:
+            "linear-gradient(rgba(0,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.08) 1px, transparent 1px)",
           backgroundSize: "40px 40px"
         }}
       />
 
       {/* HEADER */}
-      <header className="flex justify-between items-center p-8 z-10">
+      <header className="flex justify-between items-center p-6 z-10">
         <div>
-          <p className="text-cyan-400 text-[10px] tracking-[0.5em] animate-pulse uppercase italic">
+          <p className="text-cyan-400 text-[10px] tracking-[0.5em] uppercase animate-pulse">
             NEURAL CORE ACTIVE
           </p>
-          <h1 className="text-3xl font-black bg-gradient-to-r from-white to-cyan-400 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold">
             Hi {user?.name?.split(" ")[0] || "User"}
           </h1>
         </div>
 
-        <div className="w-14 h-14 rounded-full border border-cyan-400 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border border-cyan-400 flex items-center justify-center">
           <User />
         </div>
       </header>
 
       {/* MAIN */}
-      <main className="flex-1 flex flex-col items-center justify-center z-10 px-6">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 z-10">
 
-        <div className="grid grid-cols-2 gap-6 w-full max-w-md">
+        <div className="grid grid-cols-2 gap-5 w-full max-w-md">
 
-          <HoloButton icon={<ImageIcon />} label="IMAGE"
-            onClick={() => executeNexusProtocol("/create-image", "image")} />
+          <HoloButton
+            icon={<ImageIcon />}
+            label="IMAGE"
+            disabled={loading}
+            onClick={() => executeNexusProtocol("/create-image", "image")}
+          />
 
-          <HoloButton icon={<Mic />} label="VOICE"
-            onClick={() => executeNexusProtocol("/create-voice", "audio")} />
+          <HoloButton
+            icon={<Mic />}
+            label="VOICE"
+            disabled={loading}
+            onClick={() => executeNexusProtocol("/create-voice", "audio")}
+          />
 
-          <HoloButton icon={<Piano />} label="MELODY"
-            onClick={() => executeNexusProtocol("/create-melody", "audio")} />
+          <HoloButton
+            icon={<Piano />}
+            label="MELODY"
+            disabled={loading}
+            onClick={() => executeNexusProtocol("/create-melody", "audio")}
+          />
 
-          <HoloButton icon={<Guitar />} label="MUSIC"
-            onClick={() => executeNexusProtocol("/create-music", "audio")} />
+          <HoloButton
+            icon={<Guitar />}
+            label="MUSIC"
+            disabled={loading}
+            onClick={() => executeNexusProtocol("/create-music", "audio")}
+          />
 
-          <HoloButton icon={<PlaySquare />} label="VIDEO"
-            onClick={() => executeNexusProtocol("/generate-movie", "video")} />
+          <HoloButton
+            icon={<PlaySquare />}
+            label="VIDEO"
+            disabled={loading}
+            onClick={() => executeNexusProtocol("/generate-movie", "video")}
+          />
 
-          <HoloButton icon={<Music />} label="SONG"
-            onClick={() => executeNexusProtocol("/create-song", "audio")} primary />
-
+          <HoloButton
+            icon={<Music />}
+            label="SONG"
+            primary
+            disabled={loading}
+            onClick={() => executeNexusProtocol("/create-song", "audio")}
+          />
         </div>
 
         {/* STATUS */}
         {(loading || status) && (
           <div className="mt-8 text-center">
-            <div className="w-16 h-[2px] bg-zinc-800 mx-auto overflow-hidden">
-              <div className="h-full bg-cyan-400 animate-[shimmer_1.5s_infinite]" style={{ width: "40%" }} />
+            <div className="w-20 h-[3px] bg-zinc-800 mx-auto overflow-hidden rounded">
+              <div className="h-full bg-cyan-400 animate-pulse w-1/2" />
             </div>
             <p className="text-cyan-400 text-xs mt-2">{status}</p>
           </div>
         )}
 
-        {/* VIDEO */}
+        {/* VIDEO OUTPUT */}
         {resultVideo && (
           <div className="mt-6 w-full max-w-md">
-            <video src={resultVideo} controls className="w-full rounded-xl" />
+            <video
+              src={resultVideo}
+              controls
+              className="w-full rounded-xl border border-cyan-400"
+            />
             <button
-              onClick={() => window.open(resultVideo)}
+              onClick={() => window.open(resultVideo, "_blank")}
               className="mt-3 w-full bg-white text-black py-2 rounded"
             >
               Download
             </button>
           </div>
         )}
-
       </main>
-
-      <style>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(300%); }
-        }
-      `}</style>
     </div>
   );
 }
 
-// ===== 3D BUTTON =====
-function HoloButton({ icon, label, onClick, primary }: any) {
-  const ref = useRef<any>(null);
+// =========================
+// HOLO BUTTON COMPONENT
+// =========================
+function HoloButton({
+  icon,
+  label,
+  onClick,
+  primary,
+  disabled
+}: any) {
+  const ref = useRef<HTMLButtonElement | null>(null);
 
   const move = (e: any) => {
+    if (!ref.current || disabled) return;
+
     const rect = ref.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -164,12 +222,13 @@ function HoloButton({ icon, label, onClick, primary }: any) {
     const ry = (x - rect.width / 2) / 10;
 
     ref.current.style.transform =
-      `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.05)`;
+      `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.05)`;
   };
 
   const reset = () => {
+    if (!ref.current) return;
     ref.current.style.transform =
-      "perspective(1000px) rotateX(0) rotateY(0)";
+      "perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)";
   };
 
   return (
@@ -178,8 +237,14 @@ function HoloButton({ icon, label, onClick, primary }: any) {
       onMouseMove={move}
       onMouseLeave={reset}
       onClick={onClick}
-      className={`p-8 rounded-2xl border transition-all duration-300
-      ${primary ? "bg-blue-600 border-blue-400" : "bg-zinc-900/40 border-white/10"}`}
+      disabled={disabled}
+      className={`
+        p-6 rounded-2xl border transition-all duration-300
+        ${primary
+          ? "bg-blue-600 border-blue-400"
+          : "bg-zinc-900/40 border-white/10"}
+        ${disabled ? "opacity-50 cursor-not-allowed" : "hover:scale-105"}
+      `}
     >
       <div className="flex justify-center text-cyan-400 mb-2">
         {icon}
