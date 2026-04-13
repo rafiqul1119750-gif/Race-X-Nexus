@@ -12,10 +12,19 @@ import chatRouter from "./chat";
 import musicRouter from "./music";
 import shopRouter from "./shop";
 
+// 🔥 Naya Studio Router Import (AI Generation ke liye)
+import studioRouter from "./studio"; 
+
 const router: IRouter = Router();
 
+// --- Core System Routes ---
 router.use(healthRouter);
 router.use(usersRouter);
+
+// --- AI & Content Routes ---
+// 👉 Ye line aapke Studio ke saare buttons (Image, Video, Music) ko active kar degi
+router.use("/studio", studioRouter); 
+
 router.use(modulesRouter);
 router.use(rewardsRouter);
 router.use(eventsRouter);
