@@ -1,23 +1,23 @@
 import { Client, Account, Databases, Storage, Users, ID } from 'node-appwrite';
 
 const client = new Client()
-    .setEndpoint(process.env.APPWRITE_ENDPOINT)     // '!' hata diya
-    .setProject(process.env.APPWRITE_PROJECT_ID)    // '!' hata diya
-    .setKey(process.env.APPWRITE_API_KEY);          // '!' hata diya
+    .setEndpoint(process.env.APPWRITE_ENDPOINT || '')
+    .setProject(process.env.APPWRITE_PROJECT_ID || '')
+    .setKey(process.env.APPWRITE_API_KEY || '');
 
 export const account = new Account(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
 export const users = new Users(client);
 
-// Database IDs (Yahan bhi '!' hata diya)
-const DATABASE_ID = process.env.APPWRITE_DATABASE_ID; 
-const POSTS_COLLECTION_ID = 'posts';
-const COMMENTS_COLLECTION_ID = 'comments';
+// Env se ID uthao, agar nahi hai toh default 'racex_db' use karo
+export const DATABASE_ID = process.env.APPWRITE_DATABASE_ID || 'racex_db'; 
+export const POSTS_COLLECTION_ID = 'posts';
+export const COMMENTS_COLLECTION_ID = 'comments';
 
 // --- FUNCTIONS ---
 
-export const createPost = async (postData) => {
+export const createPost = async (postData: any) => {
     try {
         return await databases.createDocument(
             DATABASE_ID,
@@ -25,29 +25,17 @@ export const createPost = async (postData) => {
             ID.unique(),
             postData
         );
-    } catch (error) {
-        throw new Error(error.message);
-    }
-};
-
-export const addComment = async (commentData) => {
-    try {
-        return await databases.createDocument(
-            DATABASE_ID,
-            COMMENTS_COLLECTION_ID,
-            ID.unique(),
-            commentData
-        );
-    } catch (error) {
-        throw new Error(error.message);
+    } catch (error: any) {
+        console.error("Post Error:", error.message);
+        throw error;
     }
 };
 
 export const getAllPosts = async () => {
     try {
         return await databases.listDocuments(DATABASE_ID, POSTS_COLLECTION_ID);
-    } catch (error) {
-        throw new Error(error.message);
+    } catch (error: any) {
+        throw error;
     }
 };
 
