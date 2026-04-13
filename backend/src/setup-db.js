@@ -1,50 +1,33 @@
-import { Client, Databases } from 'node-appwrite';
+const { Client, Databases } = require('node-appwrite');
 
 async function setup() {
-    console.log("🚀 Race-X Database Setup starting...");
+    console.log("🚀 Race-X Database Sync starting...");
+    
+    const client = new Client()
+        .setEndpoint(process.env.APPWRITE_ENDPOINT.trim())
+        .setProject(process.env.APPWRITE_PROJECT_ID.trim())
+        .setKey(process.env.APPWRITE_API_KEY.trim());
 
-    // Environment variables ko clean (trim) kar rahe hain
-    const endpoint = (process.env.APPWRITE_ENDPOINT || '').trim();
-    const project = (process.env.APPWRITE_PROJECT_ID || '').trim();
-    const key = (process.env.APPWRITE_API_KEY || '').trim();
-
-    if (!endpoint || !project || !key) {
-        console.error("❌ ERROR: Missing Appwrite Keys in Render Environment Settings!");
-        return;
-    }
+    const databases = new Databases(client);
+    const DB_ID = process.env.APPWRITE_DATABASE_ID || 'racex_db';
 
     try {
-        const client = new Client()
-            .setEndpoint(endpoint)
-            .setProject(project)
-            .setKey(key);
-
-        const databases = new Databases(client);
-        const DB_ID = "racex_db";
-
-        console.log("📡 Connecting to Appwrite at:", endpoint);
-        
-        // 1. Create Database
-        try {
-            await databases.create(DB_ID, "RaceX_Main_DB");
-            console.log("✅ Database 'RaceX_Main_DB' Created!");
-        } catch (e) {
-            if (e.code === 409) console.log("ℹ️ Database already exists.");
-            else throw e;
+        // Database check karein
+        await databases.get(DB_ID);
+        console.log("ℹ️ Database already exists. Skipping creation.");
+    } catch (e) {
+        if (e.code === 404) {
+            try {
+                await databases.create(DB_ID, "RaceX_Main_DB");
+                console.log("✅ Database Created!");
+            } catch (err) {
+                console.error("❌ Database creation failed (Limit reached?).");
+            }
+        } else {
+            console.error("❌ Appwrite Error:", e.message);
         }
-
-        // 2. Create Users Collection
-        try {
-            await databases.createCollection(DB_ID, 'users', 'Users');
-            console.log("✅ Users Collection Ready");
-        } catch (e) {
-            if (e.code === 409) console.log("ℹ️ Users collection exists.");
-        }
-
-        console.log("🏁 RACEX SETUP COMPLETED SUCCESSFULLY!");
-    } catch (error) {
-        console.error("❌ Setup Error:", error.message);
     }
+    console.log("🏁 Setup process finished.");
 }
 
 setup();
