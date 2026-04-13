@@ -1,34 +1,84 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
+import fetch from "node-fetch";
+import { databases } from "../lib/appwrite"; // Make sure your appwrite config is exported
+import { Query } from "node-appwrite";
 
 const studioRouter = Router();
 
-// 🎨 Image Generation based on Idea
-studioRouter.post("/create-image", async (req: Request, res: Response) => {
-    const { prompt } = req.body; // Frontend se aapka idea yahan aayega
-    console.log("Generating Image for:", prompt);
+// --- 🔐 NEXUS KEY RETRIEVER ---
+async function getSecret(serviceName: string): Promise<string | null> {
+    try {
+        const response = await databases.listDocuments(
+            'racex_db', 
+            'api_configs', 
+            [Query.equal("service_name", serviceName)]
+        );
+        
+        if (response.documents.length > 0) {
+            return response.documents[0].key_value;
+        }
+        // Fallback to Render Env if not in Appwrite
+        return process.env[serviceName] || null;
+    } catch (error) {
+        return process.env[serviceName] || null;
+    }
+}
+
+// --- 🎬 CINEMA PROTOCOL (Seedance 2.0 via Fal) ---
+studioRouter.post("/create-cinema", async (req, res) => {
+    const { prompt, imageUrl } = req.body;
+    const FAL_KEY = await getSecret("FAL_KEY");
+
+    if (!FAL_KEY) return res.status(500).json({ success: false, message: "FAL_KEY Missing" });
 
     try {
-        // Filhal hum placeholder use kar rahe hain, 
-        // par ye aapka idea text image par likh kar dikhayega
-        const encodedIdea = encodeURIComponent(prompt || "Nexus AI");
-        const resultUrl = `https://placehold.co/600x400/0891b2/ffffff?text=${encodedIdea}`;
-        
-        res.json({ success: true, url: resultUrl });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Nexus Core Error" });
+        const response = await fetch("https://fal.run/fal-ai/seedance/v2/image-to-video", {
+            method: "POST",
+            headers: {
+                "Authorization": `Key ${FAL_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                prompt: prompt,
+                image_url: imageUrl,
+                motion_bucket_id: 127,
+                aspect_ratio: "16:9"
+            })
+        });
+
+        const data = await response.json();
+        res.json({ success: true, url: data.video?.url || data.request_id });
+    } catch (e: any) {
+        res.status(500).json({ success: false, message: e.message });
     }
 });
 
-// 🎬 Video Generation based on Idea
-studioRouter.post("/generate-movie", async (req: Request, res: Response) => {
-    const { prompt } = req.body;
-    console.log("Processing Video idea:", prompt);
-    
-    // Testing ke liye 
-    res.json({ 
-        success: true, 
-        video: "https://www.w3schools.com/html/mov_bbb.mp4" 
-    });
+// --- 🎙️ VOICE PROTOCOL (ElevenLabs) ---
+studioRouter.post("/create-voice", async (req, res) => {
+    const { text, voiceId } = req.body;
+    const ELEVEN_KEY = await getSecret("ELEVEN_LABS");
+
+    try {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId || '21m00Tcm4TbcDqxeJwzx'}`, {
+            method: "POST",
+            headers: {
+                "Accept": "audio/mpeg",
+                "Content-Type": "application/json",
+                "xi-api-key": ELEVEN_KEY || ""
+            },
+            body: JSON.stringify({
+                text: text,
+                model_id: "eleven_monolingual_v1",
+                voice_settings: { stability: 0.5, similarity_boost: 0.5 }
+            }),
+        });
+
+        const arrayBuffer = await response.arrayBuffer();
+        const base64Audio = Buffer.from(arrayBuffer).toString('base64');
+        res.json({ success: true, url: `data:audio/mpeg;base64,${base64Audio}` });
+    } catch (e: any) {
+        res.status(500).json({ success: false, message: e.message });
+    }
 });
 
 export default studioRouter;
