@@ -18,16 +18,16 @@ export default function Dashboard() {
 
   const API_BASE = "https://race-x-nexus.onrender.com";
 
-  // 🔥 AUTO INIT
+  // INIT
   useEffect(() => {
     account.get().then(setUser).catch(() => {});
 
     fetch(`${API_BASE}/health`)
       .then(() => console.log("Server Ready"))
-      .catch(() => console.log("Waking server..."));
+      .catch(() => console.log("Server connecting..."));
   }, []);
 
-  // 🚀 CORE EXECUTION ENGINE
+  // CORE FUNCTION
   async function executeNexusProtocol(
     endpoint: string,
     type: "video" | "audio" | "image"
@@ -36,7 +36,7 @@ export default function Dashboard() {
 
     try {
       setLoading(true);
-      setStatus("⚡ Initializing AI Core...");
+      setStatus("Processing...");
 
       const callAPI = async () => {
         const res = await fetch(`${API_BASE}${endpoint}`, {
@@ -46,7 +46,7 @@ export default function Dashboard() {
 
         if (!res.ok) {
           const errText = await res.text();
-          throw new Error(errText || "API Error");
+          throw new Error(errText || "Request failed");
         }
 
         return res.json();
@@ -57,13 +57,13 @@ export default function Dashboard() {
       try {
         data = await callAPI();
       } catch (err) {
-        console.log("Retrying...");
-        setStatus("🧠 Waking AI Engine...");
+        console.log("Retry...");
+        setStatus("Retrying...");
         await new Promise((r) => setTimeout(r, 3000));
         data = await callAPI();
       }
 
-      setStatus("🎬 Rendering Output...");
+      setStatus("Generating output...");
 
       // OUTPUT HANDLING
       if (type === "image" && data?.url) {
@@ -72,18 +72,18 @@ export default function Dashboard() {
 
       if (type === "audio" && data?.url) {
         const audio = new Audio(data.url);
-        audio.play().catch(() => console.log("Autoplay blocked"));
+        audio.play().catch(() => {});
       }
 
       if (type === "video" && data?.video) {
         setResultVideo(data.video);
       }
 
-      setStatus("✅ Completed");
+      setStatus("Completed");
 
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setStatus("❌ Failed to process request");
+      setStatus("Error");
     } finally {
       setLoading(false);
       setTimeout(() => setStatus(""), 3000);
@@ -106,8 +106,8 @@ export default function Dashboard() {
       {/* HEADER */}
       <header className="flex justify-between items-center p-6 z-10">
         <div>
-          <p className="text-cyan-400 text-[10px] tracking-[0.5em] uppercase animate-pulse">
-            NEURAL CORE ACTIVE
+          <p className="text-cyan-400 text-[10px] tracking-[0.5em] uppercase">
+            STUDIO DASHBOARD
           </p>
           <h1 className="text-2xl font-bold">
             Hi {user?.name?.split(" ")[0] || "User"}
@@ -199,9 +199,7 @@ export default function Dashboard() {
   );
 }
 
-// =========================
-// HOLO BUTTON COMPONENT
-// =========================
+// BUTTON
 function HoloButton({
   icon,
   label,
