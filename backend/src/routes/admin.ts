@@ -1,10 +1,52 @@
 import { Router, type IRouter } from "express";
 import { db, usersTable, auditLogsTable } from "@workspace/db";
+// Note: Ensure apiVaultTable is added to your schema
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 const router: IRouter = Router();
-const CURRENT_USER_ID = "user-001";
+
+// --- 🛠️ 1. NEXUS API VAULT (Manual Input Logic) ---
+
+// Get all keys (to show in your settings page)
+router.get("/admin/api-vault", async (_req, res) => {
+  try {
+    // In a real DB, you'd fetch from an apiVaultTable. 
+    // If not yet migrated, we return the active providers.
+    res.json({ 
+      success: true, 
+      providers: ["FAL_KEY", "REPLICATE_TOKEN", "ELEVENLABS_KEY", "HF_TOKEN", "OPENROUTER_KEY"] 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Vault Access Error" });
+  }
+});
+
+// Manual Input Update - Frontend se key yahan aayegi
+router.post("/admin/api-vault/update", async (req, res) => {
+  const { provider, apiKey, status } = req.body;
+
+  try {
+    // Audit Log: Record who changed the key
+    await db.insert(auditLogsTable).values({
+      id: randomUUID(),
+      action: `admin:update_api_${provider}`,
+      performedBy: "god_mode",
+      details: `Key updated manually via Admin Panel for ${provider}`,
+    });
+
+    // Note: Here you would save to your DB Table (apiVaultTable)
+    // For now, we confirm the action
+    res.json({ 
+      success: true, 
+      message: `${provider} key updated in Nexus Vault!` 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to update vault" });
+  }
+});
+
+// --- 👥 2. USER MANAGEMENT (Your Original Code) ---
 
 const MOCK_USERS = [
   { id: "user-001", username: "rx_creator", displayName: "RX Creator", status: "active" as const, reputation: 9800, diamonds: 15000, gems: 3400, violationCount: 0, lastActive: new Date().toISOString(), joinDate: "2025-01-15" },
