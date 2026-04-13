@@ -10,14 +10,14 @@ export const databases = new Databases(client);
 export const storage = new Storage(client);
 export const users = new Users(client);
 
-// Env se ID uthao, agar nahi hai toh default 'racex_db' use karo
+// Env variables (Bina '!' ke)
 export const DATABASE_ID = process.env.APPWRITE_DATABASE_ID || 'racex_db'; 
 export const POSTS_COLLECTION_ID = 'posts';
 export const COMMENTS_COLLECTION_ID = 'comments';
 
-// --- FUNCTIONS ---
+// --- FUNCTIONS (Pure JavaScript - No TypeScript Types) ---
 
-export const createPost = async (postData: any) => {
+export const createPost = async (postData) => {
     try {
         return await databases.createDocument(
             DATABASE_ID,
@@ -25,7 +25,7 @@ export const createPost = async (postData: any) => {
             ID.unique(),
             postData
         );
-    } catch (error: any) {
+    } catch (error) {
         console.error("Post Error:", error.message);
         throw error;
     }
@@ -34,7 +34,8 @@ export const createPost = async (postData: any) => {
 export const getAllPosts = async () => {
     try {
         return await databases.listDocuments(DATABASE_ID, POSTS_COLLECTION_ID);
-    } catch (error: any) {
+    } catch (error) {
+        console.error("Fetch Error:", error.message);
         throw error;
     }
 };
