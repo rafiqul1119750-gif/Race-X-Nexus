@@ -6,24 +6,26 @@ import studioRouter from "./routes/studio";
 dotenv.config();
 const app = express();
 
-// ✅ Sabse important: CORS ko allow karna
+// ✅ CORS: Sab kuch allow kar do taaki connection block na ho
 app.use(cors({
-    origin: "*", // Testing ke liye sab allow hai
-    methods: ["GET", "POST"],
+    origin: "*",
+    methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json());
 
-// API Routes
+// Routes
 app.use("/api/studio", studioRouter);
 
-// Health Check Route (Ye check karne ke liye ki backend zinda hai)
+// Health Check
 app.get("/", (req, res) => {
-    res.send("🚀 Nexus Core is Online");
+    res.json({ status: "online", message: "Nexus Core is Active" });
 });
 
 const PORT = process.env.PORT || 10000;
+
+// ✅ Render ke liye "0.0.0.0" par host karna zaroori hai
 app.listen(Number(PORT), "0.0.0.0", () => {
     console.log(`🚀 Nexus Backend Live on Port ${PORT}`);
 });
