@@ -4,43 +4,39 @@ import { Query } from "node-appwrite";
 
 const studioRouter = Router();
 
-// --- 🔐 NEXUS DATABASE PROTECTOR ---
+// ✅ IDs from your Appwrite Screenshots
+const DATABASE_ID = 'RaceX_Main_DB'; 
+const COLLECTION_ID = 'api_configs';
+
 async function getSecret(serviceName: string): Promise<string | null> {
     try {
-        console.log(`🔍 Searching for Key: ${serviceName}...`);
+        console.log(`📡 Fetching ${serviceName} from ${DATABASE_ID}...`);
         
-        // Note: Check if Database ID is 'racex_db' and Collection ID is 'api_configs'
         const response = await databases.listDocuments(
-            'racex_db', 
-            'api_configs', 
+            DATABASE_ID,
+            COLLECTION_ID,
             [Query.equal("service_name", serviceName)]
         );
 
-        if (response.documents && response.documents.length > 0) {
-            console.log(`✅ Key found in Database for: ${serviceName}`);
+        if (response.documents.length > 0) {
+            console.log(`✅ Key Found for ${serviceName}`);
             return response.documents[0].key_value as string;
         }
-
-        console.log(`⚠️ Key not in DB, checking Environment Variables...`);
-        return process.env[serviceName] || null;
+        
+        console.error(`⚠️ Key ${serviceName} not found in Collection!`);
+        return null;
     } catch (error: any) {
-        console.error(`❌ Appwrite Database Error: ${error.message}`);
-        return process.env[serviceName] || null;
+        console.error("❌ Appwrite Query Failed:", error.message);
+        return null;
     }
 }
 
-// --- 🎨 IMAGE GENERATION ---
 studioRouter.post("/create-image", async (req: Request, res: Response) => {
     const { prompt } = req.body;
-    
-    // Exact match for Attribute in Appwrite (Must be HUGGING_FACE)
     const HF_KEY = await getSecret("HUGGING_FACE");
 
     if (!HF_KEY) {
-        return res.status(500).json({ 
-            success: false, 
-            message: "Nexus Vault Failure: HUGGING_FACE key missing in Appwrite." 
-        });
+        return res.status(500).json({ success: false, message: "API Key missing in Nexus Vault" });
     }
 
     try {
@@ -57,20 +53,18 @@ studioRouter.post("/create-image", async (req: Request, res: Response) => {
         );
 
         if (response.status === 503) {
-            return res.status(503).json({ success: false, message: "Engine Warming Up... Try again in 20s." });
-        }
-
-        if (!response.ok) {
-            const errorMsg = await response.text();
-            throw new Error(`HF Error ${response.status}: ${errorMsg}`);
+            return res.status(503).json({ success: false, message: "AI Engine is warming up... try in 20s" });
         }
 
         const arrayBuffer = await response.arrayBuffer();
         const base64Image = Buffer.from(arrayBuffer).toString('base64');
         
-        res.json({ success: true, url: `data:image/jpeg;base64,${base64Image}` });
+        res.json({ 
+            success: true, 
+            url: `data:image/jpeg;base64,${base64Image}` 
+        });
+
     } catch (e: any) {
-        console.error("Studio Logic Error:", e.message);
         res.status(500).json({ success: false, message: e.message });
     }
 });
