@@ -1,31 +1,57 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
-import studioRouter from "./routes/studio";
+import { Client, Databases, Query } from "node-appwrite";
 
-dotenv.config();
 const app = express();
-
-// ✅ CORS: Sab kuch allow kar do taaki connection block na ho
-app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-}));
-
+app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use("/api/studio", studioRouter);
+const client = new Client()
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject('67bd97ca000c0f41a8be'); 
 
-// Health Check
-app.get("/", (req, res) => {
-    res.json({ status: "online", message: "Nexus Core is Active" });
+const databases = new Databases(client);
+
+app.post("/api/studio/create-image", async (req, res) => {
+    const { prompt } = req.body;
+    
+    try {
+        // 1. Appwrite se Hugging Face Key uthao
+        const vault = await databases.listDocuments(
+            'RaceX_Main_DB', 
+            'api_configs', 
+            [Query.equal("service_name", "HUGGING_FACE")]
+        );
+
+        const HF_KEY = vault.documents[0]?.key_value;
+        if (!HF_KEY) return res.status(500).json({ success: false, message: "API Key not found in Appwrite" });
+
+        // 2. Hugging Face ko Call karo
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5",
+            {
+                method: "POST",
+                headers: { 
+                    "Authorization": `Bearer ${HF_KEY}`,
+                    "Content-Type": "application/json" 
+                },
+                body: JSON.stringify({ inputs: prompt }),
+            }
+        );
+
+        // 3. Check if response is an image
+        if (response.ok) {
+            const arrayBuffer = await response.arrayBuffer();
+            const base64Image = Buffer.from(arrayBuffer).toString('base64');
+            return res.json({ success: true, url: `data:image/jpeg;base64,${base64Image}` });
+        } else {
+            const errorData = await response.json();
+            return res.status(500).json({ success: false, message: errorData.error || "HF Engine Busy" });
+        }
+
+    } catch (e) {
+        res.status(500).json({ success: false, message: "Nexus Core Error: " + e.message });
+    }
 });
 
-const PORT = process.env.PORT || 10000;
-
-// ✅ Render ke liye "0.0.0.0" par host karna zaroori hai
-app.listen(Number(PORT), "0.0.0.0", () => {
-    console.log(`🚀 Nexus Backend Live on Port ${PORT}`);
-});
+export default app;
