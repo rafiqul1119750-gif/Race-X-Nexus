@@ -9,24 +9,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Appwrite Setup
 const client = new Client()
     .setEndpoint('https://cloud.appwrite.io/v1')
     .setProject(process.env.APPWRITE_PROJECT_ID || '67c0500e0004f2104a39');
 
 const databases = new Databases(client);
 
-// API Endpoint to get config
 app.get('/api/config', async (req, res) => {
     try {
-        const response = await databases.listDocuments(
-            'RaceX_Main_DB', 
-            'api_configs',
-            [Query.limit(1)]
-        );
-
+        const response = await databases.listDocuments('RaceX_Main_DB', 'api_configs', [Query.limit(1)]);
         if (response.documents.length > 0) {
-            // TypeScript fix: accessing key_value using 'as any'
+            // "as any" is important here to bypass TypeScript error
             const configData = (response.documents[0] as any).key_value;
             res.json({ success: true, data: configData });
         } else {
@@ -37,7 +30,6 @@ app.get('/api/config', async (req, res) => {
     }
 });
 
-// Root route
 app.get('/', (req, res) => {
     res.send("Race-X Nexus API Engine is Online 🚀");
 });
