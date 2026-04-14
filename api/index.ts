@@ -4,7 +4,6 @@ import { Client, Databases, Query } from 'node-appwrite';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -19,7 +18,7 @@ app.get('/api/config', async (req, res) => {
     try {
         const response = await databases.listDocuments('RaceX_Main_DB', 'api_configs', [Query.limit(1)]);
         if (response.documents.length > 0) {
-            // "as any" is important here to bypass TypeScript error
+            // (as any) use karna zaroori hai error hatane ke liye
             const configData = (response.documents[0] as any).key_value;
             res.json({ success: true, data: configData });
         } else {
