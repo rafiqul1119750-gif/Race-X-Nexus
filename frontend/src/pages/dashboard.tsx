@@ -6,8 +6,8 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 
-// ✅ EXACT BACKEND URL
-const NEXUS_BACKEND = "https://race-x-nexus.onrender.com";
+// ✅ NAYA VERCEL BACKEND URL (Apne Vercel dashboard se match karlein)
+const NEXUS_BACKEND = "https://race-x-nexus-backend.vercel.app"; 
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -25,16 +25,15 @@ export default function Dashboard() {
     setLoading(true);
     setVariants({ variant1: null, variant2: null });
 
-    // Endpoint selection logic
-    const endpoint = activeTab === "cinema" ? "/api/studio/create-cinema" : 
-                     activeTab === "voice" ? "/api/studio/create-voice" : 
+    // Vercel routes logic
+    const endpoint = activeTab === "voice" ? "/api/studio/create-voice" : 
+                     activeTab === "cinema" ? "/api/studio/create-cinema" : 
                      "/api/studio/create-image";
 
     const bodyData = activeTab === "voice" ? { text: prompt } : { prompt };
-    if (activeTab === "cinema") (bodyData as any).imageUrl = variants.variant1 || "";
 
     try {
-      console.log(`📡 Requesting: ${NEXUS_BACKEND}${endpoint}`);
+      console.log(`📡 Nexus Engine Calling Vercel: ${NEXUS_BACKEND}${endpoint}`);
       
       const response = await fetch(`${NEXUS_BACKEND}${endpoint}`, {
         method: "POST",
@@ -46,7 +45,7 @@ export default function Dashboard() {
       });
 
       if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
+        throw new Error(`Vercel Response: ${response.status}`);
       }
 
       const result = await response.json();
@@ -54,11 +53,11 @@ export default function Dashboard() {
       if (result.success) {
         setVariants((prev) => ({ ...prev, variant1: result.url }));
       } else {
-        alert("Nexus Engine Error: " + result.message);
+        alert("Nexus Error: " + result.message);
       }
     } catch (error: any) {
-      console.error("🔥 Connection Error:", error);
-      alert("Link Broken: Backend se response nahi mil raha. Check Render Logs.");
+      console.error("🔥 Connection Lost:", error);
+      alert("Vercel Link Broken! Dashboard ko backend nahi mil raha.");
     } finally {
       setLoading(false);
     }
@@ -73,7 +72,7 @@ export default function Dashboard() {
           </div>
           <div>
             <h1 className="text-lg font-black uppercase tracking-tighter">Race-X Studio</h1>
-            <p className="text-[8px] font-bold text-cyan-500 uppercase tracking-widest opacity-80">God Mode Active</p>
+            <p className="text-[8px] font-bold text-cyan-500 uppercase tracking-widest opacity-80">Vercel Powered</p>
           </div>
         </div>
         <button onClick={() => setLocation("/api-manager")} className="p-3 bg-zinc-900 rounded-xl border border-white/5 hover:border-cyan-500/50 transition-all">
@@ -95,8 +94,8 @@ export default function Dashboard() {
         </div>
 
         <div className="relative group">
-          <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={activeTab === "voice" ? "Type text to speak..." : "Describe your imagination..."} className="w-full bg-zinc-900/30 border-2 border-white/5 rounded-[32px] p-8 pt-10 text-xl font-medium outline-none focus:border-cyan-500/50 transition-all min-h-[200px] resize-none placeholder:text-zinc-800" />
-          <button onClick={executeNexusEngine} disabled={loading} className="absolute bottom-6 right-6 p-6 bg-cyan-500 text-black rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:scale-105 active:scale-90 transition-all disabled:opacity-50">
+          <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Describe your imagination..." className="w-full bg-zinc-900/30 border-2 border-white/5 rounded-[32px] p-8 pt-10 text-xl font-medium outline-none focus:border-cyan-500/50 transition-all min-h-[200px] resize-none" />
+          <button onClick={executeNexusEngine} disabled={loading} className="absolute bottom-6 right-6 p-6 bg-cyan-500 text-black rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:scale-105 transition-all">
             {loading ? <Terminal className="animate-spin" size={24}/> : <Send size={24}/>}
           </button>
         </div>
@@ -106,38 +105,22 @@ export default function Dashboard() {
             {!variants.variant1 && !loading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-800">
                 <Layers size={48} className="mb-4 opacity-20" />
-                <p className="text-[10px] font-black uppercase tracking-[0.3em]">Node Variant 01</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em]">Variant 01</p>
               </div>
             )}
             {loading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
                 <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
-                <p className="text-[10px] font-black uppercase text-cyan-500 animate-pulse">Processing Core...</p>
+                <p className="text-[10px] font-black uppercase text-cyan-500 animate-pulse">Vercel Processing...</p>
               </div>
             )}
             {variants.variant1 && (
-              <>
-                {activeTab === "voice" ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-zinc-900">
-                     <Mic size={40} className="text-cyan-500 mb-6" />
-                     <audio controls src={variants.variant1} className="w-full" />
-                  </div>
-                ) : activeTab === "cinema" ? (
-                   <video src={variants.variant1} autoPlay loop muted className="w-full h-full object-cover" />
-                ) : (
-                   <img src={variants.variant1} alt="AI" className="w-full h-full object-cover" />
-                )}
-                <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-all">
-                  <button className="p-4 bg-white/10 backdrop-blur-md rounded-2xl hover:bg-white hover:text-black">
-                    <Download size={20} />
-                  </button>
-                </div>
-              </>
+               <img src={variants.variant1} alt="AI" className="w-full h-full object-cover" />
             )}
           </div>
           <div className="aspect-[4/5] bg-zinc-900/20 border border-white/5 rounded-[40px] hidden md:flex flex-col items-center justify-center text-zinc-800">
              <Sparkles size={48} className="mb-4 opacity-20" />
-             <p className="text-[10px] font-black uppercase tracking-[0.3em]">Node Variant 02</p>
+             <p className="text-[10px] font-black uppercase tracking-[0.3em]">Variant 02</p>
           </div>
         </div>
       </main>
