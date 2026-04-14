@@ -16,6 +16,7 @@ const client = new Client()
 
 const databases = new Databases(client);
 
+// API Endpoint to get config
 app.get('/api/config', async (req, res) => {
     try {
         const response = await databases.listDocuments(
@@ -25,7 +26,7 @@ app.get('/api/config', async (req, res) => {
         );
 
         if (response.documents.length > 0) {
-            // TypeScript fix: using 'as any' to access key_value
+            // TypeScript fix: accessing key_value using 'as any'
             const configData = (response.documents[0] as any).key_value;
             res.json({ success: true, data: configData });
         } else {
@@ -36,7 +37,7 @@ app.get('/api/config', async (req, res) => {
     }
 });
 
-// Root route for Vercel health check
+// Root route
 app.get('/', (req, res) => {
     res.send("Race-X Nexus API Engine is Online 🚀");
 });
