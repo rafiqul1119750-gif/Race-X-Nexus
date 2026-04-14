@@ -5,7 +5,7 @@ const client = new Client();
 
 client
     .setEndpoint('https://cloud.appwrite.io/v1') 
-    .setProject('69b9929d0024fe351bc2'); // Project ID ekdum sahi hai
+    .setProject('69b9929d0024fe351bc2'); // Frontend Project ID
 
 // 🟢 Exporting Core Modules
 export const account = new Account(client);
@@ -16,22 +16,28 @@ export const avatars = new Avatars(client);
 // 💎 Exporting Utilities
 export { ID, Query };
 
-// 🛡️ --- NEXUS API ENGINE HELPER ---
-// Is function ko dhyan se dekho, yahan 'racex_db' kar diya hai
+// 🛡️ --- NEXUS API ENGINE HELPER (Railway Version) ---
+/**
+ * Ab ye function Appwrite ke bajaye aapke Railway server se data fetch karega.
+ * Iska fayda ye hai ki aapka backend logic secure rahega.
+ */
 export const getNexusKey = async (serviceName: string) => {
     try {
-        const response = await databases.listDocuments(
-            'racex_db',     // ✅ Updated Database ID (Console se matching)
-            'api_configs',  // Collection ID
-            [Query.equal('service_name', serviceName)]
-        );
+        // Railway API Endpoint
+        const RAILWAY_NEXUS_URL = "https://race-x-nexus-production.up.railway.app/api/config";
         
-        if (response.documents.length > 0) {
-            return response.documents[0].key_value;
+        const response = await fetch(RAILWAY_NEXUS_URL);
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log(`🛡️ Nexus Sync [${serviceName}]: Success`);
+            return result.data; // Yeh aapka "7a762d44" return karega
         }
+        
+        console.warn(`⚠️ Nexus Warning: API responded but success was false`);
         return null;
     } catch (error) {
-        console.error(`Nexus Sync Error [${serviceName}]:`, error);
+        console.error(`❌ Nexus Railway Sync Error [${serviceName}]:`, error);
         return null;
     }
 };
