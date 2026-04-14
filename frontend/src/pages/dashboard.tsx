@@ -6,8 +6,8 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 
-// ✅ NAYA VERCEL BACKEND URL (Apne Vercel dashboard se match karlein)
-const NEXUS_BACKEND = "https://race-x-nexus-backend.vercel.app"; 
+// ✅ EXACT VERCEL BACKEND URL FROM YOUR SCREENSHOT
+const NEXUS_BACKEND = "https://race-x-nexus-backend-xodd.vercel.app"; 
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -25,7 +25,7 @@ export default function Dashboard() {
     setLoading(true);
     setVariants({ variant1: null, variant2: null });
 
-    // Vercel routes logic
+    // Vercel handles routes under /api
     const endpoint = activeTab === "voice" ? "/api/studio/create-voice" : 
                      activeTab === "cinema" ? "/api/studio/create-cinema" : 
                      "/api/studio/create-image";
@@ -33,7 +33,7 @@ export default function Dashboard() {
     const bodyData = activeTab === "voice" ? { text: prompt } : { prompt };
 
     try {
-      console.log(`📡 Nexus Engine Calling Vercel: ${NEXUS_BACKEND}${endpoint}`);
+      console.log(`📡 Connecting to Nexus Vercel: ${NEXUS_BACKEND}${endpoint}`);
       
       const response = await fetch(`${NEXUS_BACKEND}${endpoint}`, {
         method: "POST",
@@ -45,7 +45,7 @@ export default function Dashboard() {
       });
 
       if (!response.ok) {
-        throw new Error(`Vercel Response: ${response.status}`);
+        throw new Error(`Vercel Core Error: ${response.status}`);
       }
 
       const result = await response.json();
@@ -53,11 +53,11 @@ export default function Dashboard() {
       if (result.success) {
         setVariants((prev) => ({ ...prev, variant1: result.url }));
       } else {
-        alert("Nexus Error: " + result.message);
+        alert("Nexus Engine Failed: " + result.message);
       }
     } catch (error: any) {
-      console.error("🔥 Connection Lost:", error);
-      alert("Vercel Link Broken! Dashboard ko backend nahi mil raha.");
+      console.error("🔥 Connection Failure:", error);
+      alert("Nexus Link Broken! Check if Vercel deployment is active.");
     } finally {
       setLoading(false);
     }
@@ -65,6 +65,8 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans italic selection:bg-cyan-500/30">
+      
+      {/* --- TOP NAV --- */}
       <nav className="p-6 border-b border-white/5 flex justify-between items-center sticky top-0 bg-[#050505]/80 backdrop-blur-xl z-50">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)]">
@@ -72,63 +74,89 @@ export default function Dashboard() {
           </div>
           <div>
             <h1 className="text-lg font-black uppercase tracking-tighter">Race-X Studio</h1>
-            <p className="text-[8px] font-bold text-cyan-500 uppercase tracking-widest opacity-80">Vercel Powered</p>
+            <p className="text-[8px] font-bold text-cyan-500 uppercase tracking-widest opacity-80">Vercel Core Active</p>
           </div>
         </div>
-        <button onClick={() => setLocation("/api-manager")} className="p-3 bg-zinc-900 rounded-xl border border-white/5 hover:border-cyan-500/50 transition-all">
+        <button 
+          onClick={() => setLocation("/api-manager")}
+          className="p-3 bg-zinc-900 rounded-xl border border-white/5 hover:border-cyan-500/50 transition-all"
+        >
           <Cpu size={18} className="text-zinc-400" />
         </button>
       </nav>
 
+      {/* --- MAIN STUDIO --- */}
       <main className="p-6 max-w-5xl mx-auto space-y-8 pb-32">
+        
+        {/* TAB SELECTOR */}
         <div className="flex gap-2 p-1.5 bg-zinc-900/50 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
           {[
             { id: "image", icon: <ImageIcon size={14}/>, label: "Visual-X" },
             { id: "cinema", icon: <Film size={14}/>, label: "Cinema-V2" },
             { id: "voice", icon: <Mic size={14}/>, label: "Voice-X" }
           ].map((tab) => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? "bg-white text-black shadow-lg" : "text-zinc-500 hover:text-white"}`}>
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                activeTab === tab.id ? "bg-white text-black shadow-lg" : "text-zinc-500 hover:text-white"
+              }`}
+            >
               {tab.icon} {tab.label}
             </button>
           ))}
         </div>
 
+        {/* PROMPT AREA */}
         <div className="relative group">
-          <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Describe your imagination..." className="w-full bg-zinc-900/30 border-2 border-white/5 rounded-[32px] p-8 pt-10 text-xl font-medium outline-none focus:border-cyan-500/50 transition-all min-h-[200px] resize-none" />
-          <button onClick={executeNexusEngine} disabled={loading} className="absolute bottom-6 right-6 p-6 bg-cyan-500 text-black rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:scale-105 transition-all">
+          <textarea 
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="What should Race-X create?"
+            className="w-full bg-zinc-900/30 border-2 border-white/5 rounded-[32px] p-8 pt-10 text-xl font-medium outline-none focus:border-cyan-500/50 transition-all min-h-[200px] resize-none placeholder:text-zinc-800"
+          />
+          <button 
+            onClick={executeNexusEngine}
+            disabled={loading}
+            className="absolute bottom-6 right-6 p-6 bg-cyan-500 text-black rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:scale-105 active:scale-90 transition-all disabled:opacity-50"
+          >
             {loading ? <Terminal className="animate-spin" size={24}/> : <Send size={24}/>}
           </button>
         </div>
 
+        {/* OUTPUT GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="aspect-[4/5] bg-zinc-900/20 border border-white/5 rounded-[40px] overflow-hidden relative group">
             {!variants.variant1 && !loading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-800">
                 <Layers size={48} className="mb-4 opacity-20" />
-                <p className="text-[10px] font-black uppercase tracking-[0.3em]">Variant 01</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em]">Nexus Variant 01</p>
               </div>
             )}
             {loading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
                 <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
-                <p className="text-[10px] font-black uppercase text-cyan-500 animate-pulse">Vercel Processing...</p>
+                <p className="text-[10px] font-black uppercase text-cyan-500 animate-pulse">Computing Core...</p>
               </div>
             )}
             {variants.variant1 && (
-               <img src={variants.variant1} alt="AI" className="w-full h-full object-cover" />
+               <img src={variants.variant1} alt="AI Output" className="w-full h-full object-cover" />
             )}
           </div>
+
           <div className="aspect-[4/5] bg-zinc-900/20 border border-white/5 rounded-[40px] hidden md:flex flex-col items-center justify-center text-zinc-800">
              <Sparkles size={48} className="mb-4 opacity-20" />
-             <p className="text-[10px] font-black uppercase tracking-[0.3em]">Variant 02</p>
+             <p className="text-[10px] font-black uppercase tracking-[0.3em]">Nexus Variant 02</p>
           </div>
         </div>
+
       </main>
 
+      {/* --- MOBILE NAV --- */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-zinc-900/80 backdrop-blur-2xl border border-white/10 rounded-[32px] p-4 flex justify-around items-center shadow-2xl z-50">
-        <button onClick={() => setLocation("/")} className="p-4 text-zinc-500 hover:text-white"><History size={20}/></button>
+        <button onClick={() => setLocation("/")} className="p-4 text-zinc-500 hover:text-white transition-all"><History size={20}/></button>
         <button onClick={() => setLocation("/dashboard")} className="p-4 text-cyan-500"><Sparkles size={24} fill="currentColor"/></button>
-        <button onClick={() => setLocation("/profile")} className="p-4 text-zinc-500 hover:text-white"><Shield size={20}/></button>
+        <button onClick={() => setLocation("/profile")} className="p-4 text-zinc-500 hover:text-white transition-all"><Shield size={20}/></button>
       </div>
     </div>
   );
