@@ -1,49 +1,44 @@
-import express from "express";
-import cors from "cors";
-import { Client, Databases, Query } from "node-appwrite";
+import express from 'express';
+import cors from 'cors';
+import { Client, Databases, Query } from 'node-appwrite';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- ⚙️ APPWRITE CONFIG ---
+// Appwrite Setup
 const client = new Client()
     .setEndpoint('https://cloud.appwrite.io/v1')
-    .setProject('67bd97ca000c0f41a8be'); 
+    .setProject(process.env.APPWRITE_PROJECT_ID || '67c0500e0004f2104a39');
 
 const databases = new Databases(client);
 
-// --- 🎨 IMAGE ROUTE ---
-app.post("/api/studio/create-image", async (req, res) => {
-    const { prompt } = req.body;
-    
+app.get('/api/config', async (req, res) => {
     try {
-        // Appwrite se secret uthao
-        const vault = await databases.listDocuments(
+        const response = await databases.listDocuments(
             'RaceX_Main_DB', 
-            'api_configs', 
-            [Query.equal("service_name", "HUGGING_FACE")]
+            'api_configs',
+            [Query.limit(1)]
         );
 
-        const HF_KEY = vault.documents[0]?.key_value;
-        if (!HF_KEY) throw new Error("Vault Key Missing");
-
-        const response = await fetch(
-            "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5",
-            {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${HF_KEY}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ inputs: prompt }),
-            }
-        );
-
-        const arrayBuffer = await response.arrayBuffer();
-        const base64Image = Buffer.from(arrayBuffer).toString('base64');
-        res.json({ success: true, url: `data:image/jpeg;base64,${base64Image}` });
-
-    } catch (e) {
-        res.status(500).json({ success: false, message: e.message });
+        if (response.documents.length > 0) {
+            // TypeScript fix: using 'as any' to access key_value
+            const configData = (response.documents[0] as any).key_value;
+            res.json({ success: true, data: configData });
+        } else {
+            res.status(404).json({ success: false, message: "No config found" });
+        }
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
     }
+});
+
+// Root route for Vercel health check
+app.get('/', (req, res) => {
+    res.send("Race-X Nexus API Engine is Online 🚀");
 });
 
 export default app;
