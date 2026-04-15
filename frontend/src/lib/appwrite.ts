@@ -1,33 +1,19 @@
-import { Client, Account, Databases, Storage, Avatars, ID, Query } from 'appwrite';
-
-const client = new Client()
-    .setEndpoint('https://cloud.appwrite.io/v1') 
-    .setProject('69b9929d0024fe351bc2');
-
-export const account = new Account(client);
-export const databases = new Databases(client);
-export const storage = new Storage(client);
-export const avatars = new Avatars(client);
-export { ID, Query };
-
-// 🛡️ --- NEXUS RAILWAY CONNECTION ---
+// Is function ko apne lib/appwrite.ts mein replace karein
 export const getNexusKey = async (serviceName: string) => {
     try {
-        // Direct Railway Link
-        const RAILWAY_URL = "https://race-x-nexus-production.up.railway.app/api/config";
+        // Backend se specific service mang rahe hain
+        const RAILWAY_URL = `https://race-x-nexus-production.up.railway.app/api/config/${serviceName}`;
         
         const response = await fetch(RAILWAY_URL);
         const result = await response.json();
         
         if (result.success) {
-            console.log("🚀 Nexus Connected via Railway");
-            return result.data;
+            console.log(`🚀 Nexus Sync: ${serviceName} Active`);
+            return result.data; // Ye ab hf_... wala token dega
         }
         return null;
     } catch (error) {
-        console.error("❌ Nexus Connection Failed:", error);
+        console.error("❌ Nexus Sync Failed:", error);
         return null;
     }
 };
-
-export default client;
