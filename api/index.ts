@@ -8,7 +8,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ Vercel Frontend ko allow karein
 app.use(cors({
     origin: 'https://race-x-nexus-frontend.vercel.app',
     methods: ['GET', 'POST'],
@@ -23,19 +22,22 @@ const client = new Client()
 
 const databases = new Databases(client);
 
-app.get('/api/config', async (req, res) => {
+// 🚀 Naya Route jo specific service ki key nikalega
+app.get('/api/config/:service', async (req, res) => {
+    const { service } = req.params;
     try {
         const response = await databases.listDocuments(
             'racex_db', 
             'api_configs',
-            [Query.limit(1)]
+            [Query.equal('service_name', service)]
         );
 
         if (response.documents.length > 0) {
-            const configData = (response.documents[0] as any).key_value;
-            res.json({ success: true, data: configData });
+            // Asli Token pick karo (Column name: key_value)
+            const actualKey = (response.documents[0] as any).key_value;
+            res.json({ success: true, data: actualKey });
         } else {
-            res.status(404).json({ success: false, message: "No data found" });
+            res.status(404).json({ success: false, message: "Service not found" });
         }
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
