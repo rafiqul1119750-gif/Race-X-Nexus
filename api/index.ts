@@ -22,18 +22,18 @@ const client = new Client()
 
 const databases = new Databases(client);
 
-// 🚀 Naya Route jo specific service ki key nikalega
+// 🔥 Ye route ab specific service ki key nikalega
 app.get('/api/config/:service', async (req, res) => {
     const { service } = req.params;
     try {
         const response = await databases.listDocuments(
             'racex_db', 
             'api_configs',
-            [Query.equal('service_name', service)]
+            [Query.equal('service_name', service)] // Sirf HUGGING_FACE dhoondega
         );
 
         if (response.documents.length > 0) {
-            // Asli Token pick karo (Column name: key_value)
+            // Asli Token (hf_...) pick ho raha hai yahan
             const actualKey = (response.documents[0] as any).key_value;
             res.json({ success: true, data: actualKey });
         } else {
