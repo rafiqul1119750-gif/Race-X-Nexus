@@ -1,7 +1,6 @@
-// Is function ko apne lib/appwrite.ts mein replace karein
 export const getNexusKey = async (serviceName: string) => {
     try {
-        // Backend se specific service mang rahe hain
+        // Service name (HUGGING_FACE) URL ke end mein jayega
         const RAILWAY_URL = `https://race-x-nexus-production.up.railway.app/api/config/${serviceName}`;
         
         const response = await fetch(RAILWAY_URL);
@@ -9,7 +8,7 @@ export const getNexusKey = async (serviceName: string) => {
         
         if (result.success) {
             console.log(`🚀 Nexus Sync: ${serviceName} Active`);
-            return result.data; // Ye ab hf_... wala token dega
+            return result.data; // Ab hf_... wala token return hoga
         }
         return null;
     } catch (error) {
