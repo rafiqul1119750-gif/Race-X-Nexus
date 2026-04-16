@@ -1,36 +1,42 @@
-import express from 'express';
-import cors from 'cors'; 
+import express, { Request, Response } from 'express';
+import cors from 'cors';
 import { Client, Databases, Query } from 'node-appwrite';
 
 const app = express();
 
-// ✅ Nexus Bridge: Allowing Medo.dev to talk to Railway
+// ✅ CORS Setup
 app.use(cors({
-    origin: '*', 
+    origin: '*',
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 
-// ✅ Appwrite Configuration
-const client = new Client()
-    .setEndpoint('https://cloud.appwrite.io/v1')
-    .setProject('69b9929d0024fe351bc2'); // Aapki Project ID
+// ✅ Appwrite Setup with Type Safety
+const client = new Client();
+
+// Environment variables use karna best hai, par agar direct daal rahe ho toh as string define karo
+const endpoint = 'https://cloud.appwrite.io/v1';
+const projectId = '69b9929d0024fe351bc2';
+
+client
+    .setEndpoint(endpoint)
+    .setProject(projectId);
 
 const databases = new Databases(client);
 
-// 🌐 Health Check Route (Isse Medo "Connected" dikhayega)
-app.get('/', (req, res) => {
+// 🌐 Health Check
+app.get('/', (req: Request, res: Response) => {
     res.json({ 
         status: "Active", 
-        engine: "Race-X Nexus", 
-        message: "Neural Core is Online" 
+        engine: "Race-X Nexus",
+        timestamp: new Date().toISOString()
     });
 });
 
 // 🔑 API Config Fetcher
-app.get('/api/config/:service', async (req, res) => {
+app.get('/api/config/:service', async (req: Request, res: Response) => {
     const { service } = req.params;
     try {
         const response = await databases.listDocuments(
@@ -40,8 +46,8 @@ app.get('/api/config/:service', async (req, res) => {
         );
 
         if (response.documents.length > 0) {
-            const actualKey = (response.documents[0] as any).key_value;
-            res.json({ success: true, data: actualKey });
+            const data = response.documents[0] as any;
+            res.json({ success: true, data: data.key_value });
         } else {
             res.status(404).json({ success: false, message: "Service not found" });
         }
@@ -52,6 +58,6 @@ app.get('/api/config/:service', async (req, res) => {
 
 // 🚀 Start Engine
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Race-X Nexus Engine Running on Port ${PORT}`);
+app.listen(PORT, () => {
+    console.log(`🚀 Nexus Engine Running on Port ${PORT}`);
 });
