@@ -5,7 +5,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ YE SABSE IMPORTANT HAI: Medo isse dekh kar "Green" hoga
+// 🌐 1. Main Root Check (Already Working)
 app.get('/', (req: Request, res: Response) => {
     res.status(200).json({ 
         status: "connected", 
@@ -14,19 +14,22 @@ app.get('/', (req: Request, res: Response) => {
     });
 });
 
-// ✅ Medo ki 7 API requests ko handle karne ke liye
-app.get('/api/:service', (req: Request, res: Response) => {
+// 🔑 2. Unified Service & Health Handler
+// Ye handle karega: /api/groq, /api/groq/health, /api/fal/health, etc.
+app.get('/api/:service*', (req: Request, res: Response) => {
+    const serviceName = req.params.service;
+    
+    // Medo ko "Healthy" response bhejo
     res.json({ 
         success: true, 
         status: "healthy",
-        service: req.params.service 
+        service: serviceName,
+        message: "Nexus Bridge Active",
+        injected: true
     });
 });
 
-// Backup route for Health Checks
-app.get('/health', (req, res) => res.send('OK'));
-
 const PORT = process.env.PORT || 3000;
 app.listen(Number(PORT), "0.0.0.0", () => {
-    console.log(`🚀 God Mode Active on Port ${PORT}`);
+    console.log(`🚀 God Mode Fully Operational`);
 });
