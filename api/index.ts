@@ -1,24 +1,35 @@
 import express from 'express';
-import cors from 'cors'; // Iska install hona zaroori hai: npm install cors
+import cors from 'cors'; 
 import { Client, Databases, Query } from 'node-appwrite';
 
 const app = express();
 
-// 🚨 Sabse important change: CORS ko fully allow kar do
+// ✅ Nexus Bridge: Allowing Medo.dev to talk to Railway
 app.use(cors({
-    origin: '*', // Ye sabhi domains ko allow karega (Testing ke liye best hai)
+    origin: '*', 
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 
+// ✅ Appwrite Configuration
 const client = new Client()
     .setEndpoint('https://cloud.appwrite.io/v1')
-    .setProject('69b9929d0024fe351bc2');
+    .setProject('69b9929d0024fe351bc2'); // Aapki Project ID
 
 const databases = new Databases(client);
 
+// 🌐 Health Check Route (Isse Medo "Connected" dikhayega)
+app.get('/', (req, res) => {
+    res.json({ 
+        status: "Active", 
+        engine: "Race-X Nexus", 
+        message: "Neural Core is Online" 
+    });
+});
+
+// 🔑 API Config Fetcher
 app.get('/api/config/:service', async (req, res) => {
     const { service } = req.params;
     try {
@@ -39,5 +50,8 @@ app.get('/api/config/:service', async (req, res) => {
     }
 });
 
+// 🚀 Start Engine
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Nexus Engine Ready on ${PORT}`));
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Race-X Nexus Engine Running on Port ${PORT}`);
+});
