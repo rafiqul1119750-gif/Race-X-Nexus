@@ -1,37 +1,34 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { Client, Databases, Query } from 'node-appwrite';
 
 const app = express();
 
-// ✅ CORS Setup
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// ✅ Ultimate CORS Fix: Sabhi origins aur headers ko allow karein
+app.use(cors()); 
+app.use((req: Request, res: Response, next: NextFunction) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    next();
+});
 
 app.use(express.json());
 
-// ✅ Appwrite Setup with Type Safety
+// ✅ Appwrite Connection
 const client = new Client();
-
-// Environment variables use karna best hai, par agar direct daal rahe ho toh as string define karo
-const endpoint = 'https://cloud.appwrite.io/v1';
-const projectId = '69b9929d0024fe351bc2';
-
 client
-    .setEndpoint(endpoint)
-    .setProject(projectId);
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject('69b9929d0024fe351bc2');
 
 const databases = new Databases(client);
 
-// 🌐 Health Check
+// 🌐 Medo-Friendly Health Check
 app.get('/', (req: Request, res: Response) => {
-    res.json({ 
+    res.status(200).send({ 
         status: "Active", 
         engine: "Race-X Nexus",
-        timestamp: new Date().toISOString()
+        handshake: true 
     });
 });
 
@@ -46,8 +43,8 @@ app.get('/api/config/:service', async (req: Request, res: Response) => {
         );
 
         if (response.documents.length > 0) {
-            const data = response.documents[0] as any;
-            res.json({ success: true, data: data.key_value });
+            const doc: any = response.documents[0];
+            res.json({ success: true, data: doc.key_value });
         } else {
             res.status(404).json({ success: false, message: "Service not found" });
         }
@@ -58,6 +55,6 @@ app.get('/api/config/:service', async (req: Request, res: Response) => {
 
 // 🚀 Start Engine
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(Number(PORT), "0.0.0.0", () => {
     console.log(`🚀 Nexus Engine Running on Port ${PORT}`);
 });
