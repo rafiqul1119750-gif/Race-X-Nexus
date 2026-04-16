@@ -3,23 +3,20 @@ import cors from 'cors';
 import { Client, Databases, Query } from 'node-appwrite';
 
 const app = express();
-
-// ✅ Sabse asaan CORS: Sabko allow karo
 app.use(cors());
 app.use(express.json());
 
 const client = new Client()
     .setEndpoint('https://cloud.appwrite.io/v1')
-    .setProject('69b9929d0024fe351bc2'); // Aapki Project ID
+    .setProject('69b9929d0024fe351bc2');
 
 const databases = new Databases(client);
 
-// 🌐 Public Health Check (Medo isse dekh kar "Green" ho jayega)
+// 🌐 Health Check (Isse Medo "Green" hoga)
 app.get('/', (req: Request, res: Response) => {
-    res.status(200).send("OK"); 
+    res.status(200).send("OK");
 });
 
-// 🔑 Data Fetcher
 app.get('/api/config/:service', async (req: Request, res: Response) => {
     const { service } = req.params;
     try {
