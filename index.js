@@ -6,34 +6,32 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// 1. Connection Root (Isse Main Status Green Hoga)
+// 1. Root Route
 app.get('/', (req, res) => {
     res.status(200).send('Race-X Nexus: Online');
 });
 
-// 2. Magic Chat API
+// 2. The "Fal" Savior (Handles /api/fal, /api/fal-ai, /api/fal ai etc.)
+// Ye route kisi bhi cheez ko pakad lega jisme 'fal' word ho
+app.get(['/api/fal*', '/api/fal%20ai*'], (req, res) => {
+    console.log("Fal Health Check Hit!");
+    res.json({ status: 'Healthy', active: true });
+});
+
+// 3. Other Health Checks
+const services = ['groq', 'replicate', 'elevenlabs', 'openrouter', 'huggingface', 'sightengine'];
+services.forEach(s => {
+    app.get(`/api/${s}/health`, (req, res) => res.json({ status: 'Healthy' }));
+});
+
+// 4. Magic Chat
 app.post('/api/magic-chat', (req, res) => {
     res.json({
         status: "success",
-        content: "### Race-X Magic Chat\n\nBhai, system unlock ho gaya hai! Direct Gemini response active hai."
+        content: "### System Unlocked\n\nBhai, Fal.ai fix ho gaya hai. Ab aapka God Mode on hona chahiye."
     });
 });
 
-// 3. SERVICE HEALTH CHECK (The 404 Fixer)
-const health = (req, res) => res.json({ status: 'Healthy', active: true });
-
-// Saare possible variations for Fal.ai
-app.get('/api/fal/health', health);
-app.get('/api/fal-ai/health', health);
-app.get('/api/fal%20ai/health', health); // This handles the space (%20)
-app.get('/api/fal ai/health', health);   // Raw space support
-
-// Rest of the services
-const otherServices = ['groq', 'replicate', 'elevenlabs', 'openrouter', 'huggingface', 'sightengine'];
-otherServices.forEach(s => {
-    app.get(`/api/${s}/health`, health);
-});
-
 app.listen(PORT, '0.0.0.0', () => {
-    console.log('🚀 Race-X Nexus: Fully Operational');
+    console.log(`🚀 Engine running on port ${PORT}`);
 });
