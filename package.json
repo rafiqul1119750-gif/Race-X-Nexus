@@ -1,17 +1,13 @@
 {
   "name": "race-x-nexus-api",
   "version": "1.0.0",
-  "description": "Race-X Backend",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "echo 'No build needed'",
-    "dev": "node index.js"
+    "build": "echo 'Build skipped'"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "node-appwrite": "^11.0.0",
-    "dotenv": "^16.3.1"
+    "cors": "^2.8.5"
   }
 }
