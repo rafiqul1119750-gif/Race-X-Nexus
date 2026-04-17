@@ -1,32 +1,30 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-
-// Railway automatic port assignment
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// 1. Connection Check
+// MeDo isi route se "Online" hota hai
 app.get('/', (req, res) => {
-    res.status(200).send('<h1>Race-X Nexus: 24/7 Online</h1>');
+    res.status(200).send('Race-X Nexus: 24/7 Online');
 });
 
-// 2. Magic Chat (Direct Gemini Style)
+// Magic Chat (Direct Response)
 app.post('/api/magic-chat', (req, res) => {
     res.json({
         status: "success",
-        content: "### Race-X Magic Chat\n\nBhai, engine upgrade ho gaya hai! Ab Gemini interface active hai aur koi buttons nahi aayenge. Direct answer milega."
+        content: "### Race-X Magic Chat\n\nBhai, engine upgrade ho gaya hai! Gemini interface active hai."
     });
 });
 
-// 3. All Health Checks for MeDo
+// Services Health Checks
 const health = (req, res) => res.json({ status: 'Healthy' });
 ['groq', 'fal', 'replicate', 'elevenlabs', 'openrouter', 'huggingface', 'sightengine'].forEach(s => {
     app.get(`/api/${s}/health`, health);
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Engine active on port ${PORT}`);
+    console.log('Server active on ' + PORT);
 });
