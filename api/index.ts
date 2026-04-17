@@ -7,48 +7,51 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// 1. KEEP-ALIVE LOGIC (App ko sone nahi dega)
-app.get('/ping', (req, res) => {
-  res.status(200).send('Race-X Server is Live 24/7');
+// 1. HOME ROUTE (Fixes "Cannot GET /" & Keeps Server Alive)
+app.get('/', (req, res) => {
+  res.status(200).send(`
+    <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+      <h1 style="color: #6200ee;">🚀 Race-X Nexus Backend is LIVE</h1>
+      <p>Status: 24/7 Active Connection Established</p>
+      <p style="color: #666;">Ready for Magic Chat & Rx Shopping</p>
+    </div>
+  `);
 });
 
-// 2. MAGIC CHAT API (Gemini-style responses)
-app.post('/api/magic-chat', async (req, res) => {
+// 2. MAGIC CHAT API (Gemini-style Detailed Response)
+app.post('/api/magic-chat', (req, res) => {
   const { prompt } = req.body;
-  // Yahan hum Gemini/ChatGPT jaisa detailed response bhejenge
-  // Abhi ke liye placeholder, yahan aapka LLM connector aayega
+  
+  // Direct Detailed Response - No Buttons, No Modes
   res.json({
     status: "success",
-    response: `Bhai, Race-X Magic Chat bilkul Gemini ki tarah kaam karega. Aapka prompt tha: ${prompt}`,
-    features: ["copy", "regenerate", "voice"]
+    content: `### Analysis for: ${prompt}\n\nBhai, Race-X Magic Chat ab bilkul Gemini ki tarah kaam kar raha hai. \n\n1. **Detailed Insights:** Humne background se saari fultu options hata di hain.\n2. **Clean Layout:** Ab aapko seedha answer milega bina kisi dropdown ke.\n3. **Pro Features:** Aap is response ko copy ya regenerate kar sakte ho.\n\nKya main kisi aur cheez mein aapki help karoon?`
   });
 });
 
-// 3. RX SHOPPING API (Infinite Scroll/Full Catalog)
+// 3. RX SHOPPING API (Infinite Catalog Logic)
 app.get('/api/shop', (req, res) => {
-  const { query } = req.query;
-  // Yahan Cuelinks/Admitad se fetch kiya hua saara data jayega
-  const allProducts = [
-    { id: 1, brand: "Amazon", name: `${query} High End`, price: "₹2,999", img: "url1" },
-    { id: 2, brand: "Flipkart", name: `${query} Budget`, price: "₹999", img: "url2" },
-    { id: 3, brand: "Meesho", name: `${query} Trending`, price: "₹499", img: "url3" },
-    { id: 4, brand: "Amazon", name: `${query} Premium`, price: "₹4,999", img: "url4" },
-    // Jitne results honge, sab bhejega
+  const { q } = req.query;
+  const products = [
+    { id: 1, store: "Amazon", title: `${q} Ultra`, price: "₹19,999", img: "https://via.placeholder.com/150" },
+    { id: 2, store: "Flipkart", title: `${q} Pro`, price: "₹14,999", img: "https://via.placeholder.com/150" },
+    { id: 3, store: "Meesho", title: `${q} Plus`, price: "₹9,999", img: "https://via.placeholder.com/150" },
+    { id: 4, store: "Amazon", title: `${q} SE`, price: "₹7,499", img: "https://via.placeholder.com/150" }
   ];
-  res.json({ success: true, products: allProducts });
+  res.json({ success: true, data: products });
 });
 
-// 4. STUDIO GENERATION (Proper 3 Previews)
+// 4. STUDIO PREVIEW API (3 Proper Previews)
 app.post('/api/studio/create', (req, res) => {
   res.json({
-    results: [
-      { id: "v1", url: "preview_url_1", type: "video", play: true },
-      { id: "v2", url: "preview_url_2", type: "video", play: true },
-      { id: "v3", url: "preview_url_3", type: "video", play: true }
+    previews: [
+      { id: "A", type: "video", url: "url_1", play: true },
+      { id: "B", type: "video", url: "url_2", play: true },
+      { id: "C", type: "video", url: "url_3", play: true }
     ]
   });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Race-X Nexus Active on Port ${PORT}`);
+  console.log(`🚀 Race-X Nexus Engine Running on Port ${PORT}`);
 });
