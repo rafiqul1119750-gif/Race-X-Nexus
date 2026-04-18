@@ -1,5 +1,5 @@
 // ==========================
-// 🚀 RACE-X NEXUS PRO SERVER
+// 🚀 RACE-X NEXUS FINAL SERVER
 // ==========================
 const express = require('express');
 const cors = require('cors');
@@ -15,14 +15,17 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 // ==========================
-// 🔐 ENV
+// 🔐 ENV CONFIG
 // ==========================
 const ENV = {
-    OPENROUTER: process.env.OPENROUTER_API_KEY,
     GROQ: process.env.GROQ_API_KEY,
+    OPENROUTER: process.env.OPENROUTER_API_KEY,
     FAL: process.env.FAL_KEY,
+    HUGGINGFACE: process.env.HUGGINGFACE_API_KEY,
+    REPLICATE: process.env.REPLICATE_API_TOKEN,
     ELEVEN: process.env.ELEVENLABS_API_KEY,
-    REPLICATE: process.env.REPLICATE_API_TOKEN
+    SIGHT_USER: process.env.SIGHTENGINE_USER,
+    SIGHT_SECRET: process.env.SIGHTENGINE_SECRET
 };
 
 // ==========================
@@ -31,32 +34,100 @@ const ENV = {
 const TMP = path.join(__dirname, 'tmp');
 if (!fs.existsSync(TMP)) fs.mkdirSync(TMP);
 
-const safeJson = async (r) => {
-    const text = await r.text();
+const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    try {
+        const res = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(id);
+        return res;
+    } catch (err) {
+        clearTimeout(id);
+        throw new Error("Request timeout");
+    }
+};
+
+const safeJson = async (res) => {
+    const text = await res.text();
     try { return JSON.parse(text); }
     catch { return { raw: text }; }
 };
 
-const downloadFile = async (url, file) => {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error("Download failed");
-    const buf = await r.arrayBuffer();
-    fs.writeFileSync(file, Buffer.from(buf));
+// ==========================
+// 🛡️ MODERATION (SIGHTENGINE)
+// ==========================
+const moderate = async (text) => {
+    if (!ENV.SIGHT_USER || !ENV.SIGHT_SECRET) return true;
+
+    const url = `https://api.sightengine.com/1.0/text/check.json?text=${encodeURIComponent(text)}&models=profanity&api_user=${ENV.SIGHT_USER}&api_secret=${ENV.SIGHT_SECRET}`;
+
+    try {
+        const r = await fetchWithTimeout(url);
+        const d = await r.json();
+
+        if (d.profanity?.matches?.length > 0) return false;
+
+        return true;
+    } catch {
+        return true; // fail-open (optional: change to false)
+    }
 };
 
 // ==========================
-// 🟢 HEALTH
+// 🟢 ROOT
 // ==========================
 app.get('/', (req, res) => {
-    res.json({ status: "Race-X Nexus PRO Running" });
+    res.json({ status: "Race-X Nexus FINAL RUNNING" });
 });
 
 // ==========================
-// 🧠 AUTO AI ROUTER
+// ⚡ HEALTH CHECK (ALL SERVICES)
 // ==========================
-app.post('/api/chat', async (req, res) => {
-    const prompt = req.body.message;
+app.get('/api/:service/health', async (req, res) => {
+    const service = req.params.service;
+
+    const services = {
+        groq: ["https://api.groq.com/openai/v1/models", { Authorization: `Bearer ${ENV.GROQ}` }],
+        openrouter: ["https://openrouter.ai/api/v1/models", { Authorization: `Bearer ${ENV.OPENROUTER}` }],
+        huggingface: ["https://api-inference.huggingface.co/models", { Authorization: `Bearer ${ENV.HUGGINGFACE}` }],
+        replicate: ["https://api.replicate.com/v1/models", { Authorization: `Token ${ENV.REPLICATE}` }],
+        elevenlabs: ["https://api.elevenlabs.io/v1/models", { "xi-api-key": ENV.ELEVEN }],
+        fal: ["https://fal.run", {}],
+        sightengine: ["https://api.sightengine.com", {}]
+    };
+
+    if (!services[service]) {
+        return res.status(404).json({ error: "Unknown service" });
+    }
+
+    try {
+        const [url, headers] = services[service];
+
+        const r = await fetchWithTimeout(url, { headers }, 3000);
+
+        res.json({
+            service,
+            status: r.ok ? "Healthy" : "Error"
+        });
+
+    } catch {
+        res.json({
+            service,
+            status: "Offline"
+        });
+    }
+});
+
+// ==========================
+// 🧠 CHAT (AUTO ROUTER)
+// ==========================
+app.post(['/api/chat', '/api/groq', '/api/openrouter'], async (req, res) => {
+    const prompt = req.body.message || req.body.prompt;
     if (!prompt) return res.status(400).json({ error: "Missing message" });
+
+    const allowed = await moderate(prompt);
+    if (!allowed) return res.status(403).json({ error: "Content blocked" });
 
     const providers = [
         {
@@ -75,7 +146,7 @@ app.post('/api/chat', async (req, res) => {
 
     for (let p of providers) {
         try {
-            const r = await fetch(p.url, {
+            const r = await fetchWithTimeout(p.url, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${p.key}`,
@@ -101,122 +172,132 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // ==========================
-// 🎨 IMAGE (FAL)
+// 🎨 IMAGE (FAL + HF FALLBACK)
 // ==========================
-app.post('/api/image', async (req, res) => {
+app.post(['/api/image', '/api/fal', '/api/huggingface'], async (req, res) => {
     const prompt = req.body.prompt;
     if (!prompt) return res.status(400).json({ error: "Missing prompt" });
 
-    const r = await fetch("https://fal.run/fal-ai/fast-turbo-diffusion/generate", {
-        method: "POST",
-        headers: {
-            Authorization: `Key ${ENV.FAL}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ prompt })
-    });
+    const allowed = await moderate(prompt);
+    if (!allowed) return res.status(403).json({ error: "Blocked by moderation" });
 
-    if (!r.ok) return res.status(500).json({ error: "FAL failed" });
+    // TRY FAL
+    try {
+        const r = await fetchWithTimeout("https://fal.run/fal-ai/fast-turbo-diffusion/generate", {
+            method: "POST",
+            headers: {
+                Authorization: `Key ${ENV.FAL}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ prompt })
+        });
 
-    const d = await r.json();
+        const d = await r.json();
+        if (d.images?.[0]?.url) {
+            return res.json({ provider: "fal", image: d.images[0].url });
+        }
+    } catch {}
 
-    if (!d.images?.[0]?.url) {
-        return res.status(500).json({ error: "No image returned" });
-    }
+    // FALLBACK HF
+    try {
+        const r = await fetchWithTimeout(
+            "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${ENV.HUGGINGFACE}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ inputs: prompt })
+            }
+        );
 
-    res.json({ image: d.images[0].url });
+        if (r.ok) {
+            const buffer = await r.arrayBuffer();
+            return res.json({
+                provider: "huggingface",
+                image_base64: Buffer.from(buffer).toString("base64")
+            });
+        }
+    } catch {}
+
+    res.status(500).json({ error: "Image generation failed" });
 });
 
 // ==========================
 // 🎙️ VOICE (ELEVENLABS)
 // ==========================
-app.post('/api/voice', async (req, res) => {
-    const { text } = req.body;
+app.post(['/api/voice', '/api/elevenlabs'], async (req, res) => {
+    const text = req.body.text;
     if (!text) return res.status(400).json({ error: "Missing text" });
+
+    const allowed = await moderate(text);
+    if (!allowed) return res.status(403).json({ error: "Blocked content" });
 
     const voiceId = "EXAVITQu4vr4xnSDxMaL";
 
-    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-        method: "POST",
-        headers: {
-            "xi-api-key": ENV.ELEVEN,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text })
-    });
+    try {
+        const r = await fetchWithTimeout(
+            `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+            {
+                method: "POST",
+                headers: {
+                    "xi-api-key": ENV.ELEVEN,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ text })
+            }
+        );
 
-    if (!r.ok) return res.status(500).json({ error: "Voice failed" });
+        if (!r.ok) {
+            const err = await safeJson(r);
+            return res.status(500).json(err);
+        }
 
-    const audio = await r.arrayBuffer();
-    res.set("Content-Type", "audio/mpeg");
-    res.send(Buffer.from(audio));
+        const audio = await r.arrayBuffer();
+        res.set("Content-Type", "audio/mpeg");
+        res.send(Buffer.from(audio));
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // ==========================
-// 🎬 VIDEO BUILD (FFMPEG)
+// 🔄 REPLICATE (JOB CREATE)
 // ==========================
-app.post('/api/video', async (req, res) => {
-    const { images } = req.body;
-    if (!images || images.length === 0) {
-        return res.status(400).json({ error: "No images" });
-    }
-
-    const files = [];
-
-    for (let i = 0; i < images.length; i++) {
-        const file = path.join(TMP, `img_${i}.jpg`);
-        await downloadFile(images[i], file);
-        files.push(file);
-    }
-
-    const list = path.join(TMP, "list.txt");
-    fs.writeFileSync(list, files.map(f => `file '${f}'\nduration 2`).join('\n'));
-
-    const output = path.join(TMP, `video_${Date.now()}.mp4`);
-
-    const ff = spawn('ffmpeg', [
-        '-f', 'concat',
-        '-safe', '0',
-        '-i', list,
-        '-vf', 'scale=1280:720',
-        '-y',
-        output
-    ]);
-
-    ff.on('close', () => {
-        res.download(output);
-    });
-});
-
-// ==========================
-// 🔄 REPLICATE (REAL JOB)
-// ==========================
-app.post('/api/replicate', async (req, res) => {
+app.post(['/api/replicate'], async (req, res) => {
     const { version, input } = req.body;
 
     if (!version) {
         return res.status(400).json({ error: "Missing model version" });
     }
 
-    const r = await fetch("https://api.replicate.com/v1/predictions", {
-        method: "POST",
-        headers: {
-            Authorization: `Token ${ENV.REPLICATE}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ version, input })
-    });
+    try {
+        const r = await fetchWithTimeout(
+            "https://api.replicate.com/v1/predictions",
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Token ${ENV.REPLICATE}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ version, input })
+            }
+        );
 
-    const d = await safeJson(r);
+        const d = await safeJson(r);
 
-    if (!r.ok) {
-        return res.status(500).json({ error: d });
+        if (!r.ok) return res.status(500).json(d);
+
+        res.json(d);
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-
-    res.json(d);
 });
 
 // ==========================
 app.listen(PORT, () => {
-    console.log(`🚀 PRO SERVER RUNNING ON ${PORT}`);
+    console.log(`🚀 FINAL SERVER RUNNING ON ${PORT}`);
 });
