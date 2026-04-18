@@ -4,12 +4,12 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
-const FAL_KEY = process.env.FAL_API_KEY;
+const FAL_KEY = process.env.FAL_KEY; 
 
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('Race-X Studio: Image Formatting Fix Active'));
+app.get('/', (req, res) => res.send('Race-X Nexus: Studio v5.0 Active'));
 
 // 1. CHAT LOGIC (Working fine)
 app.post(['/api/chat/generate', '/api/magic-chat'], async (req, res) => {
@@ -29,11 +29,11 @@ app.post(['/api/chat/generate', '/api/magic-chat'], async (req, res) => {
     } catch (err) { res.json({ status: "success", content: "Chat Error." }); }
 });
 
-// 2. IMAGE STUDIO (Format Fix for MeDo Gallery)
+// 2. IMAGE STUDIO (The "No-Fail" Response Format)
 app.post(['/api/huggingface/generate', '/api/fal/generate', '/api/generate'], async (req, res) => {
-    const prompt = req.body.prompt || req.body.message || "A tiger";
+    const prompt = req.body.prompt || req.body.message || "A majestic tiger";
     
-    if (!FAL_KEY) return res.json({ status: "success", success: true, message: "Add FAL_API_KEY in Railway!" });
+    if (!FAL_KEY) return res.json({ status: "error", message: "FAL_KEY missing!" });
 
     try {
         const response = await fetch("https://fal.run/fal-ai/fast-turbo-diffusion/generate", {
@@ -41,37 +41,36 @@ app.post(['/api/huggingface/generate', '/api/fal/generate', '/api/generate'], as
             headers: { "Authorization": `Key ${FAL_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({ prompt: prompt, image_size: "landscape_16_9" })
         });
+        
         const data = await response.json();
-        const rawUrl = data.images?.[0]?.url;
+        const imageUrl = data.images?.[0]?.url;
 
-        if (rawUrl) {
-            // MeDo ko specific formats chahiye gallery mein dikhane ke liye
+        if (imageUrl) {
+            // Hum wo saare keys bhej rahe hain jo MeDo dhund sakta hai
             res.json({
                 status: "success",
                 success: true,
-                imageUrl: rawUrl, // Direct URL gallery ke liye
-                image_url: rawUrl, // Backup format
-                content: `Generating image...\n![Tiger](${rawUrl})`, // Markdown to display in chat
+                message: "Image generated successfully",
+                content: `Generated: ![Image](${imageUrl})`,
+                // MeDo Gallery formats:
+                imageUrl: imageUrl,
+                image_url: imageUrl,
+                images: [{ url: imageUrl }],
                 data: {
-                    imageUrl: rawUrl,
-                    message: "Generation successful"
+                    images: [{ url: imageUrl }],
+                    url: imageUrl
                 },
-                // MeDo some formatting uses this structure
-                response: {
-                    imageUrl: rawUrl
-                }
+                results: [{ url: imageUrl }]
             });
         } else {
-            throw new Error("No image URL");
+            throw new Error("No image found");
         }
     } catch (err) {
-        res.json({ status: "success", content: "Bhai, image generate toh hui par format reject ho gaya." });
+        res.json({ status: "success", content: "Bhai, API ne image nahi di. Credits check karo." });
     }
 });
 
-// MANDATORY HEALTH CHECKS
-app.all('/api/:service/health', (req, res) => {
-    res.json({ status: 'Healthy', active: true });
-});
+// HEALTH CHECKS
+app.all('/api/:service/health', (req, res) => res.json({ status: 'Healthy', active: true }));
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Final Image Studio Engine!`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Studio Engine v5.0 Live!`));
