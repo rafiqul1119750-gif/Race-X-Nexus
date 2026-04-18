@@ -4,14 +4,14 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
-const FAL_KEY = process.env.FAL_KEY;
+const FAL_KEY = process.env.FAL_KEY; 
 
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('Race-X Nexus v7.0: Gallery Force Mode'));
+app.get('/', (req, res) => res.send('Race-X Studio v8.0: Ultra Compatibility Mode'));
 
-// 1. CHAT (Working fine)
+// 1. CHAT LOGIC
 app.post(['/api/chat/generate', '/api/magic-chat'], async (req, res) => {
     const prompt = req.body.prompt || req.body.message || "Hi";
     try {
@@ -28,7 +28,7 @@ app.post(['/api/chat/generate', '/api/magic-chat'], async (req, res) => {
     } catch (err) { res.json({ status: "error" }); }
 });
 
-// 2. IMAGE STUDIO (Force Gallery Format)
+// 2. IMAGE STUDIO (The "No-Reject" Format)
 app.post(['/api/huggingface/generate', '/api/fal/generate', '/api/generate'], async (req, res) => {
     const prompt = req.body.prompt || req.body.message || "A tiger";
     
@@ -40,37 +40,35 @@ app.post(['/api/huggingface/generate', '/api/fal/generate', '/api/generate'], as
         });
         
         const data = await response.json();
-        const imageUrl = data.images?.[0]?.url;
+        let imageUrl = data.images?.[0]?.url;
 
         if (imageUrl) {
-            // ME-DO GALLERY MASTER FORMAT
-            // Hum saare possible formats ek saath bhej rahe hain
+            // TRICK: Agar URL ke end mein .jpg nahi hai, toh MeDo gallery nahi dikhayegi
+            // Hum query parameter add karke use ullu banayenge
+            const fakeUrl = `${imageUrl}?ext=.jpg`;
+
             res.json({
                 status: "success",
                 success: true,
-                message: "Generated",
-                imageUrl: imageUrl, 
-                image_url: imageUrl,
-                // Array formats
-                images: [imageUrl],
-                results: [{ url: imageUrl }],
-                // Data wrapper format (Most common)
-                data: {
-                    images: [{ url: imageUrl }],
-                    image_url: imageUrl,
-                    url: imageUrl
-                },
-                // Markdown content (Backup for chat)
-                content: `![Image](${imageUrl})`
+                // MeDo demands these specific fields:
+                imageUrl: fakeUrl,
+                image_url: fakeUrl,
+                url: fakeUrl,
+                // Array format that most gallery widgets use
+                images: [fakeUrl],
+                data: [{ url: fakeUrl }],
+                results: [{ url: fakeUrl }],
+                // Chat bubbles display
+                content: `Image Generated: ![Tiger](${fakeUrl})`
             });
         } else {
-            res.json({ status: "error", message: "No image" });
+            res.json({ status: "error", message: "No Image" });
         }
     } catch (err) {
-        res.json({ status: "error", message: "API Failed" });
+        res.json({ status: "error", message: "Build Fail" });
     }
 });
 
 app.all('/api/:service/health', (req, res) => res.json({ status: 'Healthy', active: true }));
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 v7.0 Gallery Force Live!`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 v8.0 Ultra Engine Live!`));
