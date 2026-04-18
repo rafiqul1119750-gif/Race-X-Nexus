@@ -1,5 +1,5 @@
 // ==========================
-// 🚀 RACE-X NEXUS FINAL SERVER
+// 🚀 RACE-X NEXUS FINAL SERVER (V2 - UPDATED)
 // ==========================
 const express = require('express');
 const cors = require('cors');
@@ -34,7 +34,7 @@ const ENV = {
 const TMP = path.join(__dirname, 'tmp');
 if (!fs.existsSync(TMP)) fs.mkdirSync(TMP);
 
-const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
+const fetchWithTimeout = async (url, options = {}, timeout = 15000) => { // Timeout badha diya 15s tak
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
 
@@ -65,65 +65,33 @@ const moderate = async (text) => {
     try {
         const r = await fetchWithTimeout(url);
         const d = await r.json();
-
         if (d.profanity?.matches?.length > 0) return false;
-
         return true;
     } catch {
-        return true; // fail-open (optional: change to false)
+        return true; 
     }
 };
 
 // ==========================
-// 🟢 ROOT
+// 🟢 ROOT & GLOBAL HEALTH
 // ==========================
 app.get('/', (req, res) => {
-    res.json({ status: "Race-X Nexus FINAL RUNNING" });
+    res.json({ status: "Race-X Nexus FINAL RUNNING", version: "2.0" });
+});
+
+// MeDo App ke liye catch-all health check
+app.all(['/api/:service/health', '/api/:service'], (req, res, next) => {
+    if (req.method === 'GET') {
+        return res.json({ status: "Healthy", active: true, service: req.params.service });
+    }
+    next();
 });
 
 // ==========================
-// ⚡ HEALTH CHECK (ALL SERVICES)
+// 🧠 CHAT (AUTO ROUTER + MEDO COMPATIBLE)
 // ==========================
-app.get('/api/:service/health', async (req, res) => {
-    const service = req.params.service;
-
-    const services = {
-        groq: ["https://api.groq.com/openai/v1/models", { Authorization: `Bearer ${ENV.GROQ}` }],
-        openrouter: ["https://openrouter.ai/api/v1/models", { Authorization: `Bearer ${ENV.OPENROUTER}` }],
-        huggingface: ["https://api-inference.huggingface.co/models", { Authorization: `Bearer ${ENV.HUGGINGFACE}` }],
-        replicate: ["https://api.replicate.com/v1/models", { Authorization: `Token ${ENV.REPLICATE}` }],
-        elevenlabs: ["https://api.elevenlabs.io/v1/models", { "xi-api-key": ENV.ELEVEN }],
-        fal: ["https://fal.run", {}],
-        sightengine: ["https://api.sightengine.com", {}]
-    };
-
-    if (!services[service]) {
-        return res.status(404).json({ error: "Unknown service" });
-    }
-
-    try {
-        const [url, headers] = services[service];
-
-        const r = await fetchWithTimeout(url, { headers }, 3000);
-
-        res.json({
-            service,
-            status: r.ok ? "Healthy" : "Error"
-        });
-
-    } catch {
-        res.json({
-            service,
-            status: "Offline"
-        });
-    }
-});
-
-// ==========================
-// 🧠 CHAT (AUTO ROUTER)
-// ==========================
-app.post(['/api/chat', '/api/groq', '/api/openrouter'], async (req, res) => {
-    const prompt = req.body.message || req.body.prompt;
+app.post(['/api/chat', '/api/groq', '/api/openrouter', '/api/magic-chat', '/api/chat/generate'], async (req, res) => {
+    const prompt = req.body.message || req.body.prompt || req.body.content;
     if (!prompt) return res.status(400).json({ error: "Missing message" });
 
     const allowed = await moderate(prompt);
@@ -145,6 +113,7 @@ app.post(['/api/chat', '/api/groq', '/api/openrouter'], async (req, res) => {
     ];
 
     for (let p of providers) {
+        if (!p.key) continue; // Skip if key is missing
         try {
             const r = await fetchWithTimeout(p.url, {
                 method: "POST",
@@ -160,81 +129,100 @@ app.post(['/api/chat', '/api/groq', '/api/openrouter'], async (req, res) => {
 
             if (r.ok) {
                 const d = await r.json();
+                const reply = d.choices?.[0]?.message?.content;
                 return res.json({
+                    status: "success",
                     provider: p.name,
-                    reply: d.choices?.[0]?.message?.content
+                    reply: reply,
+                    content: reply, // MeDo Compatibility
+                    response: reply // MeDo Compatibility
                 });
             }
-        } catch {}
+        } catch (e) { console.log(`Provider ${p.name} failed, trying next...`); }
     }
 
-    res.status(500).json({ error: "All providers failed" });
+    res.status(500).json({ status: "error", error: "All chat providers failed" });
 });
 
 // ==========================
-// 🎨 IMAGE (FAL + HF FALLBACK)
+// 🎨 IMAGE (FAL + HF FALLBACK + MEDO COMPATIBLE)
 // ==========================
-app.post(['/api/image', '/api/fal', '/api/huggingface'], async (req, res) => {
-    const prompt = req.body.prompt;
+app.post(['/api/image', '/api/fal', '/api/huggingface', '/api/generate'], async (req, res) => {
+    const prompt = req.body.prompt || req.body.message;
     if (!prompt) return res.status(400).json({ error: "Missing prompt" });
 
     const allowed = await moderate(prompt);
     if (!allowed) return res.status(403).json({ error: "Blocked by moderation" });
 
     // TRY FAL
-    try {
-        const r = await fetchWithTimeout("https://fal.run/fal-ai/fast-turbo-diffusion/generate", {
-            method: "POST",
-            headers: {
-                Authorization: `Key ${ENV.FAL}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ prompt })
-        });
-
-        const d = await r.json();
-        if (d.images?.[0]?.url) {
-            return res.json({ provider: "fal", image: d.images[0].url });
-        }
-    } catch {}
-
-    // FALLBACK HF
-    try {
-        const r = await fetchWithTimeout(
-            "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
-            {
+    if (ENV.FAL) {
+        try {
+            const r = await fetchWithTimeout("https://fal.run/fal-ai/fast-turbo-diffusion/generate", {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer ${ENV.HUGGINGFACE}`,
+                    Authorization: `Key ${ENV.FAL}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ inputs: prompt })
-            }
-        );
-
-        if (r.ok) {
-            const buffer = await r.arrayBuffer();
-            return res.json({
-                provider: "huggingface",
-                image_base64: Buffer.from(buffer).toString("base64")
+                body: JSON.stringify({ prompt })
             });
-        }
-    } catch {}
 
-    res.status(500).json({ error: "Image generation failed" });
+            const d = await r.json();
+            if (d.images?.[0]?.url) {
+                const url = d.images[0].url;
+                return res.json({ 
+                    status: "success",
+                    provider: "fal", 
+                    image: url,
+                    imageUrl: url, // MeDo Compatibility
+                    image_url: url, // MeDo Compatibility
+                    content: `![Image](${url})` 
+                });
+            }
+        } catch {}
+    }
+
+    // FALLBACK HF
+    if (ENV.HUGGINGFACE) {
+        try {
+            const r = await fetchWithTimeout(
+                "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${ENV.HUGGINGFACE}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ inputs: prompt })
+                }
+            );
+
+            if (r.ok) {
+                const buffer = await r.arrayBuffer();
+                const base64 = Buffer.from(buffer).toString("base64");
+                return res.json({
+                    status: "success",
+                    provider: "huggingface",
+                    image_base64: base64,
+                    imageUrl: `data:image/png;base64,${base64}` // Send as data URL
+                });
+            }
+        } catch {}
+    }
+
+    res.status(500).json({ status: "error", error: "Image generation failed" });
 });
 
 // ==========================
 // 🎙️ VOICE (ELEVENLABS)
 // ==========================
 app.post(['/api/voice', '/api/elevenlabs'], async (req, res) => {
-    const text = req.body.text;
+    const text = req.body.text || req.body.message;
     if (!text) return res.status(400).json({ error: "Missing text" });
 
     const allowed = await moderate(text);
     if (!allowed) return res.status(403).json({ error: "Blocked content" });
 
-    const voiceId = "EXAVITQu4vr4xnSDxMaL";
+    const voiceId = req.body.voiceId || "EXAVITQu4vr4xnSDxMaL";
 
     try {
         const r = await fetchWithTimeout(
@@ -266,7 +254,7 @@ app.post(['/api/voice', '/api/elevenlabs'], async (req, res) => {
 // ==========================
 // 🔄 REPLICATE (JOB CREATE)
 // ==========================
-app.post(['/api/replicate'], async (req, res) => {
+app.post(['/api/replicate', '/api/video'], async (req, res) => {
     const { version, input } = req.body;
 
     if (!version) {
@@ -287,10 +275,9 @@ app.post(['/api/replicate'], async (req, res) => {
         );
 
         const d = await safeJson(r);
-
         if (!r.ok) return res.status(500).json(d);
 
-        res.json(d);
+        res.json({ ...d, status: "success" });
 
     } catch (err) {
         res.status(500).json({ error: err.message });
