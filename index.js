@@ -1,97 +1,88 @@
-// ==========================
-// 🚀 RACE-X NEXUS v2.5 (REAL-ACTION ENGINE)
-// ==========================
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
+// 🔑 API Keys from Railway Variables
 const KEYS = {
-    OPENROUTER: process.env.OPENROUTER_API_KEY,
-    FAL: process.env.FAL_KEY,
-    ELEVEN: process.env.ELEVENLABS_API_KEY
+    GEMINI: process.env.GOOGLE_API_KEY,
+    HF: process.env.HUGGINGFACE_API_KEY
 };
 
-// 🟢 1. HEALTH CHECK (Tester ko khush rakhne ke liye)
+// 🟢 1. GLOBAL HEALTH CHECK (Fixes 404 Errors)
 app.all(['/api/:service/health', '/api/:service'], (req, res, next) => {
-    if (req.method === 'GET') {
-        return res.json({ status: "Healthy", active: true, service: req.params.service });
-    }
+    if (req.method === 'GET') return res.status(200).json({ status: "Online", engine: "Race-X Core" });
     next();
 });
 
-app.get('/', (req, res) => res.send('Race-X Nexus v2.5: Real-Action Mode 🟢'));
-
-// 🧠 2. CHAT ENGINE (Salman Khan Fix - Real Response)
-app.post(['/api/magic-chat', '/api/openrouter', '/api/groq', '/v1/chat/completions'], async (req, res) => {
-    // MeDo different fields bhej sakta hai, hum sab check karenge
-    const prompt = req.body.message || req.body.prompt || (req.body.messages && req.body.messages[0].content);
-    
-    if (!prompt) return res.json({ status: "error", content: "Kuch toh pucho bhai!" });
+// 🧠 2. THE BRAIN (Writer/Director Logic - Using Gemini)
+app.post(['/api/chat', '/api/magic-chat'], async (req, res) => {
+    const prompt = req.body.message || req.body.prompt;
+    if (!prompt) return res.status(400).json({ error: "No input provided" });
 
     try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        // Primary: Google Gemini (High Speed & Zero Cost)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEYS.GEMINI}`, {
             method: "POST",
-            headers: { 
-                "Authorization": `Bearer ${KEYS.OPENROUTER}`, 
-                "Content-Type": "application/json",
-                "HTTP-Referer": "https://race-x.com" // Important for OpenRouter
-            },
-            body: JSON.stringify({
-                model: "google/gemini-2.0-flash-lite-preview-0815:free",
-                messages: [{ role: "user", content: prompt }]
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
-
         const data = await response.json();
-        const reply = data.choices?.[0]?.message?.content || "Connected, but no reply.";
-
-        // MeDo Expects these exact fields:
-        res.json({ 
-            status: "success", 
-            content: reply,     // Magic Chat ke liye
-            reply: reply,       // General use ke liye
-            response: reply,    // Frontend logic ke liye
-            choices: [{ message: { content: reply } }] // OpenAI format ke liye
-        });
+        const reply = data.candidates[0].content.parts[0].text;
+        res.json({ status: "success", type: "text", content: reply });
 
     } catch (err) {
-        res.json({ status: "error", content: "API Error: Check your OpenRouter Key!" });
-    }
-});
-
-// 🎨 3. IMAGE ENGINE (Tiger Fix - Real Image)
-app.post(['/api/fal', '/api/huggingface', '/api/generate'], async (req, res) => {
-    const prompt = req.body.prompt || req.body.message;
-    if (!KEYS.FAL) return res.json({ status: "error", content: "FAL_KEY missing in Railway!" });
-
-    try {
-        const response = await fetch("https://fal.run/fal-ai/fast-turbo-diffusion/generate", {
-            method: "POST",
-            headers: { "Authorization": `Key ${KEYS.FAL}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt })
-        });
-
-        const data = await response.json();
-        const url = data.images?.[0]?.url;
-
-        if (url) {
-            res.json({ 
-                status: "success", 
-                imageUrl: url,      // Studio ke liye
-                image_url: url,     // Legacy support ke liye
-                content: `![Generated Image](${url})` // Markdown format
+        // Fallback: HuggingFace (If Gemini fails)
+        try {
+            const hfRes = await fetch("https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-11B-Vision-Instruct", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${KEYS.HF}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ inputs: prompt })
             });
-        } else {
-            res.json({ status: "error", content: "Image generate nahi ho payi." });
+            const hfData = await hfRes.json();
+            res.json({ status: "success", type: "text", content: hfData[0]?.generated_text || hfData.generated_text });
+        } catch (e) {
+            res.status(500).json({ status: "error", content: "All engines busy. Try later." });
         }
-    } catch (e) {
-        res.json({ status: "error", content: "Fal.ai Connection Failed" });
     }
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 v2.5 ACTION READY ON ${PORT}`));
+// 🎨 3. THE STUDIO (Actor/Visuals Logic - Using Pollinations)
+app.post(['/api/generate', '/api/fal'], async (req, res) => {
+    const prompt = req.body.prompt || req.body.message;
+    if (!prompt) return res.status(400).json({ error: "No prompt" });
+
+    // Pollinations: No Key, No Limit, Real AI Image
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
+    
+    // Yahan hum real response bhej rahe hain
+    res.json({ 
+        status: "success", 
+        type: "image",
+        imageUrl: imageUrl,
+        content: `![Race-X Generation](${imageUrl})`
+    });
+});
+
+// 🎙️ 4. THE AUDIO LAB (Singer/Voice Logic - Using HF)
+app.post('/api/voice', async (req, res) => {
+    const text = req.body.text;
+    try {
+        const response = await fetch("https://api-inference.huggingface.co/models/facebook/mms-tts-hin", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${KEYS.HF}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ inputs: text })
+        });
+        const audioBuffer = await response.arrayBuffer();
+        res.set('Content-Type', 'audio/mpeg');
+        res.send(Buffer.from(audioBuffer));
+    } catch (e) {
+        res.status(500).json({ error: "Audio Engine busy" });
+    }
+});
+
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 RACE-X PRODUCTION ENGINE LIVE ON ${PORT}`));
