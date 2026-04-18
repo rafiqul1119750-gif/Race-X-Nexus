@@ -9,9 +9,9 @@ const FAL_KEY = process.env.FAL_KEY;
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('Race-X Nexus v6.0: Pure Data Mode'));
+app.get('/', (req, res) => res.send('Race-X Nexus v7.0: Gallery Force Mode'));
 
-// 1. CHAT LOGIC
+// 1. CHAT (Working fine)
 app.post(['/api/chat/generate', '/api/magic-chat'], async (req, res) => {
     const prompt = req.body.prompt || req.body.message || "Hi";
     try {
@@ -24,19 +24,14 @@ app.post(['/api/chat/generate', '/api/magic-chat'], async (req, res) => {
             })
         });
         const data = await response.json();
-        res.json({
-            status: "success",
-            content: data.choices?.[0]?.message?.content || "Connected"
-        });
-    } catch (err) { res.json({ status: "error", content: "Chat Error" }); }
+        res.json({ status: "success", content: data.choices?.[0]?.message?.content });
+    } catch (err) { res.json({ status: "error" }); }
 });
 
-// 2. IMAGE STUDIO (The "Gallery-First" Format)
+// 2. IMAGE STUDIO (Force Gallery Format)
 app.post(['/api/huggingface/generate', '/api/fal/generate', '/api/generate'], async (req, res) => {
     const prompt = req.body.prompt || req.body.message || "A tiger";
     
-    if (!FAL_KEY) return res.json({ status: "error", message: "FAL_KEY missing" });
-
     try {
         const response = await fetch("https://fal.run/fal-ai/fast-turbo-diffusion/generate", {
             method: "POST",
@@ -48,23 +43,34 @@ app.post(['/api/huggingface/generate', '/api/fal/generate', '/api/generate'], as
         const imageUrl = data.images?.[0]?.url;
 
         if (imageUrl) {
-            // MeDo ko sirf ye 3 cheezein chahiye gallery populate karne ke liye
+            // ME-DO GALLERY MASTER FORMAT
+            // Hum saare possible formats ek saath bhej rahe hain
             res.json({
-                success: true,
                 status: "success",
+                success: true,
+                message: "Generated",
+                imageUrl: imageUrl, 
                 image_url: imageUrl,
-                imageUrl: imageUrl,
-                images: [imageUrl], // Simple array format
-                data: [imageUrl]    // Alternative array format
+                // Array formats
+                images: [imageUrl],
+                results: [{ url: imageUrl }],
+                // Data wrapper format (Most common)
+                data: {
+                    images: [{ url: imageUrl }],
+                    image_url: imageUrl,
+                    url: imageUrl
+                },
+                // Markdown content (Backup for chat)
+                content: `![Image](${imageUrl})`
             });
         } else {
-            throw new Error("No URL");
+            res.json({ status: "error", message: "No image" });
         }
     } catch (err) {
-        res.json({ status: "error", message: "Generation failed" });
+        res.json({ status: "error", message: "API Failed" });
     }
 });
 
 app.all('/api/:service/health', (req, res) => res.json({ status: 'Healthy', active: true }));
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 v6.0 Pure Data Engine Live!`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 v7.0 Gallery Force Live!`));
