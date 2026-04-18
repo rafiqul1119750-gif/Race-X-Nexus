@@ -4,12 +4,12 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
-const FAL_KEY = process.env.FAL_KEY; 
+const FAL_KEY = process.env.FAL_KEY;
 
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('Race-X Studio v8.0: Ultra Compatibility Mode'));
+app.get('/', (req, res) => res.send('Race-X Studio v9.0: Direct Data Mode'));
 
 // 1. CHAT LOGIC
 app.post(['/api/chat/generate', '/api/magic-chat'], async (req, res) => {
@@ -24,11 +24,12 @@ app.post(['/api/chat/generate', '/api/magic-chat'], async (req, res) => {
             })
         });
         const data = await response.json();
-        res.json({ status: "success", content: data.choices?.[0]?.message?.content });
-    } catch (err) { res.json({ status: "error" }); }
+        // MeDo might need the answer directly in 'content'
+        res.json({ content: data.choices?.[0]?.message?.content || "Online" });
+    } catch (err) { res.json({ content: "Chat Error" }); }
 });
 
-// 2. IMAGE STUDIO (The "No-Reject" Format)
+// 2. IMAGE STUDIO (Direct Root Response)
 app.post(['/api/huggingface/generate', '/api/fal/generate', '/api/generate'], async (req, res) => {
     const prompt = req.body.prompt || req.body.message || "A tiger";
     
@@ -40,35 +41,24 @@ app.post(['/api/huggingface/generate', '/api/fal/generate', '/api/generate'], as
         });
         
         const data = await response.json();
-        let imageUrl = data.images?.[0]?.url;
+        const finalUrl = data.images?.[0]?.url;
 
-        if (imageUrl) {
-            // TRICK: Agar URL ke end mein .jpg nahi hai, toh MeDo gallery nahi dikhayegi
-            // Hum query parameter add karke use ullu banayenge
-            const fakeUrl = `${imageUrl}?ext=.jpg`;
-
+        if (finalUrl) {
+            // EKDOM DIRECT RESPONSE - No nested objects
             res.json({
-                status: "success",
-                success: true,
-                // MeDo demands these specific fields:
-                imageUrl: fakeUrl,
-                image_url: fakeUrl,
-                url: fakeUrl,
-                // Array format that most gallery widgets use
-                images: [fakeUrl],
-                data: [{ url: fakeUrl }],
-                results: [{ url: fakeUrl }],
-                // Chat bubbles display
-                content: `Image Generated: ![Tiger](${fakeUrl})`
+                url: finalUrl,
+                imageUrl: finalUrl,
+                image_url: finalUrl,
+                status: "success"
             });
         } else {
-            res.json({ status: "error", message: "No Image" });
+            res.json({ error: "Failed to generate" });
         }
     } catch (err) {
-        res.json({ status: "error", message: "Build Fail" });
+        res.json({ error: "API Error" });
     }
 });
 
-app.all('/api/:service/health', (req, res) => res.json({ status: 'Healthy', active: true }));
+app.all('/api/:service/health', (req, res) => res.json({ status: 'Healthy' }));
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 v8.0 Ultra Engine Live!`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 v9.0 Direct Engine Live!`));
