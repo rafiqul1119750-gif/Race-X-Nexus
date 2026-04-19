@@ -1,34 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    
-    <title>Race-X | The Creative Nexus</title>
-    
-    <link rel="icon" type="image/png" href="/images/rx-logo.png" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Race-X: AI-Powered Social & Studio Platform" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Orbitron:wght@900&display=swap" rel="stylesheet">
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RACE-X | AI SUPER APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      body {
-        margin: 0;
-        background-color: #000000;
-        -webkit-tap-highlight-color: transparent; /* Remove mobile tap gray box */
-      }
-      /* Prevent elastic scrolling on mobile for a native app feel */
-      html, body {
-        overscroll-behavior-y: contain;
-      }
+        body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .neon-border { border: 1px solid #00F2FF; box-shadow: 0 0 15px #00f2ff44; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border-radius: 20px; }
+        .rx-gradient { background: linear-gradient(135deg, #00F2FF 0%, #BC13FE 100%); }
+        .active-tap:active { transform: scale(0.95); transition: 0.1s; }
     </style>
-  </head>
-  <body>
-    <div id="root"></div>
+</head>
+<body class="p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-black tracking-tighter rx-gradient bg-clip-text text-transparent">RACE-X</h1>
+        <div class="glass px-4 py-1 neon-border">
+            <span id="gem-count" class="text-cyan-400 font-bold">💎 --</span>
+        </div>
+    </div>
 
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <div id="studio" class="glass p-6 mb-6">
+        <h2 class="text-sm uppercase tracking-widest text-gray-400 mb-4">AI Magic Studio</h2>
+        <textarea id="prompt-input" class="w-full bg-transparent border-b border-gray-700 focus:border-cyan-400 outline-none py-2 mb-4 text-lg" placeholder="Write anything..."></textarea>
+        
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="runTask('chat')" class="rx-gradient py-3 rounded-xl font-bold active-tap">Magic Chat</button>
+            <button onclick="runTask('image')" class="bg-white text-black py-3 rounded-xl font-bold active-tap">Gen Image</button>
+        </div>
+    </div>
+
+    <div id="result-box" class="hidden glass p-4 border border-gray-800 animate-pulse">
+        <p id="output-text" class="text-gray-300 leading-relaxed"></p>
+        <img id="output-img" class="hidden w-full rounded-xl mt-4 neon-border">
+    </div>
+
+    <script>
+        const API_URL = "https://rafiqul1175-race-x-nexus.hf.space/rx_engine"; // Aapka HF URL
+        const UID = "user_redmi_786"; // Ye baad mein Auth se link hoga
+
+        async function runTask(type) {
+            const prompt = document.getElementById('prompt-input').value;
+            const resBox = document.getElementById('result-box');
+            const outText = document.getElementById('output-text');
+            const outImg = document.getElementById('output-img');
+
+            if(!prompt) return alert("Pehle kuch likho bhai!");
+
+            resBox.classList.remove('hidden');
+            outText.innerText = "Race-X Engine is thinking...";
+            outImg.classList.add('hidden');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ uid: UID, task: type, prompt: prompt })
+                });
+                const data = await response.json();
+
+                if(data.status === "success") {
+                    document.getElementById('gem-count').innerText = `💎 ${data.gems}`;
+                    if(type === 'chat') {
+                        outText.innerText = data.res;
+                    } else {
+                        outText.innerText = "Cinematic 8K Image Ready:";
+                        outImg.src = data.res;
+                        outImg.classList.remove('hidden');
+                    }
+                } else {
+                    outText.innerText = data.msg;
+                }
+            } catch (e) {
+                outText.innerText = "Connection Error! Check HF Space status.";
+            }
+        }
+    </script>
+</body>
 </html>
