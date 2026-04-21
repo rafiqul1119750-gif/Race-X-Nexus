@@ -3,54 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RACE-X | AI SUPER APP</title>
+    <title>RACE-X | NEURAL CORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .neon-border { border: 1px solid #00F2FF; box-shadow: 0 0 15px #00f2ff44; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border-radius: 20px; }
-        .rx-gradient { background: linear-gradient(135deg, #00F2FF 0%, #BC13FE 100%); }
-        .active-tap:active { transform: scale(0.95); transition: 0.1s; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            background-image: radial-gradient(#111 1px, transparent 1px);
+            background-size: 10px 10px;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .neon-cyan {
+            border: 1.5px solid #00F2FF;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+        }
+
+        .neon-cyan:active { transform: scale(0.96); }
+
+        .rx-gradient-text {
+            background: linear-gradient(135deg, #00F2FF 0%, #BC13FE 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Result Animation */
+        .glow-box {
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
+        }
     </style>
 </head>
-<body class="p-4">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-black tracking-tighter rx-gradient bg-clip-text text-transparent">RACE-X</h1>
-        <div class="glass px-4 py-1 neon-border">
-            <span id="gem-count" class="text-cyan-400 font-bold">💎 --</span>
+<body class="p-4 md:p-10">
+
+    <div class="flex justify-between items-center mb-10">
+        <div>
+            <h1 class="text-3xl font-black tracking-tighter rx-gradient-text">RACE-X</h1>
+            <p class="text-[10px] text-cyan-500 tracking-[0.3em] uppercase">Neural Engine v3.0</p>
+        </div>
+        <div class="glass-card px-5 py-2 neon-cyan rounded-full">
+            <span id="gem-count" class="text-cyan-400 font-bold tracking-widest">💎 --</span>
         </div>
     </div>
 
-    <div id="studio" class="glass p-6 mb-6">
-        <h2 class="text-sm uppercase tracking-widest text-gray-400 mb-4">AI Magic Studio</h2>
-        <textarea id="prompt-input" class="w-full bg-transparent border-b border-gray-700 focus:border-cyan-400 outline-none py-2 mb-4 text-lg" placeholder="Write anything..."></textarea>
-        
-        <div class="grid grid-cols-2 gap-3">
-            <button onclick="runTask('chat')" class="rx-gradient py-3 rounded-xl font-bold active-tap">Magic Chat</button>
-            <button onclick="runTask('image')" class="bg-white text-black py-3 rounded-xl font-bold active-tap">Gen Image</button>
+    <div class="max-w-4xl mx-auto">
+        <div class="glass-card p-6 mb-8 rounded-3xl border-white/10">
+            <h2 class="text-xs uppercase tracking-[0.4em] text-gray-500 mb-4 font-bold">Command Prompt</h2>
+            <textarea id="prompt-input" 
+                class="w-full bg-transparent border-none focus:ring-0 outline-none py-2 text-xl md:text-2xl placeholder-gray-700" 
+                placeholder="Describe your vision..."></textarea>
         </div>
-    </div>
 
-    <div id="result-box" class="hidden glass p-4 border border-gray-800 animate-pulse">
-        <p id="output-text" class="text-gray-300 leading-relaxed"></p>
-        <img id="output-img" class="hidden w-full rounded-xl mt-4 neon-border">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
+            
+            <button onclick="runTask('chat')" class="glass-card neon-cyan rounded-2xl p-4 flex flex-col items-center gap-2">
+                <span class="text-2xl">🧠</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest">Magic Chat</span>
+            </button>
+
+            <button onclick="runTask('image')" class="glass-card neon-cyan rounded-2xl p-4 flex flex-col items-center gap-2">
+                <span class="text-2xl">🖼️</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest">Gen Image</span>
+            </button>
+
+            <button onclick="runTask('voice')" class="glass-card neon-cyan rounded-2xl p-4 flex flex-col items-center gap-2">
+                <span class="text-2xl">🎙️</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest">Voice Lab</span>
+            </button>
+
+            <button onclick="runTask('video')" class="glass-card neon-cyan rounded-2xl p-4 flex flex-col items-center gap-2">
+                <span class="text-2xl">🎬</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest">Cinema AI</span>
+            </button>
+
+            <button onclick="runTask('music')" class="glass-card neon-cyan rounded-2xl p-4 flex flex-col items-center gap-2">
+                <span class="text-2xl">🎸</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest">Synth Core</span>
+            </button>
+
+            <button onclick="runTask('melody')" class="glass-card neon-cyan rounded-2xl p-4 flex flex-col items-center gap-2">
+                <span class="text-2xl">🎹</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest">Melody Gen</span>
+            </button>
+        </div>
+
+        <div id="result-box" class="hidden glass-card p-6 rounded-3xl glow-box">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                <span class="text-[10px] uppercase tracking-widest text-cyan-400">Engine Output</span>
+            </div>
+            <p id="output-text" class="text-gray-300 leading-relaxed text-lg"></p>
+            <div id="img-container" class="hidden mt-6">
+                <img id="output-img" class="w-full rounded-2xl border border-white/10 shadow-2xl">
+            </div>
+        </div>
     </div>
 
     <script>
-        const API_URL = "https://rafiqul1175-race-x-nexus.hf.space/rx_engine"; // Aapka HF URL
-        const UID = "user_redmi_786"; // Ye baad mein Auth se link hoga
+        const API_URL = "https://rafiqul1175-race-x-nexus.hf.space/rx_engine";
+        const UID = "user_redmi_786";
 
         async function runTask(type) {
             const prompt = document.getElementById('prompt-input').value;
             const resBox = document.getElementById('result-box');
             const outText = document.getElementById('output-text');
             const outImg = document.getElementById('output-img');
+            const imgCont = document.getElementById('img-container');
 
-            if(!prompt) return alert("Pehle kuch likho bhai!");
+            if(!prompt) {
+                alert("Enter a prompt first!");
+                return;
+            }
 
+            // UI Feedback
             resBox.classList.remove('hidden');
-            outText.innerText = "Race-X Engine is thinking...";
-            outImg.classList.add('hidden');
+            outText.innerText = "Initializing Race-X Neural Core...";
+            imgCont.classList.add('hidden');
+            resBox.scrollIntoView({ behavior: 'smooth' });
 
             try {
                 const response = await fetch(API_URL, {
@@ -62,18 +140,23 @@
 
                 if(data.status === "success") {
                     document.getElementById('gem-count').innerText = `💎 ${data.gems}`;
+                    
                     if(type === 'chat') {
                         outText.innerText = data.res;
-                    } else {
-                        outText.innerText = "Cinematic 8K Image Ready:";
+                    } else if (type === 'image' || type === 'video') {
+                        outText.innerText = "Processing Complete. Rendering high-fidelity output:";
                         outImg.src = data.res;
-                        outImg.classList.remove('hidden');
+                        imgCont.classList.remove('hidden');
+                    } else {
+                        // For audio or other tasks
+                        outText.innerText = data.res || "Task executed successfully.";
                     }
                 } else {
-                    outText.innerText = data.msg;
+                    outText.innerText = "Engine Error: " + data.msg;
                 }
             } catch (e) {
-                outText.innerText = "Connection Error! Check HF Space status.";
+                outText.innerText = "Critical Connection Failure. Check HF Space status.";
+                console.error(e);
             }
         }
     </script>
